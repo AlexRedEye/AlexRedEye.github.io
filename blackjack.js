@@ -34,6 +34,13 @@ function getRandomCard()
     }
 }
 
+function randomNum()
+{
+    let ranNum = Math.floor(Math.random() * 2)
+
+    return ranNum
+}
+
 function startGame()
 {
     isAlive = true
@@ -68,7 +75,10 @@ function renderGame()
     if (sum <= 20)
     {
         message = "Do you want to draw a new card?"
-    } else if (sum === 21) 
+    } else if(dealerSum < sum)
+    {
+        message = "You Win"
+    }else if (sum === 21) 
     {
         message = "Woohoo! You've got Blackjack!"
         hasBlackjack = true
@@ -89,4 +99,36 @@ function newCard()
         cards.push(newCard)
         renderGame()
     }
+}
+
+function holdCards()
+{
+    let newNum = randomNum()
+    let newDealerCard = getRandomCard()
+    if (dealerSum <= 20 && hasBlackjack === false)
+    {
+        if(newNum === 0)
+        {
+            dealerSum += newDealerCard
+            dealerCards.push(newDealerCard)
+            if(dealerSum > 21)
+            {
+                message = "you win"
+            }
+        }
+    }
+
+    if (sum > dealerSum)
+    {
+        console.log("You win")
+    }else if ( sum < dealerSum)
+    {
+        console.log("You Lose")
+    }else
+    {
+        console.log("You Lose")
+    }
+
+    isAlive = false
+    renderGame()
 }
