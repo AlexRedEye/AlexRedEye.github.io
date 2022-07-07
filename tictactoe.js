@@ -1,12 +1,12 @@
-let oneBtn = document.getElementById("1-btn")
-let twoBtn = document.getElementById("2-btn")
-let threeBtn = document.getElementById("3-btn")
+const oneBtn = document.getElementById("1-btn")
+const twoBtn = document.getElementById("2-btn")
+const threeBtn = document.getElementById("3-btn")
 const fourBtn = document.getElementById("4-btn")
 const fiveBtn = document.getElementById("5-btn")
 const sixBtn = document.getElementById("6-btn")
 const sevenBtn = document.getElementById("7-btn")
-let eightBtn = document.getElementById("8-btn")
-let nineBtn = document.getElementById("9-btn")
+const eightBtn = document.getElementById("8-btn")
+const nineBtn = document.getElementById("9-btn")
 const resetBtn = document.getElementById("reset-btn")
 let winnerEl = document.getElementById("winner-el")
 let turn = -1
@@ -36,6 +36,8 @@ oneBtn.addEventListener("click", function()
             alreadyPressed = true
         }
     }
+    
+    winCheck()
     console.log(turn)
 })
 
@@ -193,6 +195,8 @@ nineBtn.addEventListener("click", function()
 
 resetBtn.addEventListener("click", function()
 {
+    turn = -1
+    
     oneBtn.textContent = "1"
     twoBtn.textContent = "2"
     threeBtn.textContent = "3"
@@ -202,11 +206,77 @@ resetBtn.addEventListener("click", function()
     sevenBtn.textContent = "7"
     eightBtn.textContent = "8"
     nineBtn.textContent = "9"
+
+    alreadyPressed = false
+    twoAlreadyPressed = false
+    threeAlreadyPressed = false
+    fourAlreadyPressed = false
+    fiveAlreadyPressed = false
+    sixAlreadyPressed = false
+    sevenAlreadyPressed = false
+    eightAlreadyPressed = false
+    nineAlreadyPressed = false
 })
 
+function winCheck()
+{
 if (oneBtn.textContent && twoBtn.textContent && threeBtn.textContent === "X")
 {
-    winnerEl.textContent = "X"
+    winnerEl.textContent += " X"
+    console.log("bruh")
+}
 
-    console.log(winnerEl)
+if (fourBtn.textContent && fiveBtn.textContent && sixBtn.textContent === "X")
+{
+    winnerEl.textContent += " X"
+    console.log("bruh")
+}
+
+if (sevenBtn.textContent && eightBtn.textContent && nineBtn.textContent === "X")
+{
+    winnerEl.textContent += " X"
+    console.log("bruh")
+}
+
+if (oneBtn.textContent && fiveBtn.textContent && nineBtn.textContent === "X")
+{
+    winnerEl.textContent += " X"
+    console.log("bruh")
+}
+
+if (threeBtn.textContent && fiveBtn.textContent && sevenBtn.textContent === "X")
+{
+    winnerEl.textContent += " X"
+    console.log("bruh")
+}
+
+if (oneBtn.textContent && twoBtn.textContent && threeBtn.textContent === "O")
+{
+    winnerEl.textContent += " O"
+    console.log("bruh")
+}
+
+if (fourBtn.textContent && fiveBtn.textContent && sixBtn.textContent === "O")
+{
+    winnerEl.textContent += " O"
+    console.log("bruh")
+}
+
+if (sevenBtn.textContent && eightBtn.textContent && nineBtn.textContent === "O")
+{
+    winnerEl.textContent += " O"
+    console.log("bruh")
+}
+
+if (oneBtn.textContent && fiveBtn.textContent && nineBtn.textContent === "O")
+{
+    winnerEl.textContent += " O"
+    console.log("bruh")
+}
+
+if (threeBtn.textContent && fiveBtn.textContent && sevenBtn.textContent === "O")
+{
+    winnerEl.textContent += " O"
+    console.log("bruh")
+}
 }
