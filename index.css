@@ -79,3 +79,7 @@ h1 {
 .h1-blackjack {
     color: goldenrod;
 }
+
+#calc-btn {
+    background-color: blue;
+}

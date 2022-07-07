@@ -41,3 +41,8 @@ function game()
 {
     window.location.href = "blackjack.html";
 }
+
+function calculator()
+{
+    window.location.href = "calculator.html"
+}
