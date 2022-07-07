@@ -46,3 +46,8 @@ function calculator()
 {
     window.location.href = "calculator.html"
 }
+
+function tictactoe()
+{
+    window.location.href = "tictactoe.html"
+}
