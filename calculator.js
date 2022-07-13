@@ -14,12 +14,15 @@ const equalBtn = document.getElementById("=-btn")
 const clrBtn = document.getElementById("clr-btn")
 const multBtn = document.getElementById("mult-btn")
 const divBtn = document.getElementById("div-btn")
+const subBtn = document.getElementById("sub-btn")
+const decBtn = document.getElementById("dec-btn")
 
 timesPressed = 0
 
 let add = false
 let mult = false
 let div = false
+let sub = false
 
 oneBtn.addEventListener("click", function()
 {
@@ -71,6 +74,11 @@ zeroBtn.addEventListener("click", function()
     inputEl.value += "0"
 })
 
+decBtn.addEventListener("click", function()
+{
+    inputEl.value += "."
+})
+
 plusBtn.addEventListener("click", function()
 {
     add = true
@@ -98,6 +106,15 @@ divBtn.addEventListener("click", function()
     inputEl.value = ""
 })
 
+subBtn.addEventListener("click", function()
+{
+    sub = true
+    timesPressed += 0
+    num1 = inputEl.value
+    firstNum = parseInt(num1)
+    inputEl.value = ""
+})
+
 equalBtn.addEventListener("click", function()
 {
     num2 = inputEl.value
@@ -112,6 +129,9 @@ equalBtn.addEventListener("click", function()
     } else if (div === true)
     {
         finalNum = firstNum / secondNum
+    } else if (sub === true)
+    {
+        finalNum = firstNum - secondNum
     }
 
     inputEl.value = finalNum
@@ -124,6 +144,7 @@ clrBtn.addEventListener("click", function()
     add = false
     mult = false
     div = false
+    sub = false
 
     inputEl.value = ""
 })
