@@ -56,3 +56,8 @@ function snake()
 {
     window.location.href = "snake.html"
 }
+
+function leaderboard()
+{
+    window.location.href = "leaderboard.html"
+}

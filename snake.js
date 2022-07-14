@@ -1,3 +1,22 @@
+const fs = require('fs');
+
+fs.readFile('./scores.json', 'utf-8', (err, jsonString) => {
+    if (err) {
+      console.log(err);
+    } else {
+        const data = JSON.parse(jsonString);
+      console.log(jsonString.Alex);
+    }
+});
+
+scoreUrl = 'http://127.0.0.1:5500/snake.html'
+async function getScore() {
+    const response = await fetch(scoreUrl);
+    const data = await response.json();
+}
+
+getScore();
+
 //board
 var blockSize = 25;
 var rows = 20;
@@ -78,7 +97,7 @@ function update()
     let scoreEl = document.getElementById("score-el");
     let gameOverEl = document.getElementById("gameover-el");
     scoreEl.textContent = "Score: " + score.toString();
-    
+
     if (snakeX < 0 || snakeX > cols * blockSize || snakeY < 0 || snakeY > rows * blockSize)
     {
         gameOver = true;
