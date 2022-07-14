@@ -73,7 +73,7 @@ button {
 }
 
 h1 {
-    color: red;
+    color: white;
 }
 
 .h1-blackjack {
@@ -86,4 +86,9 @@ h1 {
 
 #tictactoe-btn {
     background-color: purple;
+}
+
+#snake-btn {
+    background-color: aqua;
+    color: black;
 }

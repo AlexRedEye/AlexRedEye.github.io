@@ -51,3 +51,13 @@ function tictactoe()
 {
     window.location.href = "tictactoe.html"
 }
+
+function snake()
+{
+    window.location.href = "snake.html"
+}
+
+function leaderboard()
+{
+    window.location.href = "leaderboard.html"
+}
