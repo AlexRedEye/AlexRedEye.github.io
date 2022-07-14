@@ -57,6 +57,7 @@ twoBtn.addEventListener("click", function()
             twoAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -76,6 +77,7 @@ threeBtn.addEventListener("click", function()
             threeAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -95,6 +97,7 @@ fourBtn.addEventListener("click", function()
             fourAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -114,6 +117,7 @@ fiveBtn.addEventListener("click", function()
             fiveAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -133,6 +137,7 @@ sixBtn.addEventListener("click", function()
             sixAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -152,6 +157,7 @@ sevenBtn.addEventListener("click", function()
             sevenAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -171,6 +177,7 @@ eightBtn.addEventListener("click", function()
             eightAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -190,6 +197,7 @@ nineBtn.addEventListener("click", function()
             nineAlreadyPressed = true
         }
     }
+    winCheck()
     console.log(turn)
 })
 
@@ -207,6 +215,8 @@ resetBtn.addEventListener("click", function()
     eightBtn.textContent = "8"
     nineBtn.textContent = "9"
 
+    winnerEl.textContent = "Winner:"
+
     alreadyPressed = false
     twoAlreadyPressed = false
     threeAlreadyPressed = false
@@ -220,6 +230,8 @@ resetBtn.addEventListener("click", function()
 
 function winCheck()
 {
+    if (turn > 3)
+    {
 if (oneBtn.textContent && twoBtn.textContent && threeBtn.textContent === "X")
 {
     winnerEl.textContent += " X"
@@ -278,5 +290,6 @@ if (threeBtn.textContent && fiveBtn.textContent && sevenBtn.textContent === "O")
 {
     winnerEl.textContent += " O"
     console.log("bruh")
+}
 }
 }
