@@ -35,7 +35,6 @@ window.onload = function()
 
 //score
 let score = 0;
-let scoreEl = document.getElementById("score-el");
 
 function update() 
 {
@@ -91,7 +90,9 @@ function update()
         }
     }
 
-    console.log(score);
+    let scoreEl = document.getElementById("score-el");
+    console.log(scoreEl);
+    scoreEl.textContent = "Score: " + score.toString();
 }
 
 function changeDirection(e)
