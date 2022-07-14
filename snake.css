@@ -8,3 +8,14 @@ body {
 #board {
     border: 5px solid lime;
 }
+
+#retry-btn {
+    background-color: lime;
+    border: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-weight: bold;
+    width: 200px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}

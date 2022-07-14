@@ -125,3 +125,8 @@ function placeFood()
     foodX = Math.floor(Math.random() * cols) * blockSize;
     foodY = Math.floor(Math.random() * cols) * blockSize;
 }
+
+function snake()
+{
+    window.location.href = "snake.html"
+}
