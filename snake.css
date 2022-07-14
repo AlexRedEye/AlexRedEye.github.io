@@ -1,6 +1,6 @@
 body {
     font-family: 'Courier New', Courier, monospace;
-    text-align: center;
+    
     background-color: black;
     color: lime;
 }
@@ -18,4 +18,20 @@ body {
     width: 200px;
     margin-bottom: 5px;
     border-radius: 5px;
+}
+
+#leaderboard-el {
+    text-align: center;
+}
+
+#main-el {
+    margin-left: 150px;
+}
+
+#score-el {
+    margin-left: 60px;
+}
+
+p {
+    width: 500px;
 }
