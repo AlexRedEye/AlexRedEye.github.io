@@ -35,7 +35,7 @@ window.onload = function()
 
 //score
 let score = 0;
-let scoreEl = getElementById("score-el");
+let scoreEl = document.getElementById("score-el");
 
 function update() 
 {
@@ -57,7 +57,7 @@ function update()
         placeFood();
     }
 
-    for (let i = snakeBody.length-1; i > 0; i++)
+    for (let i = snakeBody.length-1; i > 0; i--)
     {
         snakeBody[i] = snakeBody[i - 1];
     }
@@ -90,6 +90,8 @@ function update()
             alert("Game Over");
         }
     }
+
+    console.log(score);
 }
 
 function changeDirection(e)
