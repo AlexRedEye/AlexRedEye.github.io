@@ -87,3 +87,8 @@ h1 {
 #tictactoe-btn {
     background-color: purple;
 }
+
+#snake-btn {
+    background-color: aqua;
+    color: black;
+}

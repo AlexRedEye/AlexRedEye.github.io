@@ -1,0 +1,10 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    background-color: black;
+    color: lime;
+}
+
+#board {
+    border: 5px solid lime;
+}
