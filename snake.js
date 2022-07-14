@@ -75,10 +75,14 @@ function update()
     }
 
     //game over conditions
+    let scoreEl = document.getElementById("score-el");
+    let gameOverEl = document.getElementById("gameover-el");
+    scoreEl.textContent = "Score: " + score.toString();
+    
     if (snakeX < 0 || snakeX > cols * blockSize || snakeY < 0 || snakeY > rows * blockSize)
     {
         gameOver = true;
-        alert("Game Over");
+        gameOverEl.textContent = "Game Over!";
     }
 
     for (let i = 0; i < snakeBody.length; i++)
@@ -86,13 +90,9 @@ function update()
         if(snakeX == snakeBody[i][0] && snakeY == snakeBody[i][1])
         {
             gameOver = true;
-            alert("Game Over");
+            gameOverEl.textContent = "Game Over!";
         }
     }
-
-    let scoreEl = document.getElementById("score-el");
-    console.log(scoreEl);
-    scoreEl.textContent = "Score: " + score.toString();
 }
 
 function changeDirection(e)
