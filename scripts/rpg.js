@@ -5,9 +5,9 @@ let expEl = document.getElementById("exp-el");
 let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
 
-
 const attackBtn = document.getElementById("attack-btn");
 const healBtn = document.getElementById("heal-btn");
+const potionBtn = document.getElementById("potion-btn");
 
 let playerMaxHealth = 100;
 let playerHealth = 100;
@@ -82,4 +82,15 @@ attackBtn.addEventListener("click", function()
     playerLevelEl.textContent = "Player Level: " + playerLevel;
     expEl.textContent = "Experience: " + exp;
     enemyNameEl.textContent = goblin.name;
+})
+
+potionBtn.addEventListener("click", function()
+{
+    if(gold >= 50)
+    {
+        potionAmount += 1;
+        gold -= 50;
+    }
+
+    goldEl.textContent = "Gold: " + gold
 })
