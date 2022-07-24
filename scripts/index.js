@@ -57,7 +57,7 @@ function snake()
     window.location.href = "snake.html"
 }
 
-function leaderboard()
+function rpg()
 {
-    window.location.href = "leaderboard.html"
+    window.location.href = "rpg.html"
 }
