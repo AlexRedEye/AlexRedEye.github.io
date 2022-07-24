@@ -41,7 +41,7 @@ function randomNum()
 
 healBtn.addEventListener("click", function()
 {
-    if(potionAmount > 0)
+    if(potionAmount > 0 && playerHealth < 100)
     {
         playerHealth = potion;
         potionAmount -= 1;
@@ -92,5 +92,5 @@ potionBtn.addEventListener("click", function()
         gold -= 50;
     }
 
-    goldEl.textContent = "Gold: " + gold
+    goldEl.textContent = "Gold: " + gold;
 })
