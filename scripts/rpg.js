@@ -8,6 +8,11 @@ let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
 let atkBtn = document.getElementById("atk-btn");
 let playerName = document.getElementById("playerName");
+let goblinsEl = document.getElementById("goblins-el");
+let ogresEl = document.getElementById("ogres-el");
+let witchesEl = document.getElementById("witches-el");
+let usernameBoxEl = document.getElementById("usernameBox-el");
+let camImg = document.getElementById("cam-img");
 
 //Dev Cheats
 let expBtn = document.getElementById("exp-btn");
@@ -26,6 +31,9 @@ let playerMaxAttack = 5;
 let playerAttack = playerMaxAttack;
 let potion = playerMaxHealth;
 let potionAmount = 3;
+let goblinsKilled = 0;
+let ogresKilled = 0;
+let witchesKilled = 0;
 
 let currentMonster = 1;
 
@@ -33,19 +41,25 @@ window.onload = function()
 {
     currentMonster = monsterChoose();
     playerName.textContent = localStorage.getItem("username");
+    goblinsEl.textContent = "Goblins Killed: " + goblinsKilled;
+    witchesEl.textContent = "Witches Killed: " + witchesKilled;
+    ogresEl.textContent = "Ogres Killed: " + ogresKilled;
 
     if (currentMonster === 1)
     {
         enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
         enemyNameEl.textContent = goblin.name
+        camImg.src = "images/Goblin01.png"
     }else if(currentMonster === 2 && playerLevel >= 3)
     {
         enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
         enemyNameEl.textContent = ogre.name
+        camImg.src = "images/ogre.jpg"
     }else if(currentMonster === 3 && playerLevel >= 6)
     {
         enemyHealthEl.textContent = "Enemy Health: " + witch.health;
         enemyNameEl.textContent = witch.name
+        camImg.src = "images/PromoWitch.jpg"
     }else
     {
         enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
@@ -78,7 +92,7 @@ healBtn.addEventListener("click", function()
         potionAmount -= 1;
     }
 
-    playerHealthEl.textContent = "Player Health: " + playerHealth;
+    playerHealthEl.textContent = "Health: " + playerHealth;
     potionInvEl.textContent = "(" + potionAmount + ")"
 })
 
@@ -149,12 +163,15 @@ attackBtn.addEventListener("click", function()
 
     if(currentMonster === 1)
     {
+        camImg.src = "images/Goblin01.png"
         goblinFight();
     }else if(currentMonster === 2 && playerLevel >= 3)
     {
+        camImg.src = "images/ogre.jpg"
         ogreFight();
     }else if(currentMonster === 3 && playerLevel >= 6)
     {
+        "images/PromoWitch.jpg"
         witchFight();
     }else
     {
@@ -206,19 +223,19 @@ function monsterChoose()
     return ranMon
 }
 
-expBtn.addEventListener("click", function()
-{
-    playerLevel += 1;
-    exp = 0;
-    playerLevelEl.textContent = "Player Level: " + playerLevel;
-    expEl.textContent = "Experience: " + exp;
-})
+//expBtn.addEventListener("click", function()
+//{
+//    playerLevel += 1;
+//    exp = 0;
+//    playerLevelEl.textContent = "Player Level: " + playerLevel;
+//    expEl.textContent = "Experience: " + exp;
+//})
 
-cheatAtk.addEventListener("click", function()
-{
-    playerMaxAttack = 50;
-    atkPwrEl.textContent = "(" + playerMaxAttack + ")";
-})
+//cheatAtk.addEventListener("click", function()
+//{
+//    playerMaxAttack = 50;
+//    atkPwrEl.textContent = "(" + playerMaxAttack + ")";
+//})
 
 function isDeadCheck()
 {
@@ -250,18 +267,19 @@ function goblinFight()
     if (goblin.health <= 0)
     {
         exp += 5;
-        gold += 4;
+        gold += 5;
         expEl.textContent = "Experience: " + exp;
 
         currentMonster = monsterChoose();
 
         goblin.health = goblin.maxHealth;
+        goblinsKilled += 1;
     }
-
 
 
     enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
     enemyNameEl.textContent = goblin.name;
+    goblinsEl.textContent = "Goblins Killed: " + goblinsKilled;
 }
 
 function ogreFight()
@@ -286,18 +304,20 @@ function ogreFight()
     if (ogre.health <= 0)
     {
         exp += 15;
-        gold += 10;
+        gold += 13;
         expEl.textContent = "Experience: " + exp;
 
         currentMonster = monsterChoose();
 
         ogre.health = ogre.maxHealth;
+        ogresKilled += 1;
     }
 
 
 
     enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
     enemyNameEl.textContent = ogre.name;
+    ogresEl.textContent = "Ogres Killed: " + ogresKilled;
 }
 
 function witchFight()
@@ -328,10 +348,12 @@ function witchFight()
         currentMonster = monsterChoose();
 
         witch.health = witch.maxHealth;
+        witchesKilled += 1;
     }
 
 
 
     enemyHealthEl.textContent = "Enemy Health: " + witch.health;
     enemyNameEl.textContent = witch.name;
+    witchesEl.textContent = "Witches Killed: " + witchesKilled;
 }
