@@ -171,7 +171,7 @@ attackBtn.addEventListener("click", function()
         ogreFight();
     }else if(currentMonster === 3 && playerLevel >= 6)
     {
-        "images/PromoWitch.jpg"
+        "images/PromoWitch.png"
         witchFight();
     }else
     {
