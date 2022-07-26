@@ -7,6 +7,7 @@ let atkPwrEl = document.getElementById("atk-pwr-el");
 let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
 let atkBtn = document.getElementById("atk-btn");
+let playerName = document.getElementById("playerName");
 
 //Dev Cheats
 let expBtn = document.getElementById("exp-btn");
@@ -31,6 +32,7 @@ let currentMonster = 1;
 window.onload = function() 
 {
     currentMonster = monsterChoose();
+    playerName.textContent = localStorage.getItem("username");
 
     if (currentMonster === 1)
     {

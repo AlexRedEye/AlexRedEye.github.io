@@ -1,5 +1,9 @@
 //document.getElementById("count-el").innerText = 5;
 
+let userBtn = document.getElementById("user-btn");
+let usernameEl = document.getElementById("username");
+let mainGreetEl = document.getElementById("main-greet-el");
+
 let countEl = document.getElementById("count-el");
 let count = 0
 
@@ -61,3 +65,17 @@ function rpg()
 {
     window.location.href = "rpg.html"
 }
+
+userBtn.addEventListener("click", function()
+{
+    let username = usernameEl.value;
+    let key = "username";
+
+    console.log(username)
+
+    localStorage.setItem(key, username);
+
+    console.log(localStorage.getItem("username"));
+})
+
+mainGreetEl.textContent = "Hello " + localStorage.getItem("username");
