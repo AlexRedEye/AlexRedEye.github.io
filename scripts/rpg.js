@@ -132,6 +132,7 @@ atkBtn.addEventListener("click", function()
     {
         playerMaxAttack += 2;
         playerAttack += 2;
+        gold -= 100;
     }
 
     atkPwrEl.textContent = "(" + playerMaxAttack + ")";
