@@ -122,9 +122,9 @@ attackBtn.addEventListener("click", function()
         goblinFight();
     }
 
-    playerHealthEl.textContent = "Player Health: " + playerHealth;
+    playerHealthEl.textContent = "Health: " + playerHealth;
     goldEl.textContent = "Gold: " + gold
-    playerLevelEl.textContent = "Player Level: " + playerLevel;
+    playerLevelEl.textContent = "Level: " + playerLevel;
     expEl.textContent = "Experience: " + exp;
     atkPwrEl.textContent = "(" + playerMaxAttack + ")";
 })
