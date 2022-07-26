@@ -2,6 +2,7 @@ let playerHealthEl = document.getElementById("playerHealth-el");
 let playerLevelEl = document.getElementById("playerLvl-el");
 let goldEl = document.getElementById("gold-el");
 let expEl = document.getElementById("exp-el");
+let potionInvEl = document.getElementById("potion-inv-el");
 let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
 
@@ -44,6 +45,7 @@ healBtn.addEventListener("click", function()
     }
 
     playerHealthEl.textContent = "Player Health: " + playerHealth;
+    potionInvEl.textContent = "(" + potionAmount + ")"
 })
 
 attackBtn.addEventListener("click", function()
@@ -117,6 +119,7 @@ potionBtn.addEventListener("click", function()
     }
 
     goldEl.textContent = "Gold: " + gold;
+    potionInvEl.textContent = "(" + potionAmount + ")"
 })
 
 function randomNum()
