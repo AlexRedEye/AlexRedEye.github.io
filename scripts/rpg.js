@@ -32,7 +32,7 @@ window.onload = function()
     {
         enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
         enemyNameEl.textContent = goblin.name
-    }else if(currentMonster === 2 && playerLevel === 3)
+    }else if(currentMonster === 2 && playerLevel >= 3)
     {
         enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
         enemyNameEl.textContent = ogre.name
@@ -99,7 +99,7 @@ attackBtn.addEventListener("click", function()
     if(currentMonster === 1)
     {
         goblinFight();
-    }else if(currentMonster === 2 && playerLevel === 3)
+    }else if(currentMonster === 2 && playerLevel >= 3)
     {
         ogreFight();
     }else
