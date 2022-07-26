@@ -207,6 +207,7 @@ atkBtn.addEventListener("click", function()
     }
 
     atkPwrEl.textContent = "(" + playerMaxAttack + ")";
+    goldEl.textContent = "Gold: " + gold
 })
 
 function randomNum()
