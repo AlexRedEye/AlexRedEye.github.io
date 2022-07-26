@@ -9,52 +9,68 @@
 </head>
 <body>
     <a href="index.html">Go Back</a>
-    <h1>RPG</h1>
-    <div id="stats-el">
-        <div id="player-stats-el">
-            <p id="playerLvl-el">Player Level: 1</p>
-            <p id="playerHealth-el">Player Health: 100</p>
-            <p id="exp-el">Experience: 0</p>
-        </div>
-    </div>
     <div>
-        <button class="button-85" role="button" id="attack-btn">Attack</button>
-        <span id="atk-pwr-el">(5)</span>
-        <button class="button-85" role="button" id="heal-btn">Heal</button> 
-        <span id="potion-inv-el">(3)</span>
-    </div>
-    <div id="enemy-stats-el">
-        <p id="enemyName-el">Enemy</p>
-        <p id="enemyHealth-el">Enemy Health:</p>
-        <p id="gold-el">Gold: 0</p>
-    </div>
-    <div id="shop-el">
-        <h2>SHOP</h2>
-        <span id="heal-inv-el">
-            Full Heal: 
-            <button class="button-85" role="button" id="potion-btn">Buy</button>
-            50g
+        <span id="player-things-el">
+            <h1>RPG</h1>
+        <div id="stats-el">
+            <div id="player-stats-el">
+                <p id="playerLvl-el">Player Level: 1</p>
+                <p id="playerHealth-el">Player Health: 100</p>
+                <p id="exp-el">Experience: 0</p>
+            </div>
+        </div>
+        <div>
+            <button class="button-85" role="button" id="attack-btn">Attack</button>
+            <span id="atk-pwr-el">(5)</span>
+            <button class="button-85" role="button" id="heal-btn">Heal</button> 
+            <span id="potion-inv-el">(3)</span>
+        </div>
         </span>
-        <br>
-        +2 Attack: 
-        <button class="button-85" role="button" id="atk-btn">Buy</button>
-        100g
-        <!<br>
-        <!+10% Critical Chance: 
-        <!<button class="button-85" role="button" id="ctr-chance-btn"></button>
-        <!150g
-        <!<br>
-        <!+5 Critical Power: 
-        <!<button class="button-85" role="button" id="ctr-pwr-btn"></button>
-        <!200g
-        <!<br>
-        <!100 EXP:>
-        <!<button class="button-85" role="button" id="exp-btn"></button>
-        <!FREE>
-        <!<br>
-        <!50 ATK:>
-        <!<button class="button-85" role="button" id="cheatAtk-btn"></button>
-        <!FREE>
+    
+        <span id="enemy-things-el">
+            <h1>ENEMY</h1>
+            <div id="enemy-stats-el">
+                <p id="enemyName-el">Enemy</p>
+                <p id="enemyHealth-el">Enemy Health:</p>
+                <p id="rewards-el">Rewards:</p>
+            </div>
+        </span>
+    
+        <span id="shop-things-el">
+            <div id="shop-el">
+                <h1>SHOP</h1>
+                <p id="gold-el">Gold: 0</p>
+                <span id="heal-inv-el">
+                    Full Heal: 
+                    <button class="button-85" role="button" id="potion-btn">Buy</button>
+                    50g
+                </span>
+                <br>
+                +2 Attack: 
+                <button class="button-85" role="button" id="atk-btn">Buy</button>
+                100g
+                <!<br>
+                <!+10% Critical Chance: 
+                <!<button class="button-85" role="button" id="ctr-chance-btn"></button>
+                <!150g
+                <!<br>
+                <!+5 Critical Power: 
+                <!<button class="button-85" role="button" id="ctr-pwr-btn"></button>
+                <!200g
+                <!<br>
+                <!100 EXP:>
+                <!<button class="button-85" role="button" id="exp-btn"></button>
+                <!FREE>
+                <!<br>
+                <!50 ATK:>
+                <!<button class="button-85" role="button" id="cheatAtk-btn"></button>
+                <!FREE>
+            </div>
+        </span>
+
+        <span id="log-things-el">
+            <h1>LOGS</h1>
+        </span>
     </div>
 </body>
 <script src="scripts/rpg.js"></script>

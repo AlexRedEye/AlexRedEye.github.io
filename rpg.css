@@ -83,7 +83,6 @@ body{
   {
     color: #ecce05;
     font-size: 30px;
-    margin-bottom: 50px;
   }
 
   #enemy-stats-el
@@ -99,4 +98,29 @@ body{
   #stats-el
   {
     color: green;
+  }
+
+  #player-things-el
+  {
+    position: relative;
+    right: 300px;
+  }
+
+  #enemy-things-el
+  {
+    position: relative;
+    right: 300px;
+  }
+
+  #shop-things-el
+  {
+    position: relative;
+    bottom: 610px;
+  }
+
+  #log-things-el
+  {
+    position: relative;
+    bottom: 880px;
+    left: 300px;
   }
