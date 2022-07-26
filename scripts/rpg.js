@@ -51,6 +51,8 @@ window.onload = function()
         enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
         enemyNameEl.textContent = goblin.name
     }
+
+    setInterval(isDeadCheck, 1000/10);
 }
 
 class Monster {
@@ -96,14 +98,21 @@ attackBtn.addEventListener("click", function()
         playerAttack = 3
     }
 
-    if (playerHealth < 0)
+    if (playerHealth <= 0)
     {
         window.location.href = "rpg.html"
     }
 
-    if (exp >= 100)
+    if (exp >= 100 && playerLevel === 1)
     {
         gold += 25;
+        playerLevel += 1;
+        exp = 0;
+    }
+
+    if (exp >= 125 && playerLevel === 2)
+    {
+        gold += 50;
         playerLevel += 1;
         exp = 0;
     }
@@ -181,6 +190,14 @@ cheatAtk.addEventListener("click", function()
     atkPwrEl.textContent = "(" + playerMaxAttack + ")";
 })
 
+function isDeadCheck()
+{
+    if (playerHealth <= 0)
+    {
+        window.location.href = "rpg.html"
+    }
+}
+
 function goblinFight()
 {
     if (randomNum() === 1)
@@ -203,7 +220,7 @@ function goblinFight()
     if (goblin.health <= 0)
     {
         exp += 5;
-        gold += 5;
+        gold += 4;
         expEl.textContent = "Experience: " + exp;
 
         currentMonster = monsterChoose();
