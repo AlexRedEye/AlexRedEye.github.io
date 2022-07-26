@@ -8,6 +8,10 @@ let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
 let atkBtn = document.getElementById("atk-btn");
 
+//Dev Cheats
+let expBtn = document.getElementById("exp-btn");
+let cheatAtk = document.getElementById("cheatAtk-btn");
+
 const attackBtn = document.getElementById("attack-btn");
 const healBtn = document.getElementById("heal-btn");
 const potionBtn = document.getElementById("potion-btn");
@@ -36,6 +40,10 @@ window.onload = function()
     {
         enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
         enemyNameEl.textContent = ogre.name
+    }else if(currentMonster === 3 && playerLevel >= 6)
+    {
+        enemyHealthEl.textContent = "Enemy Health: " + witch.health;
+        enemyNameEl.textContent = witch.name
     }else
     {
         enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
@@ -55,6 +63,8 @@ class Monster {
 
 let goblin = new Monster("Goblin", 30, 30, 3);
 let ogre = new Monster("Ogre", 50, 50, 5);
+let witch = new Monster("Witch", 40, 40, 7);
+
 
 healBtn.addEventListener("click", function()
 {
@@ -102,6 +112,9 @@ attackBtn.addEventListener("click", function()
     }else if(currentMonster === 2 && playerLevel >= 3)
     {
         ogreFight();
+    }else if(currentMonster === 3 && playerLevel >= 6)
+    {
+        witchFight();
     }else
     {
         goblinFight();
@@ -147,10 +160,24 @@ function randomNum()
 
 function monsterChoose()
 {
-    let ranMon = Math.floor(Math.random() * 3)
+    let ranMon = Math.floor(Math.random() * 4)
 
     return ranMon
 }
+
+expBtn.addEventListener("click", function()
+{
+    playerLevel += 1;
+    exp = 0;
+    playerLevelEl.textContent = "Player Level: " + playerLevel;
+    expEl.textContent = "Experience: " + exp;
+})
+
+cheatAtk.addEventListener("click", function()
+{
+    playerMaxAttack = 50;
+    atkPwrEl.textContent = "(" + playerMaxAttack + ")";
+})
 
 function goblinFight()
 {
@@ -173,7 +200,7 @@ function goblinFight()
 
     if (goblin.health <= 0)
     {
-        exp += 25;
+        exp += 5;
         gold += 3;
         expEl.textContent = "Experience: " + exp;
 
@@ -209,8 +236,8 @@ function ogreFight()
 
     if (ogre.health <= 0)
     {
-        exp += 25;
-        gold += 3;
+        exp += 15;
+        gold += 10;
         expEl.textContent = "Experience: " + exp;
 
         currentMonster = monsterChoose();
@@ -222,4 +249,40 @@ function ogreFight()
 
     enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
     enemyNameEl.textContent = ogre.name;
+}
+
+function witchFight()
+{
+    if (randomNum() === 1)
+    {
+        witch.attack = 5
+    } else if (randomNum() === 2)
+    {
+        witch.attack = 6
+    } else if(randomNum() === 3)
+    {
+        witch.attack = 7
+    } else if (randomNum() === 0)
+    {
+        witch.attack = 5
+    }
+
+    playerHealth -= witch.attack;
+    witch.health -= playerAttack;
+
+    if (witch.health <= 0)
+    {
+        exp += 20;
+        gold += 15;
+        expEl.textContent = "Experience: " + exp;
+
+        currentMonster = monsterChoose();
+
+        witch.health = witch.maxHealth;
+    }
+
+
+
+    enemyHealthEl.textContent = "Enemy Health: " + witch.health;
+    enemyNameEl.textContent = witch.name;
 }
