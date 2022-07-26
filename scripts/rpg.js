@@ -203,7 +203,7 @@ function goblinFight()
     if (goblin.health <= 0)
     {
         exp += 5;
-        gold += 3;
+        gold += 5;
         expEl.textContent = "Experience: " + exp;
 
         currentMonster = monsterChoose();
