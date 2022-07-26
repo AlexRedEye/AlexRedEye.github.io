@@ -267,7 +267,7 @@ function goblinFight()
 
     if (goblin.health <= 0)
     {
-        exp += 5;
+        exp += 25;
         gold += 5;
         expEl.textContent = "Experience: " + exp;
 
@@ -304,7 +304,7 @@ function ogreFight()
 
     if (ogre.health <= 0)
     {
-        exp += 15;
+        exp += 25;
         gold += 13;
         expEl.textContent = "Experience: " + exp;
 
@@ -342,7 +342,7 @@ function witchFight()
 
     if (witch.health <= 0)
     {
-        exp += 20;
+        exp += 25;
         gold += 15;
         expEl.textContent = "Experience: " + exp;
 
