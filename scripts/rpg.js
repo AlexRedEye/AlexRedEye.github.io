@@ -18,6 +18,11 @@ let playerAttack = 5;
 let potion = playerMaxHealth;
 let potionAmount = 3;
 
+window.onload = function() 
+{
+    enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
+}
+
 class Monster {
     constructor(name, health, maxHealth,attack) 
     {
