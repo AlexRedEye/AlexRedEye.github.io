@@ -22,9 +22,25 @@ let playerAttack = playerMaxAttack;
 let potion = playerMaxHealth;
 let potionAmount = 3;
 
+let currentMonster = 1;
+
 window.onload = function() 
 {
-    enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
+    currentMonster = monsterChoose();
+
+    if (currentMonster === 1)
+    {
+        enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
+        enemyNameEl.textContent = goblin.name
+    }else if(currentMonster === 2 && playerLevel === 3)
+    {
+        enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
+        enemyNameEl.textContent = ogre.name
+    }else
+    {
+        enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
+        enemyNameEl.textContent = goblin.name
+    }
 }
 
 class Monster {
@@ -38,6 +54,7 @@ class Monster {
 }
 
 let goblin = new Monster("Goblin", 30, 30, 3);
+let ogre = new Monster("Ogre", 50, 50, 5);
 
 healBtn.addEventListener("click", function()
 {
@@ -67,32 +84,6 @@ attackBtn.addEventListener("click", function()
         playerAttack = 3
     }
 
-    if (randomNum() === 1)
-    {
-        goblin.attack = 1
-    } else if (randomNum() === 2)
-    {
-        goblin.attack = 2
-    } else if(randomNum() === 3)
-    {
-        goblin.attack = 3
-    } else if (randomNum() === 0)
-    {
-        goblin.attack = 1
-    }
-
-    playerHealth -= goblin.attack;
-    goblin.health -= playerAttack;
-
-    if (goblin.health <= 0)
-    {
-        exp += 25;
-        gold += 3;
-        expEl.textContent = "Experience: " + exp;
-
-        goblin.health = goblin.maxHealth;
-    }
-
     if (playerHealth < 0)
     {
         window.location.href = "rpg.html"
@@ -105,12 +96,21 @@ attackBtn.addEventListener("click", function()
         exp = 0;
     }
 
+    if(currentMonster === 1)
+    {
+        goblinFight();
+    }else if(currentMonster === 2 && playerLevel === 3)
+    {
+        ogreFight();
+    }else
+    {
+        goblinFight();
+    }
+
     playerHealthEl.textContent = "Player Health: " + playerHealth;
     goldEl.textContent = "Gold: " + gold
-    enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
     playerLevelEl.textContent = "Player Level: " + playerLevel;
     expEl.textContent = "Experience: " + exp;
-    enemyNameEl.textContent = goblin.name;
     atkPwrEl.textContent = "(" + playerMaxAttack + ")";
 })
 
@@ -142,4 +142,83 @@ function randomNum()
     let ranNum = Math.floor(Math.random() * 4)
 
     return ranNum
+}
+
+function monsterChoose()
+{
+    let ranMon = Math.floor(Math.random() * 3)
+
+    return ranMon
+}
+
+function goblinFight()
+{
+    if (randomNum() === 1)
+    {
+        goblin.attack = 1
+    } else if (randomNum() === 2)
+    {
+        goblin.attack = 2
+    } else if(randomNum() === 3)
+    {
+        goblin.attack = 3
+    } else if (randomNum() === 0)
+    {
+        goblin.attack = 1
+    }
+
+    playerHealth -= goblin.attack;
+    goblin.health -= playerAttack;
+
+    if (goblin.health <= 0)
+    {
+        exp += 25;
+        gold += 3;
+        expEl.textContent = "Experience: " + exp;
+
+        currentMonster = monsterChoose();
+
+        goblin.health = goblin.maxHealth;
+    }
+
+
+
+    enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
+    enemyNameEl.textContent = goblin.name;
+}
+
+function ogreFight()
+{
+    if (randomNum() === 1)
+    {
+        ogre.attack = 3
+    } else if (randomNum() === 2)
+    {
+        ogre.attack = 4
+    } else if(randomNum() === 3)
+    {
+        ogre.attack = 5
+    } else if (randomNum() === 0)
+    {
+        ogre.attack = 3
+    }
+
+    playerHealth -= ogre.attack;
+    ogre.health -= playerAttack;
+
+    if (ogre.health <= 0)
+    {
+        exp += 25;
+        gold += 3;
+        expEl.textContent = "Experience: " + exp;
+
+        currentMonster = monsterChoose();
+
+        ogre.health = ogre.maxHealth;
+    }
+
+
+
+    enemyHealthEl.textContent = "Enemy Health: " + ogre.health;
+    enemyNameEl.textContent = ogre.name;
 }
