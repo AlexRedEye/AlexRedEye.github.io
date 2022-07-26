@@ -110,12 +110,42 @@ attackBtn.addEventListener("click", function()
         exp = 0;
     }
 
-    if (exp >= 125 && playerLevel === 2)
+    if (exp >= 115 && playerLevel === 2)
     {
         gold += 50;
         playerLevel += 1;
         exp = 0;
     }
+
+    if (exp >= 125 && playerLevel === 3)
+    {
+        gold += 60;
+        playerLevel += 1;
+        exp = 0;
+    }
+
+    if (exp >= 135 && playerLevel === 4)
+    {
+        gold += 65;
+        playerLevel += 1;
+        exp = 0;
+    }
+
+    if (exp >= 145 && playerLevel === 5)
+    {
+        gold += 70;
+        playerLevel += 1;
+        exp = 0;
+    }
+
+    if (exp >= 155 && playerLevel === 6)
+    {
+        gold += 75;
+        playerLevel += 1;
+        exp = 0;
+    }
+
+
 
     if(currentMonster === 1)
     {
