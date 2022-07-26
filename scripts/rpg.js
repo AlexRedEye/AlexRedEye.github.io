@@ -14,7 +14,7 @@ let playerHealth = 100;
 let playerLevel = 1;
 let gold = 0;
 let exp = 0;
-let playerAttack = 5;
+let playerAttack = randomNum();
 let potion = playerMaxHealth;
 let potionAmount = 3;
 
@@ -35,15 +35,6 @@ class Monster {
 
 let goblin = new Monster("Goblin", 30, 30, 3);
 
-function randomNum()
-{
-    let ranNum = Math.floor(Math.random() * 4)
-
-    return ranNum
-}
-
-
-
 healBtn.addEventListener("click", function()
 {
     if(potionAmount > 0 && playerHealth < 100)
@@ -59,6 +50,34 @@ attackBtn.addEventListener("click", function()
 {
     playerHealth -= goblin.attack;
     goblin.health -= playerAttack;
+
+    if (randomNum() === 1)
+    {
+        playerAttack = 3
+    } else if (randomNum() === 2)
+    {
+        playerAttack = 4
+    } else if(randomNum() === 3)
+    {
+        playerAttack = 5
+    } else if (randomNum() === 0)
+    {
+        playerAttack = 3
+    }
+
+    if (randomNum() === 1)
+    {
+        goblin.attack = 1
+    } else if (randomNum() === 2)
+    {
+        goblin.attack = 2
+    } else if(randomNum() === 3)
+    {
+        goblin.attack = 3
+    } else if (randomNum() === 0)
+    {
+        goblin.attack = 1
+    }
 
     if (goblin.health <= 0)
     {
@@ -99,3 +118,10 @@ potionBtn.addEventListener("click", function()
 
     goldEl.textContent = "Gold: " + gold;
 })
+
+function randomNum()
+{
+    let ranNum = Math.floor(Math.random() * 4)
+
+    return ranNum
+}
