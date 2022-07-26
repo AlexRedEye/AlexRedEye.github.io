@@ -11,6 +11,7 @@ let playerName = document.getElementById("playerName");
 let goblinsEl = document.getElementById("goblins-el");
 let ogresEl = document.getElementById("ogres-el");
 let witchesEl = document.getElementById("witches-el");
+let darkFairyEl = document.getElementById("dark-fairy-el");
 let usernameBoxEl = document.getElementById("usernameBox-el");
 let camImg = document.getElementById("cam-img");
 
@@ -34,6 +35,7 @@ let potionAmount = 3;
 let goblinsKilled = 0;
 let ogresKilled = 0;
 let witchesKilled = 0;
+let darkFairiesKilled = 0;
 
 let currentMonster = 1;
 
@@ -44,6 +46,7 @@ window.onload = function()
     goblinsEl.textContent = "Goblins Killed: " + goblinsKilled;
     witchesEl.textContent = "Witches Killed: " + witchesKilled;
     ogresEl.textContent = "Ogres Killed: " + ogresKilled;
+    darkFairyEl.textContent = "Dark Fairies Killed: " + darkFairiesKilled;
 
     if (currentMonster === 1)
     {
@@ -60,11 +63,18 @@ window.onload = function()
         enemyHealthEl.textContent = "Enemy Health: " + witch.health;
         enemyNameEl.textContent = witch.name
         camImg.src = "images/PromoWitch.jpg"
+    }else if(currentMonster === 4)
+    {
+        enemyHealthEl.textContent = "Enemy Health: " + darkFairy.health;
+        enemyNameEl.textContent = darkFairy.name
+        camImg.src = "images/darkFairy.png"
     }else
     {
         enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
         enemyNameEl.textContent = goblin.name
+        camImg.src = "images/Goblin01.png"
     }
+    
 
     setInterval(isDeadCheck, 1000/10);
 }
@@ -82,6 +92,7 @@ class Monster {
 let goblin = new Monster("Goblin", 30, 30, 3);
 let ogre = new Monster("Ogre", 50, 50, 5);
 let witch = new Monster("Witch", 40, 40, 7);
+let darkFairy = new Monster("Dark Fairy", 20, 20, 4);
 
 
 healBtn.addEventListener("click", function()
@@ -171,10 +182,15 @@ attackBtn.addEventListener("click", function()
         ogreFight();
     }else if(currentMonster === 3 && playerLevel >= 6)
     {
-        "images/PromoWitch.png"
+        camImg.src = "images/PromoWitch.png"
         witchFight();
+    }else if(currentMonster === 4)
+    {
+        camImg.src = "images/darkFairy.png"
+        darkFairyFight();
     }else
     {
+        camImg.src = "images/Goblin01.png"
         goblinFight();
     }
 
@@ -219,7 +235,7 @@ function randomNum()
 
 function monsterChoose()
 {
-    let ranMon = Math.floor(Math.random() * 4)
+    let ranMon = Math.floor(Math.random() * 5)
 
     return ranMon
 }
@@ -281,6 +297,43 @@ function goblinFight()
     enemyHealthEl.textContent = "Enemy Health: " + goblin.health;
     enemyNameEl.textContent = goblin.name;
     goblinsEl.textContent = "Goblins Killed: " + goblinsKilled;
+}
+
+function darkFairyFight()
+{
+    if (randomNum() === 1)
+    {
+        darkFairy.attack = 2
+    } else if (randomNum() === 2)
+    {
+        darkFairy.attack = 3
+    } else if(randomNum() === 3)
+    {
+        darkFairy.attack = 4
+    } else if (randomNum() === 0)
+    {
+        darkFairy.attack = 2
+    }
+
+    playerHealth -= darkFairy.attack;
+    darkFairy.health -= playerAttack;
+
+    if (darkFairy.health <= 0)
+    {
+        exp += 7;
+        gold += 5;
+        expEl.textContent = "Experience: " + exp;
+
+        currentMonster = monsterChoose();
+
+        darkFairy.health = darkFairy.maxHealth;
+        darkFairiesKilled += 1;
+    }
+
+
+    enemyHealthEl.textContent = "Enemy Health: " + darkFairy.health;
+    enemyNameEl.textContent = darkFairy.name;
+    darkFairyEl.textContent = "Dark Fairies Killed: " + darkFairiesKilled;
 }
 
 function ogreFight()
