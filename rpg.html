@@ -11,18 +11,22 @@
     <a href="index.html">Go Back</a>
     <h1>RPG</h1>
     <div id="stats-el">
-        <p id="playerHealth-el">Player Health: 100</p>
-        <p id="playerLvl-el">Player Level: 1</p>
-        <p id="exp-el">Experience: 0</p>
-        <p id="gold-el">Gold: 0</p>
-        <p id="enemyName-el"></p>
-        <p id="enemyHealth-el">Enemy Health: 100</p>
+        <div id="player-stats-el">
+            <p id="playerLvl-el">Player Level: 1</p>
+            <p id="playerHealth-el">Player Health: 100</p>
+            <p id="exp-el">Experience: 0</p>
+        </div>
     </div>
     <div>
         <button class="button-85" role="button" id="attack-btn">Attack</button>
         <button class="button-85" role="button" id="heal-btn">Heal</button> 
     </div>
-    <div>
+    <div id="enemy-stats-el">
+        <p id="enemyName-el"></p>
+        <p id="enemyHealth-el">Enemy Health: 100</p>
+        <p id="gold-el">Gold: 0</p>
+    </div>
+    <div id="shop-el">
         <h2>SHOP</h2>
         Full Heal: 
         <button class="button-85" role="button" id="potion-btn">Buy</button>
