@@ -6,6 +6,7 @@ let potionInvEl = document.getElementById("potion-inv-el");
 let atkPwrEl = document.getElementById("atk-pwr-el");
 let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
+let atkBtn = document.getElementById("atk-btn");
 
 const attackBtn = document.getElementById("attack-btn");
 const healBtn = document.getElementById("heal-btn");
@@ -16,8 +17,8 @@ let playerHealth = 100;
 let playerLevel = 1;
 let gold = 0;
 let exp = 0;
-let playerAttack = randomNum();
 let playerMaxAttack = 5;
+let playerAttack = playerMaxAttack;
 let potion = playerMaxHealth;
 let potionAmount = 3;
 
@@ -52,9 +53,6 @@ healBtn.addEventListener("click", function()
 
 attackBtn.addEventListener("click", function()
 {
-    playerHealth -= goblin.attack;
-    goblin.health -= playerAttack;
-
     if (randomNum() === 1)
     {
         playerAttack = playerMaxAttack - 2
@@ -63,8 +61,7 @@ attackBtn.addEventListener("click", function()
         playerAttack = playerMaxAttack - 1
     } else if(randomNum() === 3)
     {
-        playerAttack = 5
-        playerMaxAttack = playerAttack
+        playerAttack = playerMaxAttack
     } else if (randomNum() === 0)
     {
         playerAttack = 3
@@ -83,6 +80,9 @@ attackBtn.addEventListener("click", function()
     {
         goblin.attack = 1
     }
+
+    playerHealth -= goblin.attack;
+    goblin.health -= playerAttack;
 
     if (goblin.health <= 0)
     {
@@ -111,7 +111,7 @@ attackBtn.addEventListener("click", function()
     playerLevelEl.textContent = "Player Level: " + playerLevel;
     expEl.textContent = "Experience: " + exp;
     enemyNameEl.textContent = goblin.name;
-    atkPwrEl.textContent = playerMaxAttack;
+    atkPwrEl.textContent = "(" + playerMaxAttack + ")";
 })
 
 potionBtn.addEventListener("click", function()
@@ -124,6 +124,17 @@ potionBtn.addEventListener("click", function()
 
     goldEl.textContent = "Gold: " + gold;
     potionInvEl.textContent = "(" + potionAmount + ")"
+})
+
+atkBtn.addEventListener("click", function()
+{
+    if(gold >= 100)
+    {
+        playerMaxAttack += 2;
+        playerAttack += 2;
+    }
+
+    atkPwrEl.textContent = "(" + playerMaxAttack + ")";
 })
 
 function randomNum()
