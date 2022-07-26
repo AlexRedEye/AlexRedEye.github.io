@@ -53,6 +53,15 @@ function update()
     {
         snakeBody.push([foodX, foodY])
         score += 1;
+
+        if(score <= localStorage.getItem("score"))
+        {
+            console.log("nice try")
+        }else if(score > localStorage.getItem("score"))
+        {
+            localStorage.setItem("score", score);
+            console.log(localStorage);
+        }
         placeFood();
     }
 
@@ -77,7 +86,9 @@ function update()
     //game over conditions
     let scoreEl = document.getElementById("score-el");
     let gameOverEl = document.getElementById("gameover-el");
+    let highScoreEl = document.getElementById("highscore-el");
     scoreEl.textContent = "Score: " + score.toString();
+    highScoreEl.textContent = "High Score: " + localStorage.getItem("score");
 
     if (snakeX < 0 || snakeX > cols * blockSize || snakeY < 0 || snakeY > rows * blockSize)
     {
