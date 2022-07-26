@@ -3,6 +3,7 @@ let playerLevelEl = document.getElementById("playerLvl-el");
 let goldEl = document.getElementById("gold-el");
 let expEl = document.getElementById("exp-el");
 let potionInvEl = document.getElementById("potion-inv-el");
+let atkPwrEl = document.getElementById("atk-pwr-el");
 let enemyHealthEl = document.getElementById("enemyHealth-el");
 let enemyNameEl = document.getElementById("enemyName-el");
 
@@ -16,6 +17,7 @@ let playerLevel = 1;
 let gold = 0;
 let exp = 0;
 let playerAttack = randomNum();
+let playerMaxAttack = 5;
 let potion = playerMaxHealth;
 let potionAmount = 3;
 
@@ -55,13 +57,14 @@ attackBtn.addEventListener("click", function()
 
     if (randomNum() === 1)
     {
-        playerAttack = 3
+        playerAttack = playerMaxAttack - 2
     } else if (randomNum() === 2)
     {
-        playerAttack = 4
+        playerAttack = playerMaxAttack - 1
     } else if(randomNum() === 3)
     {
         playerAttack = 5
+        playerMaxAttack = playerAttack
     } else if (randomNum() === 0)
     {
         playerAttack = 3
@@ -108,6 +111,7 @@ attackBtn.addEventListener("click", function()
     playerLevelEl.textContent = "Player Level: " + playerLevel;
     expEl.textContent = "Experience: " + exp;
     enemyNameEl.textContent = goblin.name;
+    atkPwrEl.textContent = playerMaxAttack;
 })
 
 potionBtn.addEventListener("click", function()
