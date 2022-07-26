@@ -13,8 +13,4 @@ userBtn.addEventListener("click", function()
 
     console.log(localStorage.getItem("username"));
 
-    if(localStorage.getItem("username") === true)
-    {
-        localStorage.removeItem("username");
-    }
 })

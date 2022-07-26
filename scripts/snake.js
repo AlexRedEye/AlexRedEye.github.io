@@ -27,6 +27,19 @@ window.onload = function()
     board.width = cols * blockSize;
     context = board.getContext("2d"); //used for drawing on the board
 
+    fetch("scores.json").then(function (response) 
+    {
+        return response.json();
+    }).then(function(obj)
+    {
+        console.log(obj);
+    }).catch(function (error) 
+    {
+        console.error('Something went wrong with retrieving the scores!');
+        console.error(error);
+    })
+    
+
     placeFood();
     document.addEventListener("keyup", changeDirection);
     //update();
