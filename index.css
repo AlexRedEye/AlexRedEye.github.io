@@ -98,9 +98,11 @@ h1 {
 }
 
 #pkm-btn {
-    background-color: blue;
-    color: red;
+    background-color: goldenrod;
+    color: yellow;
     font-weight: bolder;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: blue;
 }
 
 #user-btn
