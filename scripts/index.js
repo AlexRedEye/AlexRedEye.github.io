@@ -64,4 +64,9 @@ function rpg()
     window.location.href = "rpg.html"
 }
 
+function pokemon()
+{
+    window.location.href = "pokemon.html"
+}
+
 mainGreetEl.textContent = "Hello " + localStorage.getItem("username");

@@ -97,6 +97,12 @@ h1 {
     background-color: black;
 }
 
+#pkm-btn {
+    background-color: blue;
+    color: red;
+    font-weight: bolder;
+}
+
 #user-btn
 {
     background-color: silver;
