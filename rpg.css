@@ -8,7 +8,7 @@ body{
     color: purple;
     font-size: 30px;
     font-family: 'Edu VIC WA NT Beginner', cursive;
-} 
+}
 
 /*start*/
 .button-85 {
@@ -88,47 +88,23 @@ body{
   #enemy-stats-el
   {
     color: Red;
+    position: absolute;
+    left: 500px;
+    top: 200px;
   }
 
   #shop-el
   {
     color: goldenrod;
-    position: relative;
-    right: 250px;
-    bottom: 35px;
+    position: absolute;
+    left: 700px;
   }
 
   #stats-el
   {
     color: green;
-  }
-
-  #player-things-el
-  {
     position: absolute;
-    right: 1600px;
-    bottom: 450px;
-  }
-
-  #enemy-things-el
-  {
-    position: absolute;
-    right: 1580px;
-    bottom: 100px;
-  }
-
-  #shop-things-el
-  {
-    position: absolute;
-    bottom: 470px;
-    left: 700px;
-  }
-
-  #log-things-el
-  {
-    position: absolute;
-    bottom: 390px;
-    left: 800px;
+    left: 80px;
   }
 
   fieldset 
@@ -136,30 +112,17 @@ body{
     display: inline;
   }
 
-  #atk-heal-btns
-  {
-    position: absolute;
-    left: 250px;
-    bottom: 160px;
-  }
-
-  #heal-btn-thing
-  {
-    position: absolute;
-    top: 100px;
-    right: 0px;
-
-  }
-
-  #cam-stuff-el
-  {
-    position: absolute;
-    right: 300px;
-    bottom: 285px;
-  }
-
   #cam-img
   {
+    position: absolute;
+    top: 600px;
     width: 300px;
     height: auto;
+  }
+
+  #log-stuff-el 
+  {
+    position: absolute;
+    left: 115px;
+    top: 600px;
   }

@@ -11,7 +11,6 @@
     <a href="index.html">Go Back</a>
     <h1>HOPELESS ADVENTURE</h1>
     <div>
-        <span id="player-things-el">
         <div id="stats-el">
             <div id="player-stats-el">
                 <fieldset>
@@ -21,18 +20,17 @@
                 <p id="exp-el">Experience: 0</p>
                 </fieldset>
             </div>
+
+            <div id="atk-heal-btns">
+                <button class="button-85" role="button" id="attack-btn">Attack</button>
+                <span id="atk-pwr-el">(5)</span>
+                <span id="heal-btn-thing">
+                    <button class="button-85" role="button" id="heal-btn">Heal</button> 
+                <span id="potion-inv-el">(3)</span>
+                </span>
+            </div>
         </div>
-        <div id="atk-heal-btns">
-            <button class="button-85" role="button" id="attack-btn">Attack</button>
-            <span id="atk-pwr-el">(5)</span>
-            <span id="heal-btn-thing">
-                <button class="button-85" role="button" id="heal-btn">Heal</button> 
-            <span id="potion-inv-el">(3)</span>
-            </span>
-        </div>
-        </span>
     
-        <span id="enemy-things-el">
             <div id="enemy-stats-el">
                 <fieldset>
                     <legend>ENEMY</legend>
@@ -41,9 +39,7 @@
                 <p id="rewards-el">Rewards:</p>
                 </fieldset>
             </div>
-        </span>
     
-        <span id="shop-things-el">
             <div id="shop-el">
                 <fieldset>
                     <legend>SHOP</legend>
@@ -75,9 +71,7 @@
                 <!FREE>
                 </fieldset>
             </div>
-        </span>
 
-        <span id="log-things-el">
             <div id="log-stuff-el">
                 <fieldset>
                     <legend>LOGS</legend>
@@ -88,17 +82,8 @@
                 <p id="dark-fairy-el">Dark Fairies Killed:</p>
                 </fieldset>
             </div>
-        </span>
-
-        <span id="cam-things-el">
-            <div id="cam-stuff-el">
-                <fieldset>
-                    <legend>CAM</legend>
 
                     <img id="cam-img" src="images/Goblin01.png" alt="Image of a goblin">
-                </fieldset>
-            </div>
-        </span>
     </div>
 </body>
 <script src="scripts/rpg.js"></script>
