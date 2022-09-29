@@ -97,12 +97,10 @@ h1 {
     background-color: black;
 }
 
-#pkm-btn {
-    background-color: goldenrod;
-    color: yellow;
+#idle-btn {
+    background-color: red;
+    color: black;
     font-weight: bolder;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: blue;
 }
 
 #user-btn
