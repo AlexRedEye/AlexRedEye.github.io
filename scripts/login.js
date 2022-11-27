@@ -13,4 +13,6 @@ userBtn.addEventListener("click", function()
 
     console.log(localStorage.getItem("username"));
 
+    window.location.href = "index.html"
+
 })
