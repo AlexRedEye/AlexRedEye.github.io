@@ -1,9 +1,10 @@
 body{
-    background-image: url(images/mainBackround.jpeg);
+    background-color: #1e2124;
     background-size: null;
     font-family: null;
     font-weight: bold;
     text-align: center;
+    color: white;
 }
 
 h1{
@@ -28,95 +29,8 @@ button {
     border-radius: 5px;
 }
 
-#increment-btn {
-    background: darkred;
-}
-
-#save-btn {
-    background: darkblue;
-}
-
-#store-btn {
-    background: yellow;
-    color: black;
-    
-}
-
-#purchase-btn{
-    background: black;
-}
-
-#shoe-el {
-    width: 500px;
-    border-radius: 50px;
-}
-
-#title-el {
-    color: white;
-}
-
-#error-el {
-    background-color: black;
-    color: red;
-}
-
-#bj-btn {
-    background-color: green;
-}
-
-#other-btn-group {
-    padding-top: 25px;
-}
-
-#counter-btn {
-    background-color: brown;
-}
-
-h1 {
-    color: white;
-}
-
-.h1-blackjack {
-    color: goldenrod;
-}
-
-#calc-btn {
-    background-color: blue;
-}
-
-#tictactoe-btn {
-    background-color: purple;
-}
-
-#snake-btn {
-    background-color: aqua;
-    color: black;
-}
-
-#rpg-btn {
-    background-color: black;
-}
-
-#idle-btn {
+#main_button
+{
+    color: magenta;
     background-color: red;
-    color: black;
-    font-weight: bolder;
-}
-
-#user-btn
-{
-    background-color: silver;
-}
-
-#login-el
-{
-    position: relative;
-
-    right: 400px;
-
-    color: White;
-
-    font-size: 25px;
-
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }

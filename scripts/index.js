@@ -70,3 +70,8 @@ function idle()
 }
 
 mainGreetEl.textContent = "Hello " + localStorage.getItem("username");
+
+function link()
+{
+    window.open('https://www.twitch.tv/logical_fate')
+}
