@@ -2,6 +2,7 @@ let xp = 0;
 let health = 100;
 let gold = 50;
 let currentWeapon = 0;
+let currentArmour = 0;
 let fighting;
 let monsterHealth;
 let inventory = ["stick"];
@@ -12,6 +13,8 @@ const button2 = document.querySelector("#button2");
 const buttonTwo = document.querySelector("#buttonTwo");
 const button3 = document.querySelector("#button3");
 const buttonThree = document.querySelector("#buttonThree");
+const button4 = document.querySelector("#button4");
+const buttonFour = document.querySelector("#buttonFour");
 const text = document.querySelector("#text");
 const xpText = document.querySelector("#xpText");
 const healthText = document.querySelector("#healthText");
@@ -36,6 +39,21 @@ const weapons =
     {
         name: "sword",
         power: 100
+    }
+];
+const armours = 
+[
+    {
+        name: "T-Shirt",
+        power: 0
+    },
+    {
+        name: "leather armour",
+        power: 10
+    },
+    {
+        name: "iron armour",
+        power: 30
     }
 ];
 const monsters = 
@@ -105,6 +123,12 @@ const locations =
         "button text": ["2", "8", "Go to town square?"],
         "button functions": [pickTwo, pickEight, goTown],
         text: "You find a secret game. Pick a number above. Ten numbers will be randomly chosen between 0 and 10. If the number you choose matches one of the random numbers, you win!"
+    },
+    {
+        name: "armoury",
+        "button text": ["Buy armour (50 gold)", "Repair armour(25 gold)", "Go to town square"],
+        "button functions": [buyArmour, repairArmour, goTown],
+        text: "You enter the armoury."
     }
 ];
 
@@ -112,9 +136,12 @@ const locations =
 buttonOne.onclick = goStore;
 buttonTwo.onclick = goCave;
 buttonThree.onclick = fightDragon;
+buttonFour.onclick = goArmoury;
 
 function update(location) {
     monsterStats.style.display = "none";
+    buttonFour.style.display = "none";
+    buttonTwo.style.display = "inline";
     button1.innerText = location["button text"][0];
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
@@ -128,10 +155,16 @@ function update(location) {
 
 function goTown() {
    update(locations[0]);
+   buttonFour.style.display = "block";
 }
 
 function goStore() {
   update(locations[1]);
+}
+
+function goArmoury() {
+    update(locations[8]);
+    buttonTwo.style.display = "none";
 }
 
 function buyHealth() {
@@ -168,6 +201,32 @@ function buyWeapon() {
       }
 }
 
+function buyArmour() {
+    if (currentArmour < armours.length - 1)
+    {
+            if(gold >= 50)
+        {
+            gold -= 50;
+            currentArmour++;
+            goldText.innerText = gold;
+            let newArmour = armours[currentArmour].name;
+            text.innerText = "You now have a " + newArmour + ".";
+            inventory.push(newArmour);
+            text.innerText += " In your inventory you have: " + inventory;
+        } else {
+            text.innerText = "You do not have enough gold to buy armour.";
+          }
+    } else {
+        text.innerText = "You already have the most powerful armour!";
+        button2.innerText = "Sell armour for 25 gold";
+        buttonTwo.onclick = sellArmour;
+      }
+}
+
+function repairArmour() {
+
+}
+
 function sellWeapon() {
     if(inventory.length > 1)
     {
@@ -178,6 +237,20 @@ function sellWeapon() {
         text.innerText += " In your inventory you have: " + inventory;
     } else {
         text.innerText = "Don't sell your only weapon!";
+    }
+
+}
+
+function sellArmour() {
+    if(inventory.length > 1)
+    {
+        gold += 25;
+        goldText.innerText = gold;
+        let currentArmour = inventory.shift();
+        text.innerText = "You sold a " + currentArmour + ".";
+        text.innerText += " In your inventory you have: " + inventory;
+    } else {
+        text.innerText = "Don't sell your only armour!";
     }
 
 }
@@ -238,7 +311,7 @@ function attack() {
 }
 
 function getMonsterAttackValue(level) {
-    const hit = (level * 5) - (Math.floor(Math.random() * xp));
+    const hit = (level * 5) - (Math.floor(Math.random() * xp)) - armours[currentArmour].power;
     console.log(hit);
     return hit > 0 ? hit : 0;
 }
