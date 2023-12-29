@@ -7,8 +7,11 @@ let monsterHealth;
 let inventory = ["stick"];
 
 const button1 = document.querySelector("#button1");
+const buttonOne = document.querySelector("#buttonOne");
 const button2 = document.querySelector("#button2");
+const buttonTwo = document.querySelector("#buttonTwo");
 const button3 = document.querySelector("#button3");
+const buttonThree = document.querySelector("#buttonThree");
 const text = document.querySelector("#text");
 const xpText = document.querySelector("#xpText");
 const healthText = document.querySelector("#healthText");
@@ -106,9 +109,9 @@ const locations =
 ];
 
 //initialize buttons
-button1.onclick = goStore;
-button2.onclick = goCave;
-button3.onclick = fightDragon;
+buttonOne.onclick = goStore;
+buttonTwo.onclick = goCave;
+buttonThree.onclick = fightDragon;
 
 function update(location) {
     monsterStats.style.display = "none";
@@ -116,9 +119,9 @@ function update(location) {
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
 
-    button1.onclick = location["button functions"][0];
-    button2.onclick = location["button functions"][1];
-    button3.onclick = location["button functions"][2];
+    buttonOne.onclick = location["button functions"][0];
+    buttonTwo.onclick = location["button functions"][1];
+    buttonThree.onclick = location["button functions"][2];
 
     text.innerText = location.text;
 }
@@ -161,7 +164,7 @@ function buyWeapon() {
     } else {
         text.innerText = "You already have the most powerful weapon!";
         button2.innerText = "Sell weapon for 15 gold";
-        button2.onclick = sellWeapon;
+        buttonTwo.onclick = sellWeapon;
       }
 }
 
