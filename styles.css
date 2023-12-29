@@ -1,80 +1,97 @@
-/* styles.css */
-
-/* Reset some default styles */
-body, h1, h2, h3, p, ul, li {
-    margin: 0;
-    padding: 0;
-}
-
-/* Set a background color and base font styles */
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #1e2124; /* Dark Gray */
-    color: #fff;
-}
+    background-color: #ffffff; /* Add a background color for better visibility */
+  }
 
-/* Style the header with a background color, text color, and padding */
-header {
-    background-color: #940000; /* Light Blue */
-    padding: 20px 0;
-    text-align: center;
-}
-
-/* Style the navigation menu */
-nav ul {
-    list-style: none;
+  /* Navigation bar styles */
+  nav {
+    background-color: rgba(245, 34, 34, 0); /* Transparent black background */
+    overflow: hidden;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
     display: flex;
-    justify-content: center;
-    padding: 10px 0;
-}
+    justify-content: space-between;
+    align-items: center;
+  }
 
-nav li {
-    margin: 0 20px;
-}
+  nav img {
+    height: 50px; /* Adjust the height as needed */
+    margin-left: 20px; /* Adjust the margin as needed */
+  }
 
-nav a {
+  nav a {
+    color: black;
     text-decoration: none;
-    color: #fff;
-    font-weight: bold;
-    transition: color 0.3s;
-}
+    margin: 0 15px; /* Adjust the margin as needed */
+    font-size: 16px;
+  }
 
-/* Add a hover effect to the navigation links */
-nav a:hover {
-    color: #36393e; /* Dark Gray on hover */
-}
+  /* Change color on hover */
+  nav a:hover {
+    color: black;
+  }
 
-/* Style section headings */
-section {
-    margin-bottom: 20px;
-    text-align: center;
-}
+  .carousel-container {
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      margin-top: 100px; /* Adjust the margin as needed to avoid overlapping with the navbar */
+    }
 
-section a {
-    color: #fff;
-}
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
 
-h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: #940000; /* Light Blue */
-}
+    .carousel-item {
+      min-width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
 
-/* Style the main content area */
-.content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #424549; /* Dark Gray */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    color: #fff;
-}
+    /* Navigation buttons */
+    .carousel-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+    }
 
-/* Style the footer */
-footer {
-    background-color: #282b30; /* Gray */
-    text-align: center;
-    padding: 10px 0;
-    clear: both;
-    color: #fff;
-}
+    .prev {
+      left: 10px;
+    }
+
+    .next {
+      right: 10px;
+    }
+
+  /* Media query for mobile devices */
+  @media screen and (max-width: 600px) {
+    nav {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    nav img {
+      margin: 10px; /* Adjust the margin as needed */
+    }
+
+    nav a {
+      margin: 5px 10px; /* Adjust the margin as needed */
+    }
+  }
