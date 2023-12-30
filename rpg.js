@@ -46,15 +46,15 @@ const armours =
 [
     {
         name: "T-Shirt",
-        defense: 0
+        power: 0
     },
     {
         name: "leather armour",
-        defense: 30
+        power: 30
     },
     {
         name: "iron armour",
-        defense: 50
+        power: 50
     }
 ];
 const monsters = 
@@ -219,8 +219,8 @@ function buyArmour() {
           }
     } else {
         text.innerText = "You already have the most powerful armour!";
-        button2.innerText = "Sell armour for 25 gold";
-        buttonTwo.onclick = sellArmour;
+        button1.innerText = "Sell armour for 25 gold";
+        buttonOne.onclick = sellArmour;
       }
 }
 
