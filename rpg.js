@@ -79,8 +79,8 @@ const locations =
 [
     {
         name: "town square",
-        "button text": ["Go to store", "Go to cave", "Fight dragon"],
-        "button functions": [goStore, goCave, fightDragon],
+        "button text": ["Go to store", "Go to cave", "Fight dragon", "Go to armoury(BETA)"],
+        "button functions": [goStore, goCave, fightDragon, goArmoury],
         text: "You are in the town square. You see a sign that says \"Store\"."
     },
     {
@@ -91,8 +91,8 @@ const locations =
     },
     {
         name: "cave",
-        "button text": ["Fight slime", "Fight fanged beast", "Go to town square"],
-        "button functions": [fightSlime, fightBeast, goTown],
+        "button text": ["Fight slime", "Fight fanged beast", "Go to town square", "Fight monster"],
+        "button functions": [fightSlime, fightBeast, goTown, fightMonster],
         text: "You enter the cave. You see some monsters."
     },
     {
@@ -146,10 +146,12 @@ function update(location) {
     button1.innerText = location["button text"][0];
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
+    button4.innerText = location["button text"][3];
 
     buttonOne.onclick = location["button functions"][0];
     buttonTwo.onclick = location["button functions"][1];
     buttonThree.onclick = location["button functions"][2];
+    buttonFour.onclick = location["button functions"][3];
 
     text.innerText = location.text;
 }
@@ -266,6 +268,7 @@ function goFight() {
 
 function goCave() {
     update(locations[2]);
+    buttonFour.style.display = "inline";
 }
 
 
@@ -276,6 +279,12 @@ function fightSlime() {
 
 function fightBeast() {
     fighting = 1;
+    goFight();
+}
+
+function fightMonster() {
+    fighting = Math.random() * 2;
+    console.log("Fighting index is: " + fighting);
     goFight();
 }
 
