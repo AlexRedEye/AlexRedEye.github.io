@@ -1,11 +1,12 @@
 let xp = 0;
 let health = 100;
-let gold = 50;
+let gold = 5000;
 let currentWeapon = 0;
 let currentArmour = 0;
 let fighting;
 let monsterHealth;
 let inventory = ["stick"];
+let aInventory = ["T-Shirt"];
 
 const button1 = document.querySelector("#button1");
 const buttonOne = document.querySelector("#buttonOne");
@@ -45,15 +46,15 @@ const armours =
 [
     {
         name: "T-Shirt",
-        power: 0
+        defense: 0
     },
     {
         name: "leather armour",
-        power: 30
+        defense: 30
     },
     {
         name: "iron armour",
-        power: 50
+        defense: 50
     }
 ];
 const monsters = 
@@ -211,8 +212,8 @@ function buyArmour() {
             goldText.innerText = gold;
             let newArmour = armours[currentArmour].name;
             text.innerText = "You now have a " + newArmour + ".";
-            inventory.push(newArmour);
-            text.innerText += " In your inventory you have: " + inventory;
+            aInventory.push(newArmour);
+            text.innerText += " In your inventory you have: " + aInventory;
         } else {
             text.innerText = "You do not have enough gold to buy armour.";
           }
@@ -242,13 +243,13 @@ function sellWeapon() {
 }
 
 function sellArmour() {
-    if(inventory.length > 1)
+    if(aInventory.length > 1)
     {
         gold += 25;
         goldText.innerText = gold;
-        let currentArmour = inventory.shift();
+        let currentArmour = aInventory.shift();
         text.innerText = "You sold a " + currentArmour + ".";
-        text.innerText += " In your inventory you have: " + inventory;
+        text.innerText += " In your inventory you have: " + aInventory;
     } else {
         text.innerText = "Don't sell your only armour!";
     }
@@ -305,14 +306,12 @@ function attack() {
     }
     if(Math.random() <= .1 && currentWeapon !== 0)
     {
-        text.innerText += " Your " + weapons[currentArmour].name + " breaks.";
-        delete weapons[currentWeapon];
+        text.innerText += " Your " + inventory.pop() + " breaks.";
         currentWeapon--;
     }
     if(Math.random() <= .1 && currentArmour !== 0)
     {
-        text.innerText += " Your " + armours[currentArmour].name + " breaks.";
-        delete armours[currentArmour];
+        text.innerText += " Your " + aInventory.pop() + " breaks.";
         currentArmour--;
     }
 }
