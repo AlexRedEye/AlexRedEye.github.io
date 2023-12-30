@@ -70,6 +70,11 @@ const monsters =
         health: 60
     },
     {
+        name: "David",
+        level: 12,
+        health: 100
+    },
+    {
         name: "dragon",
         level: 20,
         health: 300
@@ -91,8 +96,8 @@ const locations =
     },
     {
         name: "cave",
-        "button text": ["Fight slime", "Fight fanged beast", "Go to town square", "Fight monster"],
-        "button functions": [fightSlime, fightBeast, goTown, fightMonster],
+        "button text": ["Fight monster", "Go to town square"],
+        "button functions": [fightMonster, goTown],
         text: "You enter the cave. You see some monsters."
     },
     {
@@ -143,6 +148,7 @@ function update(location) {
     monsterStats.style.display = "none";
     buttonFour.style.display = "none";
     buttonTwo.style.display = "inline";
+    buttonThree.style.display = "inline";
     button1.innerText = location["button text"][0];
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
@@ -268,7 +274,7 @@ function goFight() {
 
 function goCave() {
     update(locations[2]);
-    buttonFour.style.display = "inline";
+    buttonThree.style.display = "none"
 }
 
 
@@ -283,7 +289,7 @@ function fightBeast() {
 }
 
 function fightMonster() {
-    fighting = Math.random() * 2;
+    fighting = Math.floor(Math.random() * 3);
     console.log("Fighting index is: " + fighting);
     goFight();
 }
