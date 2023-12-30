@@ -49,11 +49,11 @@ const armours =
     },
     {
         name: "leather armour",
-        power: 10
+        power: 30
     },
     {
         name: "iron armour",
-        power: 30
+        power: 50
     }
 ];
 const monsters = 
@@ -311,7 +311,7 @@ function attack() {
 }
 
 function getMonsterAttackValue(level) {
-    const hit = (level * 5) - (Math.floor(Math.random() * xp)) - armours[currentArmour].power;
+    const hit = (level * 5) - armours[currentArmour].power;
     console.log(hit);
     return hit > 0 ? hit : 0;
 }

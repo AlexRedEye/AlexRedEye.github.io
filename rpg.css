@@ -4,6 +4,7 @@ body{
     background-color: black;
     font-family: "Bubblegum Sans";
     font-size: 30px;
+    overflow: auto;
 }
 
 #text{
@@ -67,7 +68,7 @@ html,
 body {
   height: 100%;
   width: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .glowing-btn {
