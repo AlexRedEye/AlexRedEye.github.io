@@ -295,7 +295,7 @@ function fightMonster() {
 }
 
 function fightDragon() {
-    fighting = 2;
+    fighting = 3;
     goFight();
 }
 
