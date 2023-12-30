@@ -305,13 +305,13 @@ function attack() {
     }
     if(Math.random() <= .1 && currentWeapon !== 0)
     {
-        text.innerText += " Your " + currentWeapon + " breaks.";
+        text.innerText += " Your " + weapons[currentArmour].name + " breaks.";
         delete weapons[currentWeapon];
         currentWeapon--;
     }
     if(Math.random() <= .1 && currentArmour !== 0)
     {
-        text.innerText += " Your " + currentArmour + " breaks.";
+        text.innerText += " Your " + armours[currentArmour].name + " breaks.";
         delete armours[currentArmour];
         currentArmour--;
     }
