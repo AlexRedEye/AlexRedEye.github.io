@@ -303,10 +303,17 @@ function attack() {
     {
         fighting === 2 ? winGame() : defeatMonster();
     }
-    if(Math.random() <= .1 && inventory.length !== 1)
+    if(Math.random() <= .1 && currentWeapon !== 0)
     {
-        text.innerText += " Your " + inventory.pop() + " breaks.";
+        text.innerText += " Your " + currentWeapon + " breaks.";
+        delete weapons[currentWeapon];
         currentWeapon--;
+    }
+    if(Math.random() <= .1 && currentArmour !== 0)
+    {
+        text.innerText += " Your " + currentArmour + " breaks.";
+        delete armours[currentArmour];
+        currentArmour--;
     }
 }
 
