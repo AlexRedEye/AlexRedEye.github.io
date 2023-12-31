@@ -1,6 +1,7 @@
 let xp = 0;
 let health = 100;
 let gold = 50;
+let pLevel = 1;
 let currentWeapon = 0;
 let currentArmour = 0;
 let fighting;
@@ -16,6 +17,7 @@ const button3 = document.querySelector("#button3");
 const buttonThree = document.querySelector("#buttonThree");
 const button4 = document.querySelector("#button4");
 const buttonFour = document.querySelector("#buttonFour");
+const pLevelText = document.querySelector("#pLevel");
 const text = document.querySelector("#text");
 const xpText = document.querySelector("#xpText");
 const healthText = document.querySelector("#healthText");
@@ -75,9 +77,19 @@ const monsters =
         health: 100
     },
     {
-        name: "dragon",
+        name: "David 2",
         level: 20,
-        health: 300
+        health: 135
+    },
+    {
+        name: "David 3",
+        level: 28,
+        health: 146
+    },
+    {
+        name: "dragon",
+        level: 50,
+        health: 800
     }
 ];
 const locations = 
@@ -289,13 +301,21 @@ function fightBeast() {
 }
 
 function fightMonster() {
-    fighting = Math.floor(Math.random() * 3);
-    console.log("Fighting index is: " + fighting);
-    goFight();
+    if(pLevel >= 1)
+    {
+        fighting = Math.floor(Math.random() * 2);
+        console.log("Fighting index is: " + fighting);
+        goFight();
+    } else if(pLevel >= 3)
+    {
+        fighting = Math.floor(Math.random() * 4);
+        console.log("Fighting index is: " + fighting);
+        goFight();
+    }
 }
 
 function fightDragon() {
-    fighting = 3;
+    fighting = 5;
     goFight();
 }
 
@@ -329,7 +349,7 @@ function attack() {
         text.innerText += " Your " + aInventory.pop() + " breaks.";
         currentArmour--;
     }
-}
+} 
 
 function getMonsterAttackValue(level) {
     const hit = (level * 5) - armours[currentArmour].power;
@@ -348,9 +368,20 @@ function dodge() {
 function defeatMonster() {
     gold += Math.floor(monsters[fighting].level * 6.7);
     xp += monsters[fighting].level;
+    if(xp >= getXpReq(pLevel))
+    {
+        pLevel += 1;
+    }
     goldText.innerText = gold;
     xpText.innerText = xp;
+    pLevelText.innerText = pLevel;
     update(locations[4]);
+}
+
+function getXpReq() {
+    let xpReq = Math.ceil(Math.pow(1.4, pLevel - 1) * 100);
+    console.log("XP Req: " + xpReq + "|| Player Level: " + pLevel);
+    return xpReq;
 }
 
 function lose() {
