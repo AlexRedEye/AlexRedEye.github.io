@@ -1,6 +1,6 @@
 let xp = 0;
 let health = 100;
-let gold = 50;
+let gold = 5000000;
 let pLevel = 1;
 let currentWeapon = 0;
 let currentArmour = 0;
@@ -126,8 +126,8 @@ const locations =
     },
     {
         name: "kill monster",
-        "button text": ["Go to town square", "Go to town square", "Go to town square"],
-        "button functions": [goTown, goTown, easterEgg],
+        "button text": ["Fight again", "Go to town square", "Go to town square"],
+        "button functions": [goFight, goTown, easterEgg],
         text: 'The monster screams "Arg!"" as it dies. You gain experience points and find gold.'
     },
     {
