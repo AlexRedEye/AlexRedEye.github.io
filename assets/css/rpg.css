@@ -366,3 +366,9 @@ button {
       box-shadow: #27272c;
     }
   }
+
+  /*other shit*/
+  .links {
+    position: fixed;
+    bottom: 0;
+  }
