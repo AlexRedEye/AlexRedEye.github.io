@@ -64,32 +64,38 @@ const monsters =
     {
         name: "slime",
         level: 2,
-        health: 15
+        health: 15,
+        xp: 5
     },
     {
         name: "fanged beast",
         level: 8,
-        health: 60
+        health: 60,
+        xp: 15
     },
     {
         name: "David",
         level: 12,
-        health: 100
+        health: 100,
+        xp: 18,
     },
     {
         name: "David 2",
         level: 20,
-        health: 135
+        health: 135,
+        xp: 20
     },
     {
         name: "David 3",
         level: 28,
-        health: 146
+        health: 146,
+        xp: 45
     },
     {
         name: "dragon",
         level: 50,
-        health: 800
+        health: 800,
+        xp: 500
     }
 ];
 const locations = 
@@ -102,7 +108,7 @@ const locations =
     },
     {
         name: "store",
-        "button text": ["Buy 10 health (10 gold)", "Buy weapon (30 gold)", "Go to town square"],
+        "button text": ["Buy 10 health (10 gold)", "Upgrade weapon (30 gold)", "Go to town square"],
         "button functions": [buyHealth, buyWeapon, goTown],
         text: "You enter the store."
     },
@@ -144,7 +150,7 @@ const locations =
     },
     {
         name: "armoury",
-        "button text": ["Buy armour (50 gold)", "Repair armour(25 gold)", "Go to town square"],
+        "button text": ["Upgrade armour (50 gold)", "Repair armour(25 gold)", "Go to town square"],
         "button functions": [buyArmour, repairArmour, goTown],
         text: "You enter the armoury."
     }
@@ -339,12 +345,12 @@ function attack() {
     {
         fighting === 2 ? winGame() : defeatMonster();
     }
-    if(Math.random() <= .1 && currentWeapon !== 0)
+    if(Math.random() * 100 <= .1 && currentWeapon !== 0)
     {
         text.innerText += " Your " + inventory.pop() + " breaks.";
         currentWeapon--;
     }
-    if(Math.random() <= .1 && currentArmour !== 0)
+    if(Math.random() * 100<= .1 && currentArmour !== 0)
     {
         text.innerText += " Your " + aInventory.pop() + " breaks.";
         currentArmour--;
@@ -367,7 +373,7 @@ function dodge() {
 
 function defeatMonster() {
     gold += Math.floor(monsters[fighting].level * 6.7);
-    xp += monsters[fighting].level;
+    xp += monsters[fighting].xp;
     if(xp >= getXpReq(pLevel))
     {
         pLevel += 1;
