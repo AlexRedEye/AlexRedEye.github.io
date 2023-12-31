@@ -1,6 +1,6 @@
 let xp = 0;
 let health = 100;
-let gold = 5000000;
+let gold = 50;
 let pLevel = 1;
 let currentWeapon = 0;
 let currentArmour = 0;
