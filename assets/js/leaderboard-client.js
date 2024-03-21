@@ -38,3 +38,16 @@ function submitLeaderboard() {
         console.error('Error:', error);
     });
 }
+
+function fetchLeaderboard() {
+    fetch('endpoint_to_fetch_leaderboard_data.php') // Replace 'endpoint_to_fetch_leaderboard_data.php' with the actual endpoint URL to fetch leaderboard data
+        .then(response => response.json())
+        .then(data => {
+            // Update HTML table with fetched leaderboard data
+            // For example, you can iterate over the data and dynamically create table rows and cells
+        })
+        .catch(error => {
+            console.error('Error fetching leaderboard data:', error);
+        });
+}
+
