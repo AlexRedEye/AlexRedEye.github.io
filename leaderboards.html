@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard</title>
+<link rel="stylesheet" type="text/css" href="assets/css/leaderboard.css">
+<script src="assets/js/leaderboard.js"></script>
+</head>
+<body>
+
+<h2>Leaderboard</h2>
+
+<form id="leaderboardForm">
+  <label for="driverName">Driver Name:</label>
+  <input type="text" id="driverName" name="driverName" required><br><br>
+  
+  <label for="trackName">Track Name:</label>
+  <input type="text" id="trackName" name="trackName" required><br><br>
+  
+  <label for="carName">Car Name:</label>
+  <input type="text" id="carName" name="carName" required><br><br>
+  
+  <label for="lapTime">Lap Time:</label>
+  <input type="text" id="lapTime" name="lapTime" required><br><br>
+  
+  <label for="videoFile">Video File:</label>
+  <input type="file" id="videoFile" name="videoFile" accept="video/*" required><br><br>
+  
+  <input type="submit" value="Submit">
+</form>
+
+<table id="leaderboard">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Driver Name</th>
+      <th>Track Name</th>
+      <th>Car Name</th>
+      <th>Lap Time</th>
+      <th>Video Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Leaderboard entries will be dynamically added here -->
+  </tbody>
+</table>
+</body>
+</html>
