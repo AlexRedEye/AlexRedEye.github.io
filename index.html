@@ -1,15 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alex Marquez</title>
-    <link rel="stylesheet" href="">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Mode Portfolio</title>
+<style>
+    body {
+        background-color: #1e1e1e;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background-color: #333;
+        padding: 20px;
+        text-align: center;
+    }
+    h1 {
+        margin: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    p {
+        line-height: 1.6;
+    }
+    /* Dark mode specific styles */
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: #121212;
+        }
+        header {
+            background-color: #1e1e1e;
+        }
+    }
+</style>
 </head>
 <body>
-    <div>
-        <h1>Alex Marquez</h1>
-        <p>Some dude who codes</p>
-    </div>
+<header>
+    <h1>My Portfolio</h1>
+</header>
+<div class="container">
+    <h2>About Me</h2>
+    <p>My name is Alex, I am 20 years old, and self taught programmer. I love learning and learn fairly quickly. I am ususally always working on a project.</p>
+    <h2>Projects</h2>
+    <ul>
+        <li>Valorant Roulette</li>
+        <li>Pocket Friend Discord Bot</li>
+        <li>Who knows</li>
+    </ul>
+    <h2>Contact</h2>
+    <p>Email: juniormarquez745@gmail.com</p>
+</div>
 </body>
 </html>
