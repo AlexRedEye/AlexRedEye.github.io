@@ -1,0 +1,141 @@
+/* Reset some default browser styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* CSS for buttons */
+/* Style for the buttons */
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 10px 0;
+  background-color: #8b8b8b;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover effect */
+.button:hover {
+  background-color: #1d1d1d;
+  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Optional: Adjusting alignment */
+#projects {
+  text-align: center;
+}
+
+
+/* Images */
+.images img {
+  max-width: 35%;        /* Ensures the image doesn't exceed the container's width */
+  height: auto;           /* Keeps the aspect ratio intact */
+  border-radius: 8px;     /* Adds rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow for a 3D effect */
+  margin: 10px 0;         /* Adds some space between the images */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for images */
+.images img:hover {
+  transform: scale(1.05); /* Slightly enlarges the image when hovered */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Increases the shadow for a lift effect */
+}
+
+
+/* Navbar Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #8b8b8b;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+}
+
+.navbar .logo a {
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar .nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.navbar .nav-links li {
+  margin-left: 20px;
+}
+
+.navbar .nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.navbar .nav-links li a:hover {
+  color: #f0a500;
+}
+
+/* Hamburger menu (for mobile) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.hamburger span {
+  height: 3px;
+  width: 25px;
+  background-color: white;
+  margin: 4px;
+  border-radius: 2px;
+}
+
+/* Content Section */
+section {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar .nav-links {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background-color: #333;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .navbar .nav-links li {
+      margin: 15px 0;
+  }
+
+  .hamburger {
+      display: flex;
+  }
+
+  .navbar.active .nav-links {
+      display: flex;
+  }
+}
