@@ -139,3 +139,8 @@ section {
       display: flex;
   }
 }
+
+/* LOGO */
+.logo img {
+  width: 25%;
+}
