@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alex Marquez</title>
+  <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
   <div>
@@ -11,27 +12,27 @@
       <nav>
         <img src="assets/PocketFriend.jpg" alt="Kitten in a shirt pocket.">
         <ul>
-          <li>Home</li>
-          <li>Projects</li>
-          <li>Freelance</li>
-          <li>Contact</li>
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#freelance">Freelance</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
     </div>
     <hr>
       <main>
-        <section class="hero">
+        <section id="hero" class="hero">
           <div>
             <h1>Alex Marquez</h1>
-            <p>Im a full stack developer.</p>
-            <button>Projects</button>
-            <button>Contact Me</button>
+            <p>I'm a full stack developer.</p>
+            <a href="#projects" class="button">Projects</a>
+            <a href="#contact" class="button">Contact Me</a>
           </div>
           <div>
             <img src="assets/PocketFriend.jpg" alt="Kitten in a shirt pocket.">
           </div>
         </section>
-        <section class="projects">
+        <section id="projects" class="projects">
           <h2>Projects</h2>
           <p>A list of my projects</p>
           <ul>
@@ -43,12 +44,12 @@
             <li>Project 3</li>
           </ul>
         </section>
-        <section class="freelance">
+        <section id="freelance" class="freelance">
           <h2>Freelance</h2>
           <p>Im willing to provide wegb development services.</p>
           <button>Contact Me</button>
         </section>
-        <section class="contact">
+        <section id="contact" class="contact">
           <h2>Contact</h2>
           <p>Alex Marquez</p>
           <p>Discord: AlexRedEye</p>

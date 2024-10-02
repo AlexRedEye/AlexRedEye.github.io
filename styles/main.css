@@ -1,0 +1,182 @@
+/* General Styling */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+main {
+  padding: 20px;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: #333;
+  margin: 40px 0;
+}
+
+/* NAV BAR STYLING */
+.nav {
+  background-color: #333;
+  padding: 10px 20px;
+}
+
+.nav nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav img {
+  width: 80px;
+  border-radius: 50%;
+}
+
+.nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.nav li {
+  margin-left: 30px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: white;
+  font-size: 18px;
+  padding: 5px 10px;
+  transition: background-color 0.3s;
+}
+
+.nav a:hover {
+  background-color: #575757;
+  border-radius: 4px;
+}
+
+/* HERO SECTION */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.hero h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.2em;
+}
+
+.hero button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.3s;
+}
+
+.hero button:hover {
+  background-color: #575757;
+}
+
+.hero img {
+  width: 300px;
+  border-radius: 10px;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-right: 10px;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #575757;
+}
+
+
+/* PROJECTS SECTION */
+.projects {
+  padding: 40px 20px;
+}
+
+.projects h2 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.projects ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+}
+
+.projects li {
+  text-align: center;
+}
+
+.projects img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* FREELANCE SECTION */
+.freelance {
+  padding: 40px 20px;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+.freelance button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.freelance button:hover {
+  background-color: #575757;
+}
+
+/* CONTACT SECTION */
+.contact {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.contact p {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #333;
+  color: white;
+}
