@@ -36,6 +36,11 @@ div {
   width: 150px;
 }
 
+.heroImage {
+  display: flex;
+  align-items: center;
+}
+
 .hero h1{
   color: red;
 }
