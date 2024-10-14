@@ -3,6 +3,8 @@
   --color-1: #0f1016;
   --text-color: white;
   --accent-color: rgb(159, 25, 25);
+  --title-color: red;
+  --text-color2: #950101;
 }
 *{
   margin: 0;
@@ -101,4 +103,28 @@ nav label svg{
 
 body{
   background-color: black;
+}
+.hero h1{
+  color: var(--title-color);
+}
+.hero{
+  display: flex;
+  justify-content: center;
+  color: var(--text-color2);
+}
+.hero img{
+  width: 25%;
+  height: 50pxpx;
+}
+.portfolio h2{
+  color: var(--title-color);
+}
+.portfolio{
+  display: flex;
+  justify-content: center;
+  color: var(--text-color2);
+}
+.portfolio img{
+  width: 25%;
+  height: 50px;
 }
