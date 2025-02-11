@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:3000";
+const API_URL = "http://localhost:3000";
 let muns = 0;
 let munsPerClick = 1;
 let upgradeCost = 25;
