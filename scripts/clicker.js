@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "http://142.196.63.80:27017";
 let muns = 0;
 let munsPerClick = 1;
 let upgradeCost = 25;
@@ -114,6 +114,8 @@ async function loginUser() {
         if (response.ok) {
             username = name;
             muns = result.muns;
+            munsPerClick = result.munsPerClick;
+            upgradeCost = result.upgradeCost;
             alert("Login successful!");
             UpdateUI();
             fetchLeaderboard();
