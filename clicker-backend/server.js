@@ -2,34 +2,45 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("Connected to MongoDB"))
     .catch(err => console.error(err));
 
-// Define a schema and model for leaderboard entries
+// Define schema
 const playerSchema = new mongoose.Schema({
-    name: { type: String, unique: true },
-    muns: Number
+    name: { type: String, unique: true, required: true },
+    muns: { type: Number, default: 0 },
+    password: { type: String, required: true },
+});
+
+// Hash password before saving
+playerSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
+    next();
 });
 
 const Player = mongoose.model("Player", playerSchema);
 
-// Save/update player score
+// Update player score
 app.post("/update", async (req, res) => {
     const { name, muns } = req.body;
+    if (!name) return res.status(400).json({ error: "Username is required" });
+
     try {
         let player = await Player.findOne({ name });
         if (player) {
             player.muns = muns;
             await player.save();
         } else {
-            player = new Player({ name, muns });
-            await player.save();
+            return res.status(404).json({ error: "Player not found" });
         }
         res.json({ success: true });
     } catch (err) {
@@ -37,7 +48,7 @@ app.post("/update", async (req, res) => {
     }
 });
 
-// Fetch leaderboard
+// Get leaderboard
 app.get("/leaderboard", async (req, res) => {
     try {
         const leaderboard = await Player.find().sort({ muns: -1 }).limit(10);
@@ -47,4 +58,51 @@ app.get("/leaderboard", async (req, res) => {
     }
 });
 
-app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
+// Fetch player data
+app.get("/player/:name", async (req, res) => {
+    const { name } = req.params;
+    try {
+        const player = await Player.findOne({ name });
+        if (player) res.json(player);
+        else res.status(404).json({ error: "Player not found" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Register player
+app.post("/register", async (req, res) => {
+    const { name, password } = req.body;
+    if (!name || !password) return res.status(400).json({ error: "All fields are required" });
+
+    try {
+        const existingPlayer = await Player.findOne({ name });
+        if (existingPlayer) return res.status(400).json({ error: "Username already taken" });
+
+        const newPlayer = new Player({ name, password });
+        await newPlayer.save();
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Login player
+app.post("/login", async (req, res) => {
+    const { name, password } = req.body;
+    if (!name || !password) return res.status(400).json({ error: "All fields are required" });
+
+    try {
+        const player = await Player.findOne({ name });
+        if (!player) return res.status(404).json({ error: "Player not found" });
+
+        const isMatch = await bcrypt.compare(password, player.password);
+        if (!isMatch) return res.status(401).json({ error: "Invalid password" });
+
+        res.json({ success: true, muns: player.muns });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.listen(process.env.PORT || 3000, () => console.log(`Server running on port ${process.env.PORT || 3000}`));
