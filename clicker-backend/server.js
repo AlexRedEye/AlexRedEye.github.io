@@ -16,8 +16,6 @@ mongoose.connect(process.env.MONGO_URI)
 const playerSchema = new mongoose.Schema({
     name: { type: String, unique: true, required: true },
     muns: { type: Number, default: 0 },
-    munsPerClick: { type: Number, default: 1 },
-    upgradeCost: { type: Number, default: 25 },
     password: { type: String, required: true },
 });
 
@@ -33,15 +31,13 @@ const Player = mongoose.model("Player", playerSchema);
 
 // Update player score
 app.post("/update", async (req, res) => {
-    const { name, muns, munsPerClick, upgradeCost } = req.body;
+    const { name, muns } = req.body;
     if (!name) return res.status(400).json({ error: "Username is required" });
 
     try {
         let player = await Player.findOne({ name });
         if (player) {
             player.muns = muns;
-            player.munsPerClick = munsPerClick;
-            player.upgradeCost = upgradeCost;
             await player.save();
         } else {
             return res.status(404).json({ error: "Player not found" });
@@ -51,7 +47,6 @@ app.post("/update", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 // Get leaderboard
 app.get("/leaderboard", async (req, res) => {
@@ -104,34 +99,10 @@ app.post("/login", async (req, res) => {
         const isMatch = await bcrypt.compare(password, player.password);
         if (!isMatch) return res.status(401).json({ error: "Invalid password" });
 
-        res.json({ 
-            success: true, 
-            muns: player.muns, 
-            munsPerClick: player.munsPerClick, 
-            upgradeCost: player.upgradeCost 
-        });
+        res.json({ success: true, muns: player.muns });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
-app.get("/player/:name", async (req, res) => {
-    const { name } = req.params;
-    try {
-        const player = await Player.findOne({ name });
-        if (player) {
-            res.json({
-                muns: player.muns,
-                munsPerClick: player.munsPerClick,
-                upgradeCost: player.upgradeCost
-            });
-        } else {
-            res.status(404).json({ error: "Player not found" });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 
 app.listen(process.env.PORT || 3000, () => console.log(`Server running on port ${process.env.PORT || 3000}`));

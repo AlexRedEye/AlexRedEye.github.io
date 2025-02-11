@@ -1,8 +1,58 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:3000"; // Change if deploying
+let token = localStorage.getItem("token");
+let username = localStorage.getItem("username");
 let muns = 0;
 let munsPerClick = 1;
 let upgradeCost = 25;
-let username = "";
+
+// Register User
+async function registerUser() {
+    const username = document.getElementById("registerUsername").value;
+    const password = document.getElementById("registerPassword").value;
+
+    const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        alert("Registration successful! Please log in.");
+    } else {
+        alert(data.error);
+    }
+}
+
+// Login User
+async function loginUser() {
+    const usernameInput = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
+
+    const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: usernameInput, password }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        token = data.token;
+        username = data.user.username;
+        muns = data.user.muns;
+        munsPerClick = data.user.munsPerClick;
+        upgradeCost = data.user.upgradeCost;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("username", username);
+
+        alert("Login successful!");
+        UpdateUI();
+        loadLeaderboard();
+    } else {
+        alert(data.error);
+    }
+}
 
 // Click to earn muns
 function Increment() {
@@ -12,7 +62,7 @@ function Increment() {
     }
     muns += munsPerClick;
     UpdateUI();
-    updateLeaderboard();
+    saveProgress();
 }
 
 // Upgrade click power
@@ -26,40 +76,33 @@ function Upgrade() {
         munsPerClick++;
         upgradeCost = Math.floor(upgradeCost * 1.5);
         UpdateUI();
-        updateLeaderboard();
+        saveProgress();
     } else {
         alert("Not enough muns!");
     }
 }
 
-// Update leaderboard
-async function updateLeaderboard() {
-    if (username) {
-        await fetch(`${API_URL}/update`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: username, muns }),
-        });
-        fetchLeaderboard();
-    }
+// Save Progress
+async function saveProgress() {
+    if (!token) return;
+
+    await fetch(`${API_URL}/update`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, muns, munsPerClick, upgradeCost }),
+    });
 }
 
-// Fetch leaderboard
-async function fetchLeaderboard() {
-    try {
-        const response = await fetch(`${API_URL}/leaderboard`);
-        const leaderboard = await response.json();
-        const leaderboardList = document.getElementById("leaderboard");
-        leaderboardList.innerHTML = "";
-
-        leaderboard.forEach(player => {
-            let li = document.createElement("li");
-            li.textContent = `${player.name}: ${player.muns} muns`;
-            leaderboardList.appendChild(li);
-        });
-    } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-    }
+// Load Leaderboard
+async function loadLeaderboard() {
+    const response = await fetch(`${API_URL}/leaderboard`);
+    const leaderboard = await response.json();
+    const leaderboardElement = document.getElementById("leaderboard");
+    leaderboardElement.innerHTML = leaderboard
+        .map((player, index) => `<li>${index + 1}. ${player.username} - ${player.muns} muns</li>`)
+        .join("");
 }
 
 // Update UI
@@ -69,60 +112,10 @@ function UpdateUI() {
     document.getElementById("upgradeCostText").textContent = upgradeCost;
 }
 
-// Register user
-async function registerUser() {
-    const name = document.getElementById("registerUsername").value.trim();
-    const password = document.getElementById("registerPassword").value.trim();
-
-    if (!name || !password) {
-        alert("Please enter both username and password.");
-        return;
+// Load leaderboard on page load
+window.onload = () => {
+    if (username) {
+        loadLeaderboard();
+        UpdateUI();
     }
-
-    try {
-        const response = await fetch(`${API_URL}/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, password }),
-        });
-        const result = await response.json();
-
-        alert(response.ok ? "Registration successful!" : result.error);
-    } catch (error) {
-        console.error("Error registering user:", error);
-    }
-}
-
-// Login user
-async function loginUser() {
-    const name = document.getElementById("loginUsername").value.trim();
-    const password = document.getElementById("loginPassword").value.trim();
-
-    if (!name || !password) {
-        alert("Please enter both username and password.");
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, password }),
-        });
-        const result = await response.json();
-
-        if (response.ok) {
-            username = name;
-            muns = result.muns;
-            munsPerClick = result.munsPerClick;
-            upgradeCost = result.upgradeCost;
-            alert("Login successful!");
-            UpdateUI();
-            fetchLeaderboard();
-        } else {
-            alert(result.error);
-        }
-    } catch (error) {
-        console.error("Error logging in:", error);
-    }
-}
+};
