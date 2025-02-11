@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker</title>
+    <link rel="stylesheet" href="styles/clicker.css">
+</head>
+<body>
+    <h1>Clicker</h1>
+    <label for="username">Enter Username:</label>
+    <input type="text" id="username" placeholder="Your name">
+    <button onclick="setUsername()">Set Name</button>
+    <p>Muns: <span id="munsText">0</span></p>
+    <p>Muns Per Click: <span id="mpcText">1</span></p>
+    <p>Upgrade Cost: <span id="upgradeCostText">25</span></p>
+    <button onclick="Increment()">Click</button>
+    <button onclick="Upgrade()">Upgrade</button>
+    
+    <h2>Leaderboard</h2>
+    <ul id="leaderboard"></ul>
+
+    <script src="scripts/clicker.js"></script>
+</body>
+</html>
