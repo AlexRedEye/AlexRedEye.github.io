@@ -10,11 +10,115 @@ const rewards = [
     { name: "Jackpot Crown", rarity: "Legendary", color: "gold", weight: 1, effect: "unlock" }
 ];
 
-function earnChips() {
-    chips += chipsPerClick;
+// Load saved data from localStorage
+function loadGameData() {
+    const savedChips = localStorage.getItem('chips');
+    const savedInventory = localStorage.getItem('inventory');
+    const savedChipsPerClick = localStorage.getItem('chipsPerClick');
+
+    if (savedChips !== null) {
+        chips = parseInt(savedChips);
+    }
+
+    if (savedInventory !== null) {
+        inventory = JSON.parse(savedInventory);
+    }
+
+    if (savedChipsPerClick !== null) {
+        chipsPerClick = parseInt(savedChipsPerClick);
+    }
+
     updateDisplay();
 }
 
+// Save game data to localStorage
+function saveGameData() {
+    localStorage.setItem('chips', chips);
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+    localStorage.setItem('chipsPerClick', chipsPerClick);
+}
+
+// Functions for basic clicker game
+function earnChips() {
+    chips += chipsPerClick;
+    updateDisplay();
+    saveGameData();
+}
+
+function pullGacha() {
+    if (chips < 10) {
+        alert("Not enough chips!");
+        return;
+    }
+    chips -= 10;
+
+    let reward = getRandomReward();
+    addToInventory(reward);
+    updateDisplay();
+    saveGameData();
+}
+
+function getRandomReward() {
+    let totalWeight = rewards.reduce((sum, r) => sum + r.weight, 0);
+    let rand = Math.random() * totalWeight;
+    for (let reward of rewards) {
+        if (rand < reward.weight) return reward;
+        rand -= reward.weight;
+    }
+}
+
+function addToInventory(reward) {
+    if (!inventory[reward.name]) {
+        inventory[reward.name] = { count: 0, details: reward };
+    }
+    inventory[reward.name].count++;
+
+    let log = document.getElementById("log");
+    log.innerHTML = `<p style="color:${reward.color}">${reward.rarity}: ${reward.name}</p>` + log.innerHTML;
+
+    applyItemEffect(reward);
+    saveGameData();
+}
+
+function applyItemEffect(item) {
+    if (item.effect === "boost") {
+        chipsPerClick += item.boostAmount;
+    } else if (item.effect === "unlock") {
+        alert("You've unlocked High-Roller Mode!");
+    }
+}
+
+function sellItem(itemName) {
+    if (inventory[itemName] && inventory[itemName].count > 0) {
+        let item = inventory[itemName].details;
+        if (item.effect === "sell") {
+            chips += item.value;
+            inventory[itemName].count--;
+            updateDisplay();
+            saveGameData();
+        }
+    }
+}
+
+function updateDisplay() {
+    document.getElementById("chips").textContent = chips;
+
+    let invDisplay = document.getElementById("inventory");
+    invDisplay.innerHTML = "<h3>Inventory</h3>";
+    for (let item in inventory) {
+        if (inventory[item].count > 0) {
+            let itemData = inventory[item].details;
+            invDisplay.innerHTML += `
+                <p style="color:${itemData.color}">
+                    ${itemData.name} (x${inventory[item].count})
+                    ${itemData.effect === "sell" ? `<button onclick="sellItem('${item}')">Sell (${itemData.value} Chips)</button>` : ""}
+                </p>
+            `;
+        }
+    }
+}
+
+// Slot Machine
 function playSlotMachine() {
     if (chips < 10) {
         alert("Not enough chips!");
@@ -24,7 +128,7 @@ function playSlotMachine() {
 
     let symbols = ["🍒", "🔔", "7️⃣", "🍋", "💎"];
     let result = [randomSymbol(symbols), randomSymbol(symbols), randomSymbol(symbols)];
-    
+
     let log = document.getElementById("slot-machine");
     log.innerHTML = `<h3>🎰 ${result[0]} | ${result[1]} | ${result[2]} 🎰</h3>`;
 
@@ -37,6 +141,7 @@ function playSlotMachine() {
 
     chips += winnings;
     updateDisplay();
+    saveGameData();
 }
 
 function randomSymbol(arr) {
@@ -117,12 +222,16 @@ function endBlackjack(playerWins) {
     }
 
     updateDisplay();
+    saveGameData();
 }
 
 function handTotal(hand) {
     return hand.reduce((sum, card) => sum + card, 0);
 }
 
-function updateDisplay() {
-    document.getElementById("chips").textContent = chips;
-}
+// Hooking up the slot machine and blackjack buttons
+document.getElementById('slot-machine-btn').addEventListener('click', playSlotMachine);
+document.getElementById('blackjack-btn').addEventListener('click', startBlackjack);
+
+// Load the game when the page is ready
+window.onload = loadGameData;
