@@ -7,7 +7,7 @@ const rewards = [
     { name: "Lucky Charm", rarity: "Uncommon", color: "green", weight: 30, effect: "boost", boostAmount: 1 },
     { name: "Golden Ticket", rarity: "Rare", color: "blue", weight: 15, effect: "boost", boostAmount: 2 },
     { name: "Diamond Ring", rarity: "Epic", color: "purple", weight: 4, effect: "sell", value: 100 },
-    { name: "Jackpot Crown", rarity: "Legendary", color: "gold", weight: 1, effect: "unlock" }
+    { name: "Jackpot Crown", rarity: "Legendary", color: "gold", weight: 1, effect: "unlock", specialEffect: "chipsPerClickBoost", boostAmount: 5 }
 ];
 
 // Load saved data from localStorage
@@ -85,6 +85,13 @@ function applyItemEffect(item) {
         chipsPerClick += item.boostAmount;
     } else if (item.effect === "unlock") {
         alert("You've unlocked High-Roller Mode!");
+    } else if (item.effect === "sell") {
+        // Sell logic is handled in sellItem function
+    }
+
+    if (item.specialEffect === "chipsPerClickBoost") {
+        chipsPerClick += item.boostAmount;
+        alert(`You've received a permanent boost of ${item.boostAmount} chips per click from the Jackpot Crown!`);
     }
 }
 
