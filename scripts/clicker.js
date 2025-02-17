@@ -86,7 +86,7 @@ function applyItemEffect(item) {
     } else if (item.effect === "unlock") {
         alert("You've unlocked High-Roller Mode!");
     } else if (item.effect === "sell") {
-        // Sell logic is handled in sellItem function
+        sellItem(item);
     }
 
     if (item.specialEffect === "chipsPerClickBoost") {
@@ -236,9 +236,7 @@ function handTotal(hand) {
     return hand.reduce((sum, card) => sum + card, 0);
 }
 
-// Hooking up the slot machine and blackjack buttons
 document.getElementById('slot-machine-btn').addEventListener('click', playSlotMachine);
 document.getElementById('blackjack-btn').addEventListener('click', startBlackjack);
 
-// Load the game when the page is ready
 window.onload = loadGameData;
