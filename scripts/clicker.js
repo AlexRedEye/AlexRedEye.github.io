@@ -237,6 +237,58 @@ function handTotal(hand) {
     return hand.reduce((sum, card) => sum + card, 0);
 }
 
+async function registerUser(username, password) {
+    let response = await fetch('http://localhost:5000/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+    });
+    return response.json();
+}
+
+
+async function loginUser(username, password) {
+    let response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+    });
+
+    let data = await response.json();
+    if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.user.username);
+        return data.user;
+    } else {
+        return { error: data.message };
+    }
+}
+
+
+async function saveUserData() {
+    let username = localStorage.getItem('username');
+    let token = localStorage.getItem('token');
+    if (!username || !token) return;
+
+    let response = await fetch('http://localhost:5000/save', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token
+        },
+        body: JSON.stringify({
+            username,
+            chips,
+            inventory,
+            chipsPerClick
+        }),
+    });
+
+    let data = await response.json();
+    console.log(data.message);
+}
+
+
 document.getElementById('slot-machine-btn').addEventListener('click', playSlotMachine);
 document.getElementById('blackjack-btn').addEventListener('click', startBlackjack);
 
