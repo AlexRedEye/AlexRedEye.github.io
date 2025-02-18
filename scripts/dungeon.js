@@ -260,16 +260,44 @@ function removeItemEffect(item) {
     }
 }
 
-// Item Generation (Gacha)
+// Item Generation (Gacha) with Rarity Weights
 function getRandomItem() {
     const items = [
-        { name: 'Sword of Flames', type: 'weapon', effectValue: 10, effect: () => showMessage('You received the Sword of Flames!') },
-        { name: 'Shield of the Ancients', type: 'shield', effectValue: 10, effect: () => showMessage('You received the Shield of the Ancients!') },
-        { name: 'Health Potion', type: 'potion', effectValue: 30, effect: () => showMessage('You received a Health Potion!') },
-        { name: 'Fire Scroll', type: 'scroll', effectValue: 20, effect: () => showMessage('You received a Fire Scroll!') }
+        { name: 'Sword of Flames', type: 'weapon', effectValue: 10, rarity: 'common', effect: () => showMessage('You received the Sword of Flames!') },
+        { name: 'Sword of Shadows', type: 'weapon', effectValue: 15, rarity: 'rare', effect: () => showMessage('You received the Sword of Shadows!') },
+        { name: 'Excalibur', type: 'weapon', effectValue: 30, rarity: 'legendary', effect: () => showMessage('You received Excalibur!') },
+        { name: 'Shield of the Ancients', type: 'shield', effectValue: 10, rarity: 'common', effect: () => showMessage('You received the Shield of the Ancients!') },
+        { name: 'Aegis Shield', type: 'shield', effectValue: 20, rarity: 'rare', effect: () => showMessage('You received the Aegis Shield!') },
+        { name: 'Phoenix Shield', type: 'shield', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received the Phoenix Shield!') },
+        { name: 'Health Potion', type: 'potion', effectValue: 30, rarity: 'common', effect: () => showMessage('You received a Health Potion!') },
+        { name: 'Fire Scroll', type: 'scroll', effectValue: 20, rarity: 'common', effect: () => showMessage('You received a Fire Scroll!') }
     ];
-    return items[Math.floor(Math.random() * items.length)];
+
+    // Define rarity weights
+    const rarityWeights = {
+        common: 0.7,   // 70% chance
+        rare: 0.25,    // 25% chance
+        legendary: 0.05 // 5% chance
+    };
+
+    // Calculate weighted probability
+    const randomChoice = Math.random();
+    let weightSum = 0;
+    let chosenItem = null;
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        weightSum += rarityWeights[item.rarity];
+
+        if (randomChoice < weightSum) {
+            chosenItem = item;
+            break;
+        }
+    }
+
+    return chosenItem;
 }
+
 
 document.querySelector('.gacha-btn').addEventListener('click', () => {
     if (playerStats.gold >= 100) {
