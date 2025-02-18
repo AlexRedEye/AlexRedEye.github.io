@@ -36,6 +36,7 @@ function saveGameData() {
     localStorage.setItem('chips', chips);
     localStorage.setItem('inventory', JSON.stringify(inventory));
     localStorage.setItem('chipsPerClick', chipsPerClick);
+    saveUserData();
 }
 
 // Functions for basic clicker game
@@ -238,7 +239,7 @@ function handTotal(hand) {
 }
 
 async function register(username, password) {
-    let response = await fetch('http://localhost:5000/register', {
+    let response = await fetch('http://142.196.63.80:5000/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -248,7 +249,7 @@ async function register(username, password) {
 
 
 async function login(username, password) {
-    let response = await fetch('http://localhost:5000/login', {
+    let response = await fetch('http://142.196.63.80:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -270,7 +271,7 @@ async function saveUserData() {
     let token = localStorage.getItem('token');
     if (!username || !token) return;
 
-    let response = await fetch('http://localhost:5000/save', {
+    let response = await fetch('http://142.196.63.80:5000/save', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
