@@ -237,7 +237,7 @@ function handTotal(hand) {
     return hand.reduce((sum, card) => sum + card, 0);
 }
 
-async function registerUser(username, password) {
+async function register(username, password) {
     let response = await fetch('http://localhost:5000/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -247,7 +247,7 @@ async function registerUser(username, password) {
 }
 
 
-async function loginUser(username, password) {
+async function login(username, password) {
     let response = await fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
