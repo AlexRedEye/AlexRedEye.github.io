@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const https = require('https');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -88,5 +90,14 @@ app.post('/save', authenticateToken, async (req, res) => {
     }
 });
 
+// Set up HTTPS server
+const options = {
+  key: fs.readFileSync('private.key'),
+  cert: fs.readFileSync('cert.cer'),
+  //ca: fs.readFileSync('/path/to/your/ca_bundle.crt') // Optional, if needed
+};
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+https.createServer(options, app).listen(PORT, () => {
+    console.log(`Secure server running on https://localhost:${PORT}`);
+});

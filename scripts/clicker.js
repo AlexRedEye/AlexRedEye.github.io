@@ -239,7 +239,7 @@ function handTotal(hand) {
 }
 
 async function register(username, password) {
-    let response = await fetch('http://142.196.63.80:5000/register', {
+    let response = await fetch('https://pocketfriends.org:5000/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -249,7 +249,7 @@ async function register(username, password) {
 
 
 async function login(username, password) {
-    let response = await fetch('http://142.196.63.80:5000/login', {
+    let response = await fetch('https://pocketfriends.org:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -271,7 +271,7 @@ async function saveUserData() {
     let token = localStorage.getItem('token');
     if (!username || !token) return;
 
-    let response = await fetch('http://142.196.63.80:5000/save', {
+    let response = await fetch('https://pocketfriends.org:5000/save', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -288,6 +288,17 @@ async function saveUserData() {
     let data = await response.json();
     console.log(data.message);
 }
+
+const http = require('http');
+
+// Redirect HTTP to HTTPS
+http.createServer((req, res) => {
+  res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+  res.end();
+}).listen(80, () => {
+  console.log('Redirecting HTTP to HTTPS on port 80');
+});
+
 
 
 document.getElementById('slot-machine-btn').addEventListener('click', playSlotMachine);
