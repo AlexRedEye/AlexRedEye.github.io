@@ -238,18 +238,40 @@ function handTotal(hand) {
     return hand.reduce((sum, card) => sum + card, 0);
 }
 
-async function register(username, password) {
-    let response = await fetch('https://pocketfriends.org:5000/register', {
+async function registerUser() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+        alert("Please enter both a username and password.");
+        return;
+    }
+
+    let response = await fetch('https://clicker.pocketfriends.org:5000/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password })
     });
-    return response.json();
+
+    let data = await response.json();
+    if (data.success) {
+        alert("Registration successful!");
+        localStorage.setItem('username', username);
+    } else {
+        alert("Registration failed: " + data.message);
+    }
 }
 
+async function loginUser() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-async function login(username, password) {
-    let response = await fetch('https://pocketfriends.org:5000/login', {
+    if (!username || !password) {
+        alert("Please enter both a username and password.");
+        return;
+    }
+
+    let response = await fetch('https://clicker.pocketfriends.org:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -259,11 +281,14 @@ async function login(username, password) {
     if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.user.username);
-        return data.user;
+        alert("Login successful!");
+        // Update the display to show the logged-in username
+        document.getElementById("player-name").textContent = data.user.username;
     } else {
-        return { error: data.message };
+        alert("Login failed: " + data.message);
     }
 }
+
 
 
 async function saveUserData() {
@@ -271,7 +296,7 @@ async function saveUserData() {
     let token = localStorage.getItem('token');
     if (!username || !token) return;
 
-    let response = await fetch('https://pocketfriends.org:5000/save', {
+    let response = await fetch('https://clicker.pocketfriends.org:5000/save', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -289,19 +314,7 @@ async function saveUserData() {
     console.log(data.message);
 }
 
-const http = require('http');
-
-// Redirect HTTP to HTTPS
-http.createServer((req, res) => {
-  res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
-  res.end();
-}).listen(80, () => {
-  console.log('Redirecting HTTP to HTTPS on port 80');
-});
-
-
-
-document.getElementById('slot-machine-btn').addEventListener('click', playSlotMachine);
-document.getElementById('blackjack-btn').addEventListener('click', startBlackjack);
+//document.getElementById('slot-machine-btn').addEventListener('click', playSlotMachine);
+//document.getElementById('blackjack-btn').addEventListener('click', startBlackjack);
 
 window.onload = loadGameData;

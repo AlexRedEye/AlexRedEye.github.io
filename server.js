@@ -30,20 +30,27 @@ const User = mongoose.model('User', UserSchema);
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
 
+    // Validate password presence
+    if (!password || password.trim() === "") {
+        return res.status(400).json({ message: "Password is required" });
+    }
+
     try {
         let existingUser = await User.findOne({ username });
         if (existingUser) return res.status(400).json({ message: 'Username already exists!' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
         let newUser = new User({ username, password: hashedPassword });
         await newUser.save();
 
         res.json({ message: 'User registered!' });
     } catch (error) {
+        console.error('Error during registration:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+
 
 // **Login user and return JWT token**
 app.post('/login', async (req, res) => {
