@@ -195,6 +195,7 @@ function hit() {
     playerHand.push(drawCard());
 
     if (handTotal(playerHand) > 21) {
+        displayBlackjack();
         endBlackjack(false);
     } else {
         displayBlackjack();
