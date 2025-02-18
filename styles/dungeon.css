@@ -1,0 +1,198 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    padding: 10px;
+    background-color: #333;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #ff4d4d;
+}
+
+/* Player & Monster Sections */
+.dungeon-container {
+    display: flex;
+    flex-direction: row; /* Change to row to make them side by side */
+    justify-content: center; /* Center them horizontally */
+    gap: 40px; /* Space between player and monster */
+    flex-grow: 1;
+    margin-bottom: 50px;
+}
+
+.player, .monster {
+    background: #292929;
+    padding: 20px;
+    border-radius: 15px;
+    width: 45%; /* Adjust width to fit side by side */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content inside */
+}
+
+.player h2, .monster h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #ff4d4d;
+}
+
+img {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    object-fit: cover;
+}
+
+/* Stats Section */
+.playerStats, .monsterStats {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+strong {
+    color: #ff4d4d;
+}
+
+/* Buttons */
+.buttons, .gacha {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #e60000;
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Gacha Section */
+.gacha {
+    background: #333;
+    padding: 20px;
+    border-radius: 10px;
+    width: 60%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center items horizontally */
+}
+
+.gacha h2 {
+    font-size: 1.5rem;
+    color: #ff4d4d;
+    margin-bottom: 15px;
+}
+
+.gacha p {
+    margin: 10px 0;
+    font-size: 1.2rem;
+    color: #ffcc00;
+}
+
+.gacha-btn {
+    background-color: #4dff4d;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    margin-top: 15px; /* Add some space between text and button */
+}
+
+.gacha-btn:hover {
+    background-color: #33cc33;
+    transform: scale(1.05);
+}
+
+.gacha-btn:active {
+    transform: scale(0.98);
+}
+
+#gacha-result {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    color: #ffcc00;
+    font-weight: bold;
+}
+
+/* Inventory Section */
+#inventory {
+    margin-top: 30px;
+    padding: 10px;
+    background: #333;
+    border-radius: 10px;
+    width: 60%;
+}
+
+#inventory h3 {
+    font-size: 1.5rem;
+    color: #ff4d4d;
+}
+
+#inventory ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#inventory li {
+    background: #444;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Footer */
+footer {
+    background: #111;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+    margin-top: auto;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #ff4d4d;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
