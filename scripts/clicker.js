@@ -96,7 +96,7 @@ function applyItemEffect(item) {
     }
 }
 
-function sellAllItems(itemName) {
+function sellItem(itemName) {
     if (inventory[itemName] && inventory[itemName].count > 0) {
         let item = inventory[itemName].details;
         if (item.effect === "sell") {
