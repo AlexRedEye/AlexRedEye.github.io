@@ -82,8 +82,8 @@ let monsterStats = { ...monsterPool[0] };
 function updatePlayerStats() {
     let attackBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.effectValue : 0;
     let defenseBonus = playerStats.equippedShield ? playerStats.equippedShield.effectValue : 0;
-    let critRateBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.effectValue : 0;
-    let critDamageBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.effectValue : 0;
+    let critRateBonus = playerStats.equippedWeapon ? playerStats.equippedFeet.effectValue : 0;
+    let critDamageBonus = playerStats.equippedWeapon ? playerStats.equippedRing.effectValue : 0;
     
     document.querySelector('.playerStats').innerHTML = `
         <p><strong>Level:</strong> ${playerStats.level}</p>
@@ -388,12 +388,30 @@ function equipItem(index) {
 
 function sellItem(index) {
     const item = playerStats.inventory[index];
-    playerStats.gold += 50;
+    let price;
+
+    // Set price based on rarity
+    switch(item.rarity) {
+        case 'common':
+            price = 50;
+            break;
+        case 'rare':
+            price = 100;
+            break;
+        case 'legendary':
+            price = 200;
+            break;
+        default:
+            price = 50; // Default to common if rarity is unknown
+    }
+
+    playerStats.gold += price;
     playerStats.inventory.splice(index, 1);
-    showMessage(`Sold ${item.name} for 50 gold.`);
+    showMessage(`Sold ${item.name} for ${price} gold.`);
     updatePlayerStats();
     updateInventory();
 }
+
 
 // Initialize Game
 function init() {
