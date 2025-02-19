@@ -1,4 +1,4 @@
-// Player Stats
+// Player Stats - Kept the same
 let playerStats = {
     health: 100,
     attack: 20,
@@ -20,44 +20,47 @@ let monstersTillNextFloor = 5;
 
 // Leveling System with Dynamic XP increments
 function levelUp() {
-    while (playerStats.xp >= XP_PER_LEVEL) {  // Use a loop to ensure XP is properly deducted
+    while (playerStats.xp >= XP_PER_LEVEL) {  
         playerStats.level += 1;
         playerStats.xp -= XP_PER_LEVEL;
-        playerStats.health += 15; // Reduce health growth per level-up
-        playerStats.attack += 4;  // Reduce attack growth per level-up
-        playerStats.defense += 2; // Reduce defense growth per level-up
+        playerStats.health += 20; // Buffed health gain for survivability
+        playerStats.attack += 5;  // Slightly buffed attack
+        playerStats.defense += 3; // Buffed defense gain
         playerStats.speed += 2;
         playerStats.critRate += 1;
         playerStats.critDamage += 5;
         playerStats.levelCap += 5;
         showMessage(`You leveled up to level ${playerStats.level}!`);
-        XP_PER_LEVEL = 100 + (playerStats.level * 15);  // XP required increases by 15 per level
+
+        // Slower XP scaling early on, but steeper later
+        XP_PER_LEVEL = 100 + (playerStats.level * 12) + (playerStats.level >= 5 ? playerStats.level * 5 : 0);
     }
     updatePlayerStats();
 }
 
-
-// Monster Stats with adjusted base stats for better balance
+// Monster Pool - Slightly nerfed early attack/defense for balance
 const monsterPool = [
-    { name: 'X3L4', health: 80, attack: 35, defense: 20, speed: 12, critRate: 8, critDamage: 25 },
-    { name: 'Razor Beast', health: 70, attack: 30, defense: 15, speed: 10, critRate: 10, critDamage: 35 },
-    { name: 'Venom Drake', health: 85, attack: 32, defense: 18, speed: 9, critRate: 9, critDamage: 40 },
-    { name: 'Spectral Knight', health: 90, attack: 34, defense: 20, speed: 11, critRate: 9, critDamage: 35 },
-    { name: 'Thunder Fang', health: 120, attack: 40, defense: 25, speed: 15, critRate: 12, critDamage: 50 },
+    { name: 'X3L4', health: 75, attack: 25, defense: 12, speed: 10, critRate: 5, critDamage: 20 },
+    { name: 'Razor Beast', health: 65, attack: 22, defense: 10, speed: 9, critRate: 7, critDamage: 30 },
+    { name: 'Venom Drake', health: 80, attack: 24, defense: 12, speed: 8, critRate: 6, critDamage: 35 },
+    { name: 'Spectral Knight', health: 85, attack: 26, defense: 14, speed: 9, critRate: 7, critDamage: 30 },
+    { name: 'Thunder Fang', health: 100, attack: 30, defense: 18, speed: 12, critRate: 9, critDamage: 40 },
 ];
 
-
+// Boss Pool - Slightly easier early bosses, but tougher late bosses
 const bossPool = [
-    { name: 'Dark Warden', health: 80, attack: 22, defense: 14, speed: 11, critRate: 7, critDamage: 35 },
-    { name: 'Inferno Beast', health: 90, attack: 25, defense: 15, speed: 9, critRate: 8, critDamage: 40 },
-    { name: 'Frost Dragon', health: 100, attack: 28, defense: 16, speed: 8, critRate: 7, critDamage: 45 },
-    { name: 'Chaos Serpent', health: 120, attack: 30, defense: 17, speed: 11, critRate: 10, critDamage: 50 },
-    { name: 'Abyssal Lord', health: 130, attack: 32, defense: 18, speed: 10, critRate: 12, critDamage: 55 }
+    { name: 'Dark Warden', health: 90, attack: 28, defense: 16, speed: 10, critRate: 7, critDamage: 30 },
+    { name: 'Inferno Beast', health: 100, attack: 30, defense: 17, speed: 9, critRate: 8, critDamage: 35 },
+    { name: 'Frost Dragon', health: 110, attack: 32, defense: 18, speed: 8, critRate: 7, critDamage: 40 },
+    { name: 'Chaos Serpent', health: 130, attack: 35, defense: 20, speed: 10, critRate: 10, critDamage: 45 },
+    { name: 'Abyssal Lord', health: 150, attack: 40, defense: 22, speed: 11, critRate: 12, critDamage: 50 }
 ];
 
-// Function to scale monsters based on current floor level
+// Scaling Monsters - Easier early game, harder late game
 function scaleMonsterStats(floor, baseMonster) {
-    const scalingFactor = 1 + Math.min(0.1 * (floor - 1), 0.5); // Max 1.5x scaling
+    let scalingFactor = 1 + Math.min(0.05 * (floor - 1), 0.5); // Slower scaling early
+    if (floor > 5) scalingFactor += 0.05 * (floor - 5); // Faster scaling past floor 5
+    scalingFactor = Math.min(scalingFactor, 2.0); // Max 2x scaling
 
     return {
         name: baseMonster.name,
@@ -65,10 +68,11 @@ function scaleMonsterStats(floor, baseMonster) {
         attack: Math.floor(baseMonster.attack * scalingFactor),
         defense: Math.floor(baseMonster.defense * scalingFactor),
         speed: Math.floor(baseMonster.speed * scalingFactor),
-        critRate: baseMonster.critRate + Math.floor(Math.min(floor * 0.5, 5)), 
-        critDamage: baseMonster.critDamage + Math.floor(Math.min(floor * 2, 10)) 
+        critRate: baseMonster.critRate + Math.floor(Math.min(floor * 0.4, 6)), 
+        critDamage: baseMonster.critDamage + Math.floor(Math.min(floor * 1.5, 15)) 
     };
 }
+
 
 
 let monsterStats = { ...monsterPool[0] };
