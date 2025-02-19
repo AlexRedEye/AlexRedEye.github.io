@@ -151,7 +151,7 @@ function checkMonsterHealth() {
         let baseGold = Math.max(25, Math.floor(monsterStats.health * 0.2));
         playerStats.gold += baseGold;
         
-        playerStats.xp += Math.floor((playerStats.level ** 1.5) * 15);
+        playerStats.xp += Math.floor((playerStats.level ** 1.5) * 2);
         updatePlayerStats();
         levelUp(); // Check for level up
 
