@@ -79,15 +79,20 @@ let monsterStats = { ...monsterPool[0] };
 
 // Update Player Stats
 function updatePlayerStats() {
+    let attackBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.attackBonus : 0;
+    let defenseBonus = playerStats.equippedShield ? playerStats.equippedShield.defenseBonus : 0;
+    let critRateBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.critRateBonus : 0;
+    let critDamageBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.critDamageBonus : 0;
+    
     document.querySelector('.playerStats').innerHTML = `
         <p><strong>Level:</strong> ${playerStats.level}</p>
         <p><strong>XP:</strong> ${playerStats.xp}/${XP_PER_LEVEL}</p>
         <p><strong>Health:</strong> ${playerStats.health}</p>
-        <p><strong>Attack:</strong> ${playerStats.attack}</p>
-        <p><strong>Defense:</strong> ${playerStats.defense}</p>
+        <p><strong>Attack:</strong> ${playerStats.attack} <span class="bonus">(+${attackBonus})</span></p>
+        <p><strong>Defense:</strong> ${playerStats.defense} <span class="bonus">(+${defenseBonus})</span></p>
         <p><strong>Speed:</strong> ${playerStats.speed}</p>
-        <p><strong>Crit Rate:</strong> ${playerStats.critRate}%</p>
-        <p><strong>Crit Damage:</strong> ${playerStats.critDamage}%</p>
+        <p><strong>Crit Rate:</strong> ${playerStats.critRate}% <span class="bonus">(+${critRateBonus}%)</span></p>
+        <p><strong>Crit Damage:</strong> ${playerStats.critDamage}% <span class="bonus">(+${critDamageBonus}%)</span></p>
         <p><strong>Gold:</strong> <span id="gold">${playerStats.gold}</span> 💰</p>
         <p><strong>Equipped Weapon:</strong> ${playerStats.equippedWeapon ? playerStats.equippedWeapon.name : 'None'} <button onclick="unequipItem('weapon')">❌ Unequip</button></p>
         <p><strong>Equipped Shield:</strong> ${playerStats.equippedShield ? playerStats.equippedShield.name : 'None'} <button onclick="unequipItem('shield')">❌ Unequip</button></p>
@@ -146,7 +151,7 @@ function checkMonsterHealth() {
         let baseGold = Math.max(25, Math.floor(monsterStats.health * 0.2));
         playerStats.gold += baseGold;
         
-        playerStats.xp += 10; // XP Reward
+        playerStats.xp += Math.floor((playerStats.level ** 1.5) * 15);
         updatePlayerStats();
         levelUp(); // Check for level up
 
