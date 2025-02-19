@@ -79,10 +79,10 @@ let monsterStats = { ...monsterPool[0] };
 
 // Update Player Stats
 function updatePlayerStats() {
-    let attackBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.attackBonus : 0;
-    let defenseBonus = playerStats.equippedShield ? playerStats.equippedShield.defenseBonus : 0;
-    let critRateBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.critRateBonus : 0;
-    let critDamageBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.critDamageBonus : 0;
+    let attackBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.effectValue : 0;
+    let defenseBonus = playerStats.equippedShield ? playerStats.equippedShield.effectValue : 0;
+    let critRateBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.effectValue : 0;
+    let critDamageBonus = playerStats.equippedWeapon ? playerStats.equippedWeapon.effectValue : 0;
     
     document.querySelector('.playerStats').innerHTML = `
         <p><strong>Level:</strong> ${playerStats.level}</p>
@@ -267,23 +267,33 @@ function removeItemEffect(item) {
 // Item Generation (Gacha) with Rarity Weights
 function getRandomItem() {
     const items = [
+        // Common Items
         { name: 'Sword of Flames', type: 'weapon', effectValue: 10, rarity: 'common', effect: () => showMessage('You received the Sword of Flames!') },
-        { name: 'Sword of Shadows', type: 'weapon', effectValue: 15, rarity: 'rare', effect: () => showMessage('You received the Sword of Shadows!') },
-        { name: 'Excalibur', type: 'weapon', effectValue: 30, rarity: 'legendary', effect: () => showMessage('You received Excalibur!') },
-        { name: 'Silver Blade', type: 'weapon', effectValue: 20, rarity: 'rare', effect: () => showMessage('You received the Silver Blade!') },
-        { name: 'Dragon Slayer', type: 'weapon', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received the Dragon Slayer!') },
         { name: 'Shield of the Ancients', type: 'shield', effectValue: 10, rarity: 'common', effect: () => showMessage('You received the Shield of the Ancients!') },
+        { name: 'Health Potion', type: 'potion', effectValue: 30, rarity: 'common', effect: () => showMessage('You received a Health Potion!') },
+        { name: 'Fire Scroll', type: 'scroll', effectValue: 20, rarity: 'common', effect: () => showMessage('You received a Fire Scroll!') },
+    
+        // Rare Items
+        { name: 'Sword of Shadows', type: 'weapon', effectValue: 15, rarity: 'rare', effect: () => showMessage('You received the Sword of Shadows!') },
+        { name: 'Silver Blade', type: 'weapon', effectValue: 20, rarity: 'rare', effect: () => showMessage('You received the Silver Blade!') },
         { name: 'Aegis Shield', type: 'shield', effectValue: 20, rarity: 'rare', effect: () => showMessage('You received the Aegis Shield!') },
+        { name: 'Obsidian Shield', type: 'shield', effectValue: 25, rarity: 'rare', effect: () => showMessage('You received the Obsidian Shield!') },
+        { name: 'Greater Health Potion', type: 'potion', effectValue: 50, rarity: 'rare', effect: () => showMessage('You received a Greater Health Potion!') },
+        { name: 'Ice Scroll', type: 'scroll', effectValue: 25, rarity: 'rare', effect: () => showMessage('You received an Ice Scroll!') },
+        { name: 'Arcane Scroll', type: 'scroll', effectValue: 30, rarity: 'rare', effect: () => showMessage('You received an Arcane Scroll!') },
+        { name: 'Valkyrie Shield', type: 'shield', effectValue: 22, rarity: 'rare', effect: () => showMessage('You received the Valkyrie Shield!') },
+    
+        // Legendary Items
+        { name: 'Excalibur', type: 'weapon', effectValue: 30, rarity: 'legendary', effect: () => showMessage('You received Excalibur!') },
+        { name: 'Dragon Slayer', type: 'weapon', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received the Dragon Slayer!') },
         { name: 'Phoenix Shield', type: 'shield', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received the Phoenix Shield!') },
         { name: 'Titan Shield', type: 'shield', effectValue: 30, rarity: 'legendary', effect: () => showMessage('You received the Titan Shield!') },
-        { name: 'Obsidian Shield', type: 'shield', effectValue: 25, rarity: 'rare', effect: () => showMessage('You received the Obsidian Shield!') },
-        { name: 'Health Potion', type: 'potion', effectValue: 30, rarity: 'common', effect: () => showMessage('You received a Health Potion!') },
-        { name: 'Greater Health Potion', type: 'potion', effectValue: 50, rarity: 'rare', effect: () => showMessage('You received a Greater Health Potion!') },
-        { name: 'Fire Scroll', type: 'scroll', effectValue: 20, rarity: 'common', effect: () => showMessage('You received a Fire Scroll!') },
-        { name: 'Ice Scroll', type: 'scroll', effectValue: 25, rarity: 'rare', effect: () => showMessage('You received an Ice Scroll!') },
         { name: 'Storm Scroll', type: 'scroll', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received a Storm Scroll!') },
-        { name: 'Arcane Scroll', type: 'scroll', effectValue: 30, rarity: 'rare', effect: () => showMessage('You received an Arcane Scroll!') }
+        { name: 'Healing Tonic', type: 'potion', effectValue: 100, rarity: 'legendary', effect: () => showMessage('You received a Healing Tonic!') },
+        { name: 'Celestial Greatsword', type: 'weapon', effectValue: 35, rarity: 'legendary', effect: () => showMessage('You received the Celestial Greatsword!') },
+        { name: 'Thunder Scroll', type: 'scroll', effectValue: 50, rarity: 'legendary', effect: () => showMessage('You received a Thunder Scroll!') },
     ];
+    
 
     // Define rarity weights
     const rarityWeights = {
@@ -347,7 +357,7 @@ function updateInventory() {
 function useItem(index) {
     const item = playerStats.inventory[index];
     if (item.type === 'potion') {
-        playerStats.health = Math.min(100, playerStats.health + item.effectValue);
+        playerStats.health += Math.min(100, playerStats.health + item.effectValue);
         showMessage(`You used a Health Potion! Health restored by ${item.effectValue}.`);
     } else if (item.type === 'scroll') {
         monsterStats.health -= item.effectValue;
