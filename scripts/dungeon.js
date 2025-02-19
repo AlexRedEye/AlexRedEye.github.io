@@ -55,37 +55,12 @@ const bossPool = [
     { name: 'Abyssal Lord', health: 130, attack: 32, defense: 18, speed: 10, critRate: 12, critDamage: 55 }
 ];
 
-
-
-// Function to scale monsters based on the floor level with gradual stat increase
-function scaleMonsterStats(floor) {
-    const baseMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
-    
-    // Scaling factor that adjusts for the floor level
-    const scalingFactor = 10 + Math.min(0.05 * (floor - 1), 0.3); 
-
-
-    // Gradually scaling the monster stats to ensure difficulty increases steadily
-    const scaledMonster = {
-        name: baseMonster.name,
-        health: Math.floor(baseMonster.health * scalingFactor),
-        attack: Math.floor(baseMonster.attack * scalingFactor),
-        defense: Math.floor(baseMonster.defense * scalingFactor),
-        speed: Math.floor(baseMonster.speed * scalingFactor),
-        critRate: baseMonster.critRate + Math.floor(floor * 0.3), // Slight increase in critRate per floor
-        critDamage: baseMonster.critDamage + Math.floor(floor * 1) // Gradual increase in critDamage per floor
-    };
-
-    return scaledMonster;
-}
-
-
 // Function to scale monsters based on current floor level
 function scaleMonsterStats(floor) {
     const baseMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
     
     // Gradual scaling factor
-    const scalingFactor = 1 + Math.min(0.1 * (floor - 1), 0.5); // Starts slow and increases up to a max of 1.5x (50% increase)
+    const scalingFactor = 3 + Math.min(0.1 * (floor - 1), 0.5); // Starts slow and increases up to a max of 1.5x (50% increase)
 
     const scaledMonster = {
         name: baseMonster.name,
