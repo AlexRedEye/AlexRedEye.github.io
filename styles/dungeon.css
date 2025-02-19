@@ -10,48 +10,50 @@ body {
     flex-direction: column;
     min-height: 100vh;
     overflow-x: hidden; /* Prevent horizontal scrolling */
+    font-size: 0.85rem; /* Smaller base font size */
 }
 
 /* Player & Monster Sections */
 img {
-    width: 120px; /* Default width */
-    height: 120px; /* Default height */
-    border-radius: 10px;
-    margin-bottom: 10px;
+    width: 80px; /* Smaller images */
+    height: 80px;
+    border-radius: 8px;
+    margin-bottom: 5px;
     object-fit: cover;
-    max-width: 100%; /* Ensure images scale on smaller screens */
-    max-height: 150px; /* Limit the height on larger screens */
+    max-width: 100%;
+    max-height: 100px;
 }
+
 .dungeon-container {
     display: flex;
     justify-content: center;
-    gap: 40px;
+    gap: 20px;
     flex-grow: 1;
-    margin-bottom: 50px;
-    flex-wrap: wrap; /* Allow elements to wrap on smaller screens */
+    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
 .player, .monster {
     background: #292929;
-    padding: 20px;
-    border-radius: 15px;
-    width: 45%; /* Adjust width to fit side by side on large screens */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+    width: 40%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .player h2, .monster h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.2rem;
+    margin-bottom: 5px;
     color: #ff4d4d;
 }
 
 /* Stats Section */
 .playerStats, .monsterStats {
-    font-size: 1rem;
-    line-height: 1.6;
+    font-size: 0.85rem;
+    line-height: 1.4;
 }
 
 strong {
@@ -60,40 +62,40 @@ strong {
 
 /* Buttons */
 .buttons, .gacha {
-    margin-top: 20px;
+    margin-top: 10px;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 5px;
 }
 
 button {
     background-color: #ff4d4d;
     color: white;
     border: none;
-    padding: 12px 25px;
-    font-size: 1.2rem;
-    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
 }
 
 button:hover {
     background-color: #e60000;
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 button:active {
-    transform: scale(0.98);
+    transform: scale(0.96);
 }
 
 /* Gacha Section */
 .gacha {
     background: #333;
-    padding: 20px;
-    border-radius: 10px;
-    width: 60%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 8px;
+    width: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -101,14 +103,14 @@ button:active {
 }
 
 .gacha h2 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #ff4d4d;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .gacha p {
-    margin: 10px 0;
-    font-size: 1.2rem;
+    margin: 5px 0;
+    font-size: 1rem;
     color: #ffcc00;
 }
 
@@ -116,42 +118,42 @@ button:active {
     background-color: #4dff4d;
     color: white;
     border: none;
-    padding: 12px 25px;
-    font-size: 1.2rem;
-    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    margin-top: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    margin-top: 10px;
 }
 
 .gacha-btn:hover {
     background-color: #33cc33;
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .gacha-btn:active {
-    transform: scale(0.98);
+    transform: scale(0.96);
 }
 
 #gacha-result {
-    margin-top: 15px;
-    font-size: 1.1rem;
+    margin-top: 10px;
+    font-size: 1rem;
     color: #ffcc00;
     font-weight: bold;
 }
 
 /* Inventory Section */
 #inventory {
-    margin-top: 30px;
-    padding: 10px;
+    margin-top: 20px;
+    padding: 8px;
     background: #333;
-    border-radius: 10px;
-    width: 60%;
+    border-radius: 8px;
+    width: 50%;
 }
 
 #inventory h3 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #ff4d4d;
 }
 
@@ -163,20 +165,21 @@ button:active {
 
 #inventory li {
     background: #444;
-    margin: 5px 0;
-    padding: 10px;
+    margin: 3px 0;
+    padding: 8px;
     border-radius: 5px;
+    font-size: 0.85rem;
 }
 
 /* Footer */
 footer {
     background: #111;
     color: white;
-    padding: 10px;
+    padding: 8px;
     text-align: center;
     width: 100%;
     margin-top: auto;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 footer a {
@@ -190,57 +193,55 @@ footer a:hover {
 
 /* Mobile Responsiveness */
 @media screen and (max-width: 768px) {
-    @media screen and (max-width: 768px) {
-        img {
-            width: 100px; /* Smaller images on mobile */
-            height: 100px;
-        }
+    img {
+        width: 70px;
+        height: 70px;
     }
+
     .dungeon-container {
-        flex-direction: column; /* Stack elements vertically on mobile */
-        gap: 20px;
+        flex-direction: column;
+        gap: 15px;
     }
 
     .player, .monster {
-        width: 80%; /* Use more width on mobile */
-        margin: 0 auto; /* Center elements */
+        width: 75%;
+        margin: 0 auto;
     }
 
-    /* Adjust buttons size for mobile */
     .buttons button, .gacha-btn {
-        padding: 10px 20px;
-        font-size: 1rem;
+        padding: 6px 12px;
+        font-size: 0.85rem;
     }
 
     .gacha {
-        width: 80%;
+        width: 75%;
     }
 
     #inventory {
-        width: 80%;
+        width: 75%;
     }
 }
 
 /* Further adjustments for very small screens */
 @media screen and (max-width: 480px) {
     .player h2, .monster h2 {
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
 
     .playerStats, .monsterStats {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     button {
-        font-size: 1rem;
-        padding: 10px 15px;
+        font-size: 0.85rem;
+        padding: 6px 10px;
     }
 
     .gacha h2 {
-        font-size: 1.3rem;
+        font-size: 1.1rem;
     }
 
     .gacha p {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 }
