@@ -6,7 +6,7 @@ let playerStats = {
     speed: 10,
     critRate: 5,
     critDamage: 50,
-    gold: 500,
+    gold: 200,
     xp: 0,
     level: 1,
     levelCap: 10,
@@ -23,40 +23,43 @@ function levelUp() {
     while (playerStats.xp >= XP_PER_LEVEL) {  // Use a loop to ensure XP is properly deducted
         playerStats.level += 1;
         playerStats.xp -= XP_PER_LEVEL;
-        playerStats.health += 20;
-        playerStats.attack += 5;
-        playerStats.defense += 3;
+        playerStats.health += 15; // Reduce health growth per level-up
+        playerStats.attack += 4;  // Reduce attack growth per level-up
+        playerStats.defense += 2; // Reduce defense growth per level-up
         playerStats.speed += 2;
         playerStats.critRate += 1;
         playerStats.critDamage += 5;
         playerStats.levelCap += 5;
         showMessage(`You leveled up to level ${playerStats.level}!`);
-        XP_PER_LEVEL += 20; // Increase XP required for next level
+        XP_PER_LEVEL = 100 + (playerStats.level * 15);  // XP required increases by 15 per level
     }
     updatePlayerStats();
 }
 
 
-// Monster Stats
+// Monster Stats with adjusted base stats for better balance
 const monsterPool = [
-    { name: 'X3L4', health: 50, attack: 15, defense: 8, speed: 10, critRate: 5, critDamage: 25 },
-    { name: 'Razor Beast', health: 60, attack: 20, defense: 10, speed: 8, critRate: 8, critDamage: 30 },
-    { name: 'Venom Drake', health: 70, attack: 20, defense: 12, speed: 6, critRate: 6, critDamage: 35 },
-    { name: 'Spectral Knight', health: 60, attack: 20, defense: 14, speed: 10, critRate: 5, critDamage: 25 },
-    { name: 'Thunder Fang', health: 100, attack: 22, defense: 18, speed: 12, critRate: 10, critDamage: 40 },
-    { name: 'Dark Warden', health: 110, attack: 25, defense: 18, speed: 12, critRate: 12, critDamage: 45 },
-    { name: 'Inferno Beast', health: 120, attack: 27, defense: 18, speed: 10, critRate: 15, critDamage: 50 },
-    { name: 'Frost Dragon', health: 130, attack: 30, defense: 18, speed: 8, critRate: 10, critDamage: 55 },
-    { name: 'Chaos Serpent', health: 150, attack: 35, defense: 18, speed: 14, critRate: 18, critDamage: 60 },
-    { name: 'Abyssal Lord', health: 170, attack: 37, defense: 18, speed: 12, critRate: 20, critDamage: 65 }
+    { name: 'X3L4', health: 40, attack: 12, defense: 5, speed: 8, critRate: 3, critDamage: 15 },
+    { name: 'Razor Beast', health: 45, attack: 15, defense: 7, speed: 7, critRate: 5, critDamage: 20 },
+    { name: 'Venom Drake', health: 50, attack: 17, defense: 9, speed: 6, critRate: 4, critDamage: 25 },
+    { name: 'Spectral Knight', health: 55, attack: 18, defense: 10, speed: 8, critRate: 4, critDamage: 20 },
+    { name: 'Thunder Fang', health: 70, attack: 20, defense: 12, speed: 10, critRate: 6, critDamage: 30 },
+    { name: 'Dark Warden', health: 80, attack: 22, defense: 14, speed: 11, critRate: 7, critDamage: 35 },
+    { name: 'Inferno Beast', health: 90, attack: 25, defense: 15, speed: 9, critRate: 8, critDamage: 40 },
+    { name: 'Frost Dragon', health: 100, attack: 28, defense: 16, speed: 8, critRate: 7, critDamage: 45 },
+    { name: 'Chaos Serpent', health: 120, attack: 30, defense: 17, speed: 11, critRate: 10, critDamage: 50 },
+    { name: 'Abyssal Lord', health: 130, attack: 32, defense: 18, speed: 10, critRate: 12, critDamage: 55 }
 ];
+
+
 
 // Function to scale monsters based on the floor level with gradual stat increase
 function scaleMonsterStats(floor) {
     const baseMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
     
     // Scaling factor that adjusts for the floor level
-    const scalingFactor = 1 + (floor - 1) * 0.05; // Increase stats by 5% per floor
+    const scalingFactor = 1 + Math.min(0.05 * (floor - 1), 0.3);  // Slow down scaling
+
 
     // Gradually scaling the monster stats to ensure difficulty increases steadily
     const scaledMonster = {
@@ -140,16 +143,16 @@ function attack() {
 }
 
 function monsterAttack() {
-    let damage = Math.floor(monsterStats.attack - playerStats.defense);
-    damage = Math.max(damage, 0);
-    if (Math.random() * 100 < monsterStats.critRate) {
-        damage = Math.floor(damage * (1 + monsterStats.critDamage / 100));
-        showMessage("Monster landed a Critical Hit!");
+    let damage = Math.floor(monsterStats.attack - playerStats.defense);  // Fixed the damage calculation
+    if (Math.random() * 100 < monsterStats.critRate) {  // Assuming critRate is a monster stat
+        damage = Math.floor(damage * (1 + monsterStats.critDamage / 100));  // Assuming critDamage is a monster stat
+        showMessage("Critical Hit!");
     }
-    playerStats.health -= damage;
+    playerStats.health -= Math.max(damage, 0);  // Avoid negative damage
     updatePlayerStats();
     checkPlayerHealth();
 }
+
 
 function showMessage(message) {
     const messageElement = document.querySelector('#combat-message');
@@ -161,7 +164,7 @@ function showMessage(message) {
 function checkMonsterHealth() {
     if (monsterStats.health <= 0) {
         showMessage('Monster defeated!');
-        playerStats.gold += 100;
+        playerStats.gold += Math.max(25, Math.floor(monsterStats.health / 10)); // Scale gold with monster's health
         playerStats.xp += 10; // Award XP for defeating the monster
         updatePlayerStats();
         levelUp(); // Check if player leveled up
@@ -226,7 +229,7 @@ function restartGame() {
 }
 
 function dodge() {
-    const dodgeChance = playerStats.speed / (playerStats.speed + monsterStats.speed) * 100;
+    const dodgeChance = Math.min(10, playerStats.speed / (playerStats.speed + monsterStats.speed) * 100); // cap dodge chance at 10%
     if (Math.random() * 100 < dodgeChance) {
         showMessage("You dodged the attack!");
     } else {
@@ -266,37 +269,51 @@ function getRandomItem() {
         { name: 'Sword of Flames', type: 'weapon', effectValue: 10, rarity: 'common', effect: () => showMessage('You received the Sword of Flames!') },
         { name: 'Sword of Shadows', type: 'weapon', effectValue: 15, rarity: 'rare', effect: () => showMessage('You received the Sword of Shadows!') },
         { name: 'Excalibur', type: 'weapon', effectValue: 30, rarity: 'legendary', effect: () => showMessage('You received Excalibur!') },
+        { name: 'Silver Blade', type: 'weapon', effectValue: 20, rarity: 'rare', effect: () => showMessage('You received the Silver Blade!') },
+        { name: 'Dragon Slayer', type: 'weapon', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received the Dragon Slayer!') },
         { name: 'Shield of the Ancients', type: 'shield', effectValue: 10, rarity: 'common', effect: () => showMessage('You received the Shield of the Ancients!') },
         { name: 'Aegis Shield', type: 'shield', effectValue: 20, rarity: 'rare', effect: () => showMessage('You received the Aegis Shield!') },
         { name: 'Phoenix Shield', type: 'shield', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received the Phoenix Shield!') },
+        { name: 'Titan Shield', type: 'shield', effectValue: 30, rarity: 'legendary', effect: () => showMessage('You received the Titan Shield!') },
+        { name: 'Obsidian Shield', type: 'shield', effectValue: 25, rarity: 'rare', effect: () => showMessage('You received the Obsidian Shield!') },
         { name: 'Health Potion', type: 'potion', effectValue: 30, rarity: 'common', effect: () => showMessage('You received a Health Potion!') },
-        { name: 'Fire Scroll', type: 'scroll', effectValue: 20, rarity: 'common', effect: () => showMessage('You received a Fire Scroll!') }
+        { name: 'Greater Health Potion', type: 'potion', effectValue: 50, rarity: 'rare', effect: () => showMessage('You received a Greater Health Potion!') },
+        { name: 'Fire Scroll', type: 'scroll', effectValue: 20, rarity: 'common', effect: () => showMessage('You received a Fire Scroll!') },
+        { name: 'Ice Scroll', type: 'scroll', effectValue: 25, rarity: 'rare', effect: () => showMessage('You received an Ice Scroll!') },
+        { name: 'Storm Scroll', type: 'scroll', effectValue: 40, rarity: 'legendary', effect: () => showMessage('You received a Storm Scroll!') },
+        { name: 'Arcane Scroll', type: 'scroll', effectValue: 30, rarity: 'rare', effect: () => showMessage('You received an Arcane Scroll!') }
     ];
 
     // Define rarity weights
     const rarityWeights = {
-        common: 0.7,   // 70% chance
-        rare: 0.25,    // 25% chance
-        legendary: 0.05 // 5% chance
+        common: 0.8,  
+        rare: 0.15,   
+        legendary: 0.05  
     };
 
-    // Calculate weighted probability
-    const randomChoice = Math.random();
-    let weightSum = 0;
+    // Create a cumulative weight array
+    const cumulativeWeights = [];
+    let totalWeight = 0;
+
+    for (const item of items) {
+        totalWeight += rarityWeights[item.rarity];
+        cumulativeWeights.push(totalWeight);
+    }
+
+    // Generate a random number and find the corresponding item
+    const randomChoice = Math.random() * totalWeight;
     let chosenItem = null;
 
     for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        weightSum += rarityWeights[item.rarity];
-
-        if (randomChoice < weightSum) {
-            chosenItem = item;
+        if (randomChoice < cumulativeWeights[i]) {
+            chosenItem = items[i];
             break;
         }
     }
 
     return chosenItem;
 }
+
 
 
 document.querySelector('.gacha-btn').addEventListener('click', () => {
