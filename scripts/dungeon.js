@@ -61,7 +61,7 @@ function scaleMonsterStats(floor) {
     const baseMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
     
     // Scaling factor that adjusts for the floor level
-    const scalingFactor = 1 + Math.min(0.05 * (floor - 1), 0.3);  // Slow down scaling
+    const scalingFactor = 10 + Math.min(0.05 * (floor - 1), 0.3); 
 
 
     // Gradually scaling the monster stats to ensure difficulty increases steadily
@@ -214,7 +214,7 @@ function handleFloorProgression() {
         
         floorLevel += 1;
         monstersDefeated = 0;
-        monstersTillNextFloor += 5;
+        monstersTillNextFloor += Math.floor(2 + floorLevel * 0.5);
         updateFloorLevel();
     } else {
         // Select a regular monster
@@ -224,15 +224,16 @@ function handleFloorProgression() {
 
 function selectNewMonster() {
     let randomMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
-    monsterStats = { ...randomMonster };
+    monsterStats = scaleMonsterStats(floorLevel);
     updateMonsterStats();
 }
 
 function selectNewBoss() {
     let randomBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
-    monsterStats = { ...randomBoss };
+    monsterStats = scaleMonsterStats(floorLevel);
     updateMonsterStats();
 }
+
 
 // Restart Game
 function restartGame() {
