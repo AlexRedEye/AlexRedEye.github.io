@@ -15,6 +15,9 @@ let playerStats = {
     inventory: []
 };
 
+let floorLevel = 1;
+let monstersDefeated = 0;
+
 let XP_PER_LEVEL = 100;
 let monstersTillNextFloor = 5;
 
@@ -151,7 +154,7 @@ function checkMonsterHealth() {
         let baseGold = Math.max(25, Math.floor(monsterStats.health * 0.2));
         playerStats.gold += baseGold;
         
-        playerStats.xp += Math.floor((playerStats.level ** 1.5) * 2);
+        playerStats.xp += Math.floor((floorLevel ** 1.5) * 2);
         updatePlayerStats();
         levelUp(); // Check for level up
 
@@ -178,8 +181,6 @@ function checkPlayerHealth() {
 }
 
 // Floor and Monster Progression
-let floorLevel = 1;
-let monstersDefeated = 0;
 
 function updateFloorLevel() {
     const floorTitle = document.querySelector('header h1');
