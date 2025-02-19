@@ -96,17 +96,18 @@ function applyItemEffect(item) {
     }
 }
 
-function sellItem(itemName) {
+function sellAllItems(itemName) {
     if (inventory[itemName] && inventory[itemName].count > 0) {
         let item = inventory[itemName].details;
         if (item.effect === "sell") {
-            chips += item.value;
-            inventory[itemName].count--;
+            chips += item.value * inventory[itemName].count; // Multiply by count to sell all
+            inventory[itemName].count = 0; // Remove all items
             updateDisplay();
             saveGameData();
         }
     }
 }
+
 
 function updateDisplay() {
     document.getElementById("chips").textContent = chips;
