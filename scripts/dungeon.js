@@ -44,6 +44,9 @@ const monsterPool = [
     { name: 'Venom Drake', health: 50, attack: 17, defense: 9, speed: 6, critRate: 4, critDamage: 25 },
     { name: 'Spectral Knight', health: 55, attack: 18, defense: 10, speed: 8, critRate: 4, critDamage: 20 },
     { name: 'Thunder Fang', health: 70, attack: 20, defense: 12, speed: 10, critRate: 6, critDamage: 30 },
+];
+
+const bossPool = [
     { name: 'Dark Warden', health: 80, attack: 22, defense: 14, speed: 11, critRate: 7, critDamage: 35 },
     { name: 'Inferno Beast', health: 90, attack: 25, defense: 15, speed: 9, critRate: 8, critDamage: 40 },
     { name: 'Frost Dragon', health: 100, attack: 28, defense: 16, speed: 8, critRate: 7, critDamage: 45 },
@@ -203,17 +206,31 @@ function updateFloorLevel() {
 
 function handleFloorProgression() {
     monstersDefeated += 1;
+    
+    // Check if it's the last monster of the floor
     if (monstersDefeated >= monstersTillNextFloor) {
+        // Select a boss for the last monster
+        selectNewBoss();
+        
         floorLevel += 1;
         monstersDefeated = 0;
         monstersTillNextFloor += 5;
         updateFloorLevel();
+    } else {
+        // Select a regular monster
+        selectNewMonster();
     }
 }
 
 function selectNewMonster() {
     let randomMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
     monsterStats = { ...randomMonster };
+    updateMonsterStats();
+}
+
+function selectNewBoss() {
+    let randomBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
+    monsterStats = { ...randomBoss };
     updateMonsterStats();
 }
 
