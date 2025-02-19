@@ -39,12 +39,13 @@ function levelUp() {
 
 // Monster Stats with adjusted base stats for better balance
 const monsterPool = [
-    { name: 'X3L4', health: 40, attack: 12, defense: 5, speed: 8, critRate: 3, critDamage: 15 },
-    { name: 'Razor Beast', health: 45, attack: 15, defense: 7, speed: 7, critRate: 5, critDamage: 20 },
-    { name: 'Venom Drake', health: 50, attack: 17, defense: 9, speed: 6, critRate: 4, critDamage: 25 },
-    { name: 'Spectral Knight', health: 55, attack: 18, defense: 10, speed: 8, critRate: 4, critDamage: 20 },
-    { name: 'Thunder Fang', health: 70, attack: 20, defense: 12, speed: 10, critRate: 6, critDamage: 30 },
+    { name: 'X3L4', health: 80, attack: 35, defense: 20, speed: 12, critRate: 8, critDamage: 25 },
+    { name: 'Razor Beast', health: 70, attack: 30, defense: 15, speed: 10, critRate: 10, critDamage: 35 },
+    { name: 'Venom Drake', health: 85, attack: 32, defense: 18, speed: 9, critRate: 9, critDamage: 40 },
+    { name: 'Spectral Knight', health: 90, attack: 34, defense: 20, speed: 11, critRate: 9, critDamage: 35 },
+    { name: 'Thunder Fang', health: 120, attack: 40, defense: 25, speed: 15, critRate: 12, critDamage: 50 },
 ];
+
 
 const bossPool = [
     { name: 'Dark Warden', health: 80, attack: 22, defense: 14, speed: 11, critRate: 7, critDamage: 35 },
