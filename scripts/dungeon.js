@@ -56,23 +56,18 @@ const bossPool = [
 ];
 
 // Function to scale monsters based on current floor level
-function scaleMonsterStats(floor) {
-    const baseMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
-    
-    // Gradual scaling factor
-    const scalingFactor = 3 + Math.min(0.1 * (floor - 1), 0.5); // Starts slow and increases up to a max of 1.5x (50% increase)
+function scaleMonsterStats(floor, baseMonster) {
+    const scalingFactor = 1 + Math.min(0.1 * (floor - 1), 0.5); // Max 1.5x scaling
 
-    const scaledMonster = {
+    return {
         name: baseMonster.name,
         health: Math.floor(baseMonster.health * scalingFactor),
         attack: Math.floor(baseMonster.attack * scalingFactor),
         defense: Math.floor(baseMonster.defense * scalingFactor),
         speed: Math.floor(baseMonster.speed * scalingFactor),
-        critRate: baseMonster.critRate + Math.floor(Math.min(floor * 0.5, 5)), // Increase crit rate more gradually
-        critDamage: baseMonster.critDamage + Math.floor(Math.min(floor * 2, 10)) // Increase crit damage more gradually
+        critRate: baseMonster.critRate + Math.floor(Math.min(floor * 0.5, 5)), 
+        critDamage: baseMonster.critDamage + Math.floor(Math.min(floor * 2, 10)) 
     };
-
-    return scaledMonster;
 }
 
 
@@ -110,28 +105,27 @@ function updateMonsterStats() {
 
 // Combat Functions
 function attack() {
-    let damage = Math.floor(playerStats.attack - monsterStats.defense);
+    let damage = Math.max(0, Math.floor(playerStats.attack - monsterStats.defense * 0.5)); // Reduced defense effect
     if (Math.random() * 100 < playerStats.critRate) {
         damage = Math.floor(damage * (1 + playerStats.critDamage / 100));
         showMessage("Critical Hit!");
     }
-    monsterStats.health -= Math.max(damage, 0);
+    monsterStats.health -= damage;
     updateMonsterStats();
-    monsterAttack();
+    if (monsterStats.health > 0) monsterAttack();
     checkMonsterHealth();
 }
 
 function monsterAttack() {
-    let damage = Math.floor(monsterStats.attack - playerStats.defense);  // Fixed the damage calculation
-    if (Math.random() * 100 < monsterStats.critRate) {  // Assuming critRate is a monster stat
-        damage = Math.floor(damage * (1 + monsterStats.critDamage / 100));  // Assuming critDamage is a monster stat
+    let damage = Math.max(0, Math.floor(monsterStats.attack - playerStats.defense * 0.5)); 
+    if (Math.random() * 100 < monsterStats.critRate) {
+        damage = Math.floor(damage * (1 + monsterStats.critDamage / 100));
         showMessage("Critical Hit!");
     }
-    playerStats.health -= Math.max(damage, 0);  // Avoid negative damage
+    playerStats.health -= damage;
     updatePlayerStats();
     checkPlayerHealth();
 }
-
 
 function showMessage(message) {
     const messageElement = document.querySelector('#combat-message');
@@ -143,26 +137,29 @@ function showMessage(message) {
 function checkMonsterHealth() {
     if (monsterStats.health <= 0) {
         showMessage('Monster defeated!');
-        playerStats.gold += Math.max(25, Math.floor(monsterStats.health / 10)); // Scale gold with monster's health
-        playerStats.xp += 10; // Award XP for defeating the monster
+        
+        // Gold reward based on original monster health
+        let baseGold = Math.max(25, Math.floor(monsterStats.health * 0.2));
+        playerStats.gold += baseGold;
+        
+        playerStats.xp += 10; // XP Reward
         updatePlayerStats();
-        levelUp(); // Check if player leveled up
+        levelUp(); // Check for level up
 
-        monstersDefeated += 1; // Increment the number of defeated monsters
+        monstersDefeated += 1; // Track monster kills
 
-        // Every 5 monsters defeated, increase the floor level
-        if (monstersDefeated >= monstersTillNextFloor) {
+        if (monstersDefeated >= monstersTillNextFloor) { 
             floorLevel += 1;
-            monstersDefeated = 0; // Reset monster count after increasing floor level
-            monstersTillNextFloor += 5;
-            updateFloorLevel(); // Update the floor in the title
+            monstersDefeated = 0;
+            monstersTillNextFloor += Math.floor(2 + floorLevel * 0.5);
+            updateFloorLevel();
+            selectNewBoss();
+        } else {
+            selectNewMonster();
         }
-
-        // Scale the monster for the next floor
-        monsterStats = scaleMonsterStats(floorLevel);
-        updateMonsterStats();
     }
 }
+
 
 function checkPlayerHealth() {
     if (playerStats.health <= 0) {
@@ -199,15 +196,16 @@ function handleFloorProgression() {
 }
 
 function selectNewMonster() {
-    let randomMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
-    monsterStats = scaleMonsterStats(floorLevel);
+    let baseMonster = monsterPool[Math.floor(Math.random() * monsterPool.length)];
+    monsterStats = scaleMonsterStats(floorLevel, baseMonster); // Pass the monster to scale it
     updateMonsterStats();
 }
 
 function selectNewBoss() {
-    let randomBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
-    monsterStats = scaleMonsterStats(floorLevel);
+    let baseBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
+    monsterStats = scaleMonsterStats(floorLevel, baseBoss); // Scale boss properly
     updateMonsterStats();
+    showMessage(`A Boss has appeared: ${monsterStats.name}!`);
 }
 
 
