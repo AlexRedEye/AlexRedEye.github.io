@@ -371,6 +371,10 @@ function useItem(index) {
 
 function equipItem(index) {
     const item = playerStats.inventory[index];
+    if (!item) {
+        console.error('Invalid item at index:', index);
+        return;
+    }
     if (item.type === 'weapon') {
         if (playerStats.equippedWeapon) unequipItem('weapon');
         playerStats.equippedWeapon = item;
