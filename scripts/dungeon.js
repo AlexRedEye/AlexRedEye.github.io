@@ -40,11 +40,11 @@ function levelUp() {
 
 // Monster Pool - Slightly nerfed early attack/defense for balance
 const monsterPool = [
-    { name: 'X3L4', health: 75, attack: 25, defense: 12, speed: 10, critRate: 5, critDamage: 20 },
-    { name: 'Razor Beast', health: 65, attack: 22, defense: 10, speed: 9, critRate: 7, critDamage: 30 },
-    { name: 'Venom Drake', health: 80, attack: 24, defense: 12, speed: 8, critRate: 6, critDamage: 35 },
-    { name: 'Spectral Knight', health: 85, attack: 26, defense: 14, speed: 9, critRate: 7, critDamage: 30 },
-    { name: 'Thunder Fang', health: 100, attack: 30, defense: 18, speed: 12, critRate: 9, critDamage: 40 },
+    { name: 'X3L4', health: 50, attack: 25, defense: 15, speed: 10, critRate: 5, critDamage: 20 },
+    { name: 'Razor Beast', health: 70, attack: 18, defense: 20, speed: 9, critRate: 3, critDamage: 15 },
+    { name: 'Venom Drake', health: 40, attack: 20, defense: 12, speed: 8, critRate: 6, critDamage: 35 },
+    //{ name: 'Spectral Knight', health: 85, attack: 26, defense: 14, speed: 9, critRate: 7, critDamage: 30 },
+    //{ name: 'Thunder Fang', health: 100, attack: 30, defense: 18, speed: 12, critRate: 9, critDamage: 40 },
 ];
 
 // Boss Pool - Slightly easier early bosses, but tougher late bosses
