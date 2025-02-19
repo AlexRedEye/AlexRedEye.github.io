@@ -61,8 +61,8 @@ const bossPool = [
 
 // Scaling Monsters - Easier early game, harder late game
 function scaleMonsterStats(floor, baseMonster) {
-    let scalingFactor = 1 + Math.min(0.05 * (floor - 1), 0.5); // Slower scaling early
-    if (floor > 5) scalingFactor += 0.05 * (floor - 5); // Faster scaling past floor 5
+    let scalingFactor = 1 + Math.min(0.5 * (floor - 1), 0.5); // Slower scaling early
+    if (floor > 5) scalingFactor += 0.5 * (floor - 5); // Faster scaling past floor 5
     scalingFactor = Math.min(scalingFactor, 2.0); // Max 2x scaling
 
     return {
@@ -361,6 +361,7 @@ function useItem(index) {
     } else if (item.type === 'scroll') {
         monsterStats.health -= item.effectValue;
         showMessage(`You used the Fire Scroll! Monster health decreased by ${item.effectValue}.`);
+        checkMonsterHealth();
     }
     playerStats.inventory.splice(index, 1);
     updatePlayerStats();
