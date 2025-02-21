@@ -185,7 +185,7 @@ function populateUpgrades() {
         if (chips >= upgrade.price) {
             let unitsRequiredMet = false;
 
-            if (upgrade.name.includes("Slot Machine") && units.slotMachine.count >= upgrade.requiredUnits) {
+            if (upgrade.name.includes("Slot") && units.slotMachine.count >= upgrade.requiredUnits) {
                 unitsRequiredMet = true;
             } else if (upgrade.name.includes("Roullete") && units.roullete.count >= upgrade.requiredUnits) {
                 unitsRequiredMet = true;
