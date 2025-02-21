@@ -11,7 +11,7 @@ let bossPool = [];
 // Load Monsters from json
 async function loadMonsters() {
     try {
-        const response = await fetch('../data/monsters.json');
+        const response = await fetch('../json/monsters.json');
         const data = await response.json();
         monsterPool = data.monsters;  // Store the monsters in the monster pool
         console.log("Monsters loaded:", monsterPool);
