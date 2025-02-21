@@ -9,7 +9,7 @@
 <body>
     <header>
         <h1>Pocket Friends Casino</h1>
-        <p>Version 0.1.0</p>
+        <p>Version 0.9.0</p>
     </header>
 
     <section class="stats">
@@ -22,11 +22,20 @@
 
     <section class="games">
         <h2>Games</h2>
-        <p>Buy Slot Machine ($<span id="slotMachinePrice">10</span>) <span id="slotMachineCount">x0</span></p>
+        <!-- Slot Machine Section -->
+        <p>Buy Slot Machine ($<span id="slotMachinePrice">15</span>) <span id="slotMachineCount">x0</span></p>
         <button id="buySlotMachineButton">Buy</button>
+        <p>Buy Roullete ($<span id="roulletePrice">15</span>) <span id="roulleteCount">x0</span></p>
+        <button id="buyRoulleteButton">Buy</button>
+    </section>
+
+    <section class="upgrades">
+        <h2>Upgrades</h2>
+        <!-- Upgrades will be populated dynamically by JavaScript -->
     </section>
 
     <button id="deleteSave">Delete Save</button>
+
     <script type="module" src="scripts/clicker.js"></script>
 </body>
 </html>

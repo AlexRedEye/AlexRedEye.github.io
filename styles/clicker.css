@@ -85,3 +85,64 @@ strong {
 #slotMachineCount {
     color: #e74c3c; /* Red color for slot machine count */
 }
+
+/* Roullete */
+#roulleteCount {
+    color: #e74c3c; /* Red color for slot machine count */
+}
+
+/* Upgrades Section */
+.upgrades {
+    background-color: #1e1e1e; /* Dark black background for upgrades section */
+    border: 1px solid #b88a47; /* Gold border */
+    border-radius: 10px;
+    margin: 20px;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+}
+
+.upgrades h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #b88a47; /* Gold color for titles */
+}
+
+.upgrades p {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+.upgrades button {
+    background-color: #b88a47; /* Gold button for upgrades */
+    color: #1e1e1e;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.upgrades button:hover {
+    background-color: #ffae17; /* Darker gold for hover effect */
+}
+
+/* Delete Save Button */
+#deleteSave {
+    background-color: #e74c3c; /* Red button for delete action */
+    color: #fff; /* White text for contrast */
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+
+#deleteSave:hover {
+    background-color: #c0392b; /* Darker red for hover effect */
+}
+

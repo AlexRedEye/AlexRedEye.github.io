@@ -1,0 +1,19 @@
+{
+    "units": {
+      "slotMachine": {
+        "name": "Slot Machine",
+        "price": 15,
+        "count": 0,
+        "modifier": 0.1,
+        "cps": 0.1
+      },
+      "spinner": {
+        "name": "Spinner",
+        "price": 100,
+        "count": 0,
+        "modifier": 0.5,
+        "cps": 0.5
+      }
+    }
+  }
+  

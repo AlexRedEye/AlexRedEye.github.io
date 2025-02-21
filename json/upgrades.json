@@ -1,0 +1,28 @@
+{
+  "upgrades": [
+    {
+      "name": "Slot Machine Upgrade",
+      "price": 100,
+      "requiredUnits": { "slotMachine": 1 },
+      "description": "Personal and Casino slot machines are twice as efficient.",
+      "effect": "cpc *= 2; units.slotMachine.modifier *= 2; cps = units.slotMachine.count * units.slotMachine.modifier;",
+      "unlocked": false
+    },
+    {
+      "name": "Slot Machine Upgrade II",
+      "price": 500,
+      "requiredUnits": { "slotMachine": 5 },
+      "description": "Personal and Casino slot machines are twice as efficient.",
+      "effect": "cpc *= 2; units.slotMachine.modifier *= 2; cps = units.slotMachine.count * units.slotMachine.modifier;",
+      "unlocked": false
+    },
+    {
+      "name": "Personal Slot Upgrade",
+      "price": 1000,
+      "requiredUnits": { "slotMachine": 10 },
+      "description": "Spinning gains +1% of your CPS",
+      "effect": "cpc += (cps * 0.01);",
+      "unlocked": false
+    }
+  ]
+}
