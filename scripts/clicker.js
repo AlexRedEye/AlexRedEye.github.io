@@ -6,9 +6,41 @@ let slotMachines = 0;
 let slotMachinePrice = 15;
 let slotMachineModifier = 0.1;
 
+// Load data from localStorage (if available)
+function loadGame() {
+    if (localStorage.getItem('chips')) {
+        chips = parseFloat(localStorage.getItem('chips'));
+    }
+    if (localStorage.getItem('cps')) {
+        cps = parseFloat(localStorage.getItem('cps'));
+    }
+    if (localStorage.getItem('slotMachines')) {
+        slotMachines = parseFloat(localStorage.getItem('slotMachines'));
+    }
+    if (localStorage.getItem('slotMachinePrice')) {
+        slotMachinePrice = parseFloat(localStorage.getItem('slotMachinePrice'));
+    }
+
+    refreshDisplays();  // Refresh the display to reflect the loaded values
+}
+
+// Save game state to localStorage
+function saveGame() {
+    localStorage.setItem('chips', chips);
+    localStorage.setItem('cps', cps);
+    localStorage.setItem('slotMachines', slotMachines);
+    localStorage.setItem('slotMachinePrice', slotMachinePrice);
+}
+
+// Function to save the game each time the state changes
+function updateGameState() {
+    saveGame();
+    refreshDisplays();
+}
+
 function spin() {
     chips += cpc;
-    refreshDisplays();
+    updateGameState(); // Save the state after the spin
 }
 
 function buyUnit() {
@@ -21,7 +53,7 @@ function buyUnit() {
         const priceMultiplier = 1.15;  // Price increases by 15% each time
         slotMachinePrice = Math.ceil(slotMachinePrice * priceMultiplier);
 
-        refreshDisplays();
+        updateGameState(); // Save the state after purchasing
     } else {
         console.log('Not Enough Chips!');
     }
@@ -39,13 +71,13 @@ function refreshDisplays() {
     document.getElementById("slotMachineCount").textContent = 'x' + slotMachines;
 }
 
-
 // Add auto-collecting CPS
 setInterval(() => {
-    chips += cps; // Add chips based on cps
-    refreshDisplays(); // Update the display
-}, 1000); // Runs every second
+    chips += cps;
+    updateGameState();  // Save the state every second
+}, 1000);
 
+// Event listeners for buttons
 document.getElementById("spinButton").addEventListener("click", () => {
     spin();
 });
@@ -54,4 +86,5 @@ document.getElementById("buySlotMachineButton").addEventListener("click", () => 
     buyUnit();
 });
 
-refreshDisplays();
+// Load saved data when the page loads
+loadGame();
