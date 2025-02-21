@@ -1,82 +1,64 @@
+<!-- dungeon.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dungeon</title>
+    <title>Eternal Void</title>
     <link rel="stylesheet" href="styles/dungeon.css">
 </head>
 <body>
-    <header>
-        <a href="index.html" class="home-button">🏠 Home</a>
-        <h1>Eternal Void: F1</h1>
-        <p>Version: 0.3.2</p>
-        <div id="combat-message" style="color: red; font-weight: bold;"></div>
-    </header>
+    <h1>Eternal Void: Floor <span id="floor">1</span></h1>
+    <p>Version 0.9.0</p>
 
-    <main class="dungeon-container">
-        <!-- Player Section -->
-        <section class="player">
-            <h2>Pocket Friend</h2>
-            <img src="assets/PocketFriend.jpg" alt="Player" class="player-image">
-            <div class="playerStats">
-                <p><strong>Health:</strong> 100</p>
-                <p><strong>Attack:</strong> 20</p>
-                <p><strong>Defense:</strong> 15</p>
-                <p><strong>Speed:</strong> 10</p>
-                <p><strong>Crit Rate:</strong> 5%</p>
-                <p><strong>Crit Damage:</strong> 50%</p>
-                <p><strong>Gold:</strong> <span id="gold">500</span> 💰</p>
-                <p><strong>Equipped Weapon:</strong> <span id="equipped-weapon">None</span> <button onclick="unequipItem('weapon')">❌ Unequip</button></p>
-                <p><strong>Equipped Shield:</strong> <span id="equipped-shield">None</span> <button onclick="unequipItem('shield')">❌ Unequip</button></p>
-                <!-- In your HTML -->
-            <div id="level-progress">
-                <progress id="xp-bar" value="0" max="100"></progress>
-            </div>
+    <!-- Player Stats -->
+    <section class="playerStats">
+        <h2>Pocket Friend</h2>
+        <ul>
+            <li><strong>Level:</strong> <span id="player-level">1</span></li>
+            <li><strong>XP:</strong> <span id="player-xp">0</span></li>
+            <li><strong>Health:</strong> <span id="player-health">100</span></li>
+            <li><strong>Gold:</strong> <span id="player-gold">50</span></li>
+            <li><strong>Attack:</strong> <span id="player-attack">10</span></li>
+            <li><strong>Defense:</strong> <span id="player-defense">5</span></li>
+        </ul>
+    </section>
 
-            </div>
-        </section>
+    <!-- Monster Stats -->
+    <section class="monsterStats">
+        <h2><span id="monster-name">Monster</span></h2>
+        <ul>
+            <li><strong>Level:</strong> <span id="monster-level">1</span></li>
+            <li><strong>Health:</strong> <span id="monster-health">80</span></li>
+            <li><strong>Attack:</strong> <span id="monster-attack">8</span></li>
+            <li><strong>Defense:</strong> <span id="monster-defense">3</span></li>
+        </ul>
+        <button id="attack-button">Attack</button>
+    </section>
 
-        <!-- Monster Section -->
-        <section class="monster">
-            <h2>Monster</h2>
-            <img src="assets/X3L4.jpg" alt="Monster" class="monster-image">
-            <div class="monsterStats">
-                <p><strong>Name:</strong> X3L4</p>
-                <p><strong>Health:</strong> 80</p>
-                <p><strong>Attack:</strong> 15</p>
-                <p><strong>Defense:</strong> 10</p>
-                <p><strong>Speed:</strong> 12</p>
-                <p><strong>Crit Rate:</strong> 8%</p>
-                <p><strong>Crit Damage:</strong> 40%</p>
-            </div>
-        </section>
+    <!-- Equipment -->
+    <section class="equipment">
+        <h2>Equipment</h2>
+        <ul id="equipment-list">
+            <li>Empty</li>
+        </ul>
+    </section>
 
-        <!-- Action Buttons -->
-        <section class="buttons">
-            <button class="attack-btn">⚔️ Attack</button>
-            <button class="dodge-btn">🛡️ Dodge</button>
-        </section>
+    <!-- Inventory -->
+    <section class="inventory">
+        <h2>Inventory</h2>
+        <p>Common = Gray, Uncommon = Green, Rare = Blue, Epic = Purple, Legendary = Orange</p>
+        <ul id="inventory-list">
+            <li>Empty</li>
+        </ul>
+    </section>
 
-        <!-- Inventory Section -->
-        <section id="inventory">
-            <h3>Inventory</h3>
-            <ul id="inventory-list">
-                <!-- Inventory items will be dynamically inserted here -->
-            </ul>
-        </section>
-
-
-        <!-- Gacha Section -->
-        <section class="gacha">
-            <h2>Spirits Gift</h2>
-            <p>Spend 100 Gold to roll for a random item!</p>
-            <button class="gacha-btn">Pay a spirit</button>
-            <p id="gacha-result"></p>
-        </section>
-    </main>
-
-    <script src="scripts/dungeon.js"></script>
+    <!-- Gacha System -->
+    <section class="gacha">
+        <h2>Spirits Gift (15 Gold)</h2>
+        <button id="gacha-button">Summon</button>
+    </section>
+    
+    <script type="module" src="scripts/dungeon.js"></script>
 </body>
-<footer>Made by Alex and Joker150305©All Rights Reserved</footer>
 </html>

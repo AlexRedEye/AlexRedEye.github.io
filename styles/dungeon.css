@@ -1,247 +1,94 @@
-/* General Styles */
+/* ======== GENERAL STYLES ======== */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #1a1a1a;
-    color: white;
-    text-align: center;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #fff;
+    text-align: center; /* Centers most elements */
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    font-size: 0.85rem; /* Smaller base font size */
 }
 
-/* Player & Monster Sections */
-img {
-    width: 80px; /* Smaller images */
-    height: 80px;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    object-fit: cover;
-    max-width: 100%;
-    max-height: 100px;
+/* ======== SECTION STYLING ======== */
+section {
+    border: 2px solid #444; /* Subtle border */
+    padding: 15px;
+    margin: 10px auto;
+    width: 80%; /* Responsive width */
+    border-radius: 8px; /* Slightly rounded edges */
+    background-color: #222;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1); /* Soft glow effect */
 }
 
-.dungeon-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.player, .monster {
-    background: #292929;
-    padding: 10px;
-    border-radius: 10px;
-    width: 40%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.player h2, .monster h2 {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-    color: #ff4d4d;
-}
-
-/* Stats Section */
+/* ======== PLAYER & MONSTER STATS ======== */
 .playerStats, .monsterStats {
-    font-size: 0.85rem;
-    line-height: 1.4;
+    display: inline-block; /* Makes them sit side by side */
+    width: 40%; /* Keeps width balanced */
+    border: 2px solid #ffcc00; /* Gold border for a premium RPG feel */
+    background-color: #333; /* Slightly lighter than the main section */
+    padding: 10px;
 }
 
-strong {
-    color: #ff4d4d;
+/* ======== LIST STYLING ======== */
+ul {
+    list-style-type: none; /* Removes bullet points */
+    padding: 0;
 }
 
-/* Buttons */
-.buttons, .gacha {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 5px;
+li {
+    margin: 5px 0;
 }
 
+/* ======== BUTTON STYLING ======== */
 button {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border-radius: 8px;
+    background-color: #444; /* Dark gray button */
+    color: #fff;
+    border: 2px solid #ffcc00; /* Gold border for emphasis */
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 5px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #e60000;
-    transform: scale(1.03);
+    background-color: #666; /* Slightly lighter gray on hover */
+    box-shadow: 0 0 10px #ffcc00; /* Glowing effect */
 }
 
-button:active {
-    transform: scale(0.96);
-}
-
-/* Gacha Section */
+/* ======== GACHA SYSTEM ======== */
 .gacha {
-    background: #333;
-    padding: 10px;
-    border-radius: 8px;
-    width: 50%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    border: 2px solid #ff00ff;
+    background-color: #222;
 }
 
-.gacha h2 {
-    font-size: 1.2rem;
-    color: #ff4d4d;
-    margin-bottom: 10px;
+/* ======== INVENTORY STYLING ======== */
+.inventory {
+    border: 2px solid #00ccff;
+    background-color: #222;
 }
 
-.gacha p {
-    margin: 5px 0;
-    font-size: 1rem;
-    color: #ffcc00;
+/* ======== EQUIPMENT STYLING ======== */
+.equipment {
+    border: 2px solid #ff3300;
+    background-color: #222;
 }
 
-.gacha-btn {
-    background-color: #4dff4d;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    margin-top: 10px;
-}
-
-.gacha-btn:hover {
-    background-color: #33cc33;
-    transform: scale(1.03);
-}
-
-.gacha-btn:active {
-    transform: scale(0.96);
-}
-
-#gacha-result {
-    margin-top: 10px;
-    font-size: 1rem;
-    color: #ffcc00;
-    font-weight: bold;
-}
-
-/* Inventory Section */
-#inventory {
-    margin-top: 20px;
-    padding: 8px;
-    background: #333;
-    border-radius: 8px;
-    width: 50%;
-}
-
-#inventory h3 {
-    font-size: 1.2rem;
-    color: #ff4d4d;
-}
-
-#inventory ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-#inventory li {
-    background: #444;
-    margin: 3px 0;
-    padding: 8px;
-    border-radius: 5px;
-    font-size: 0.85rem;
-}
-
-/* Footer */
-footer {
-    background: #111;
-    color: white;
-    padding: 8px;
-    text-align: center;
-    width: 100%;
-    margin-top: auto;
-    font-size: 0.8rem;
-}
-
-footer a {
-    color: #ff4d4d;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* Mobile Responsiveness */
+/* ======== RESPONSIVE DESIGN (Mobile) ======== */
 @media screen and (max-width: 768px) {
-    img {
-        width: 70px;
-        height: 70px;
-    }
-
-    .dungeon-container {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .player, .monster {
-        width: 75%;
-        margin: 0 auto;
-    }
-
-    .buttons button, .gacha-btn {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
-
-    .gacha {
-        width: 75%;
-    }
-
-    #inventory {
-        width: 75%;
-    }
-}
-
-/* Further adjustments for very small screens */
-@media screen and (max-width: 480px) {
-    .player h2, .monster h2 {
-        font-size: 1rem;
+    section {
+        width: 95%; /* Makes sections take more space on smaller screens */
+        padding: 10px;
     }
 
     .playerStats, .monsterStats {
-        font-size: 0.8rem;
+        display: block; /* Stacks them instead of side-by-side */
+        width: 90%;
+        margin: 10px auto;
     }
 
     button {
-        font-size: 0.85rem;
-        padding: 6px 10px;
-    }
-
-    .gacha h2 {
-        font-size: 1.1rem;
-    }
-
-    .gacha p {
-        font-size: 0.9rem;
+        width: 100%; /* Makes buttons full-width for easier tapping */
+        font-size: 16px; /* Slightly smaller font for better mobile fit */
+        padding: 12px;
     }
 }
