@@ -2,7 +2,7 @@
 
 export const player = {
     id: 1,
-    name: "Hero",
+    name: "Pocket Friend",
     level: 1,
     health: 100,
     max_health: 100,
@@ -25,22 +25,31 @@ export const player = {
     inventory: []
 };
 
-// Function to level up the player when they have enough XP
 export function levelUp() {
-    const xpNeeded = player.level * 100;  // Example: 100 XP per level
+    const xpNeeded = Math.floor(100 * Math.pow(1.2, player.level)); // Scales XP exponentially
     if (player.xp >= xpNeeded) {
-        player.xp -= xpNeeded;  // Deduct XP after leveling up
-        player.level++;  // Increase level
+        player.xp -= xpNeeded;  
+        player.level++;  
         
-        // Increase stats (customize the increments as you like)
-        player.max_health += 20;
-        player.health = player.max_health;  // Restore health after level-up
-        player.attack += 5;
-        player.defense += 2;
+        // Percentage-based stat increases for smoother scaling
+        player.max_health = Math.floor(player.max_health * 1.1); // 10% increase
+        player.health = player.max_health;  
+        player.attack = Math.floor(player.attack * 1.08); // 8% increase
+        player.defense = Math.floor(player.defense * 1.05); // 5% increase
         
+        // Bonus stat points for more variability (random within a range)
+        const bonusAttack = Math.floor(Math.random() * 3) + 1;  // +1 to 3 attack
+        const bonusDefense = Math.floor(Math.random() * 2) + 1; // +1 to 2 defense
+        
+        player.attack += bonusAttack;
+        player.defense += bonusDefense;
+
         console.log(`${player.name} leveled up to Level ${player.level}!`);
-        
+        console.log(`+${bonusAttack} Attack, +${bonusDefense} Defense`);
+        console.log(`New Stats - Health: ${player.max_health}, Attack: ${player.attack}, Defense: ${player.defense}`);
+
         return true;
     }
     return false;
 }
+
