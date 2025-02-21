@@ -153,13 +153,16 @@ function loadGame() {
     if (localStorage.getItem('cpc')) cpc = parseFloat(localStorage.getItem('cpc'));
     if (localStorage.getItem('reached100')) reached100 = JSON.parse(localStorage.getItem('reached100'));
 
-    // Load each unit's count and price
+    // Load each unit's count, price, and modifier
     Object.keys(units).forEach(unit => {
         if (localStorage.getItem(`${unit}_count`)) {
             units[unit].count = parseInt(localStorage.getItem(`${unit}_count`));
         }
         if (localStorage.getItem(`${unit}_price`)) {
             units[unit].price = parseInt(localStorage.getItem(`${unit}_price`));
+        }
+        if (localStorage.getItem(`${unit}_modifier`)) {
+            units[unit].modifier = parseFloat(localStorage.getItem(`${unit}_modifier`));  // Load modifier
         }
     });
 
@@ -230,15 +233,16 @@ function saveGame() {
     localStorage.setItem('chips', chips);
     localStorage.setItem('cps', cps);
     localStorage.setItem('cpc', cpc);
-    localStorage.setItem('reached100', JSON.stringify(reached100)); 
+    localStorage.setItem('reached100', JSON.stringify(reached100));
 
-    // Save each unit's count and price
+    // Save each unit's count, price, and modifier
     Object.keys(units).forEach(unit => {
         localStorage.setItem(`${unit}_count`, units[unit].count);
         localStorage.setItem(`${unit}_price`, units[unit].price);
+        localStorage.setItem(`${unit}_modifier`, units[unit].modifier);  // Save modifier
     });
 
-    // Save unlocked upgrades
+    // Save unlocked upgrades and their effects
     upgrades.forEach((upgrade, index) => {
         localStorage.setItem(`upgrade_${index}_unlocked`, upgrade.unlocked);
     });
