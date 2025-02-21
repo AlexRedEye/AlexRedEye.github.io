@@ -1,0 +1,98 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "name": "Health Potion",
+            "type": "consumable",
+            "effect": {
+                "type": "heal",
+                "value": 50
+            },
+            "rarity": "common",
+            "description": "Restores 50 health points."
+        },
+        {
+            "id": 2,
+            "name": "Scroll of Fireball",
+            "type": "consumable",
+            "effect": {
+                "type": "damage",
+                "value": 30
+            },
+            "rarity": "uncommon",
+            "description": "Deals 30 damage to the target."
+        },
+        {
+            "id": 3,
+            "name": "Iron Sword",
+            "type": "weapon",
+            "attack": 15,
+            "defense": 0,
+            "rarity": "common",
+            "description": "A sturdy sword forged from iron."
+        },
+        {
+            "id": 4,
+            "name": "Iron Helmet",
+            "type": "armor",
+            "slot": "head",
+            "defense": 5,
+            "rarity": "common",
+            "description": "A helmet made of iron for head protection."
+        },
+        {
+            "id": 5,
+            "name": "Iron Chestplate",
+            "type": "armor",
+            "slot": "chest",
+            "defense": 15,
+            "rarity": "uncommon",
+            "description": "A chestplate crafted from iron for body protection."
+        },
+        {
+            "id": 6,
+            "name": "Iron Leggings",
+            "type": "armor",
+            "slot": "legs",
+            "defense": 10,
+            "rarity": "uncommon",
+            "description": "Leggings made of iron to protect your legs."
+        },
+        {
+            "id": 7,
+            "name": "Iron Boots",
+            "type": "armor",
+            "slot": "feet",
+            "defense": 5,
+            "rarity": "common",
+            "description": "Boots made from iron to protect your feet."
+        },
+        {
+            "id": 8,
+            "name": "Silver Sword",
+            "type": "weapon",
+            "attack": 25,
+            "defense": 0,
+            "rarity": "rare",
+            "description": "A sword made from silver with enhanced sharpness."
+        },
+        {
+            "id": 9,
+            "name": "Dragon Helm",
+            "type": "armor",
+            "slot": "head",
+            "defense": 20,
+            "rarity": "epic",
+            "description": "A legendary helm crafted from dragon scales."
+        },
+        {
+            "id": 10,
+            "name": "Phoenix Armor",
+            "type": "armor",
+            "slot": "chest",
+            "defense": 50,
+            "rarity": "legendary",
+            "description": "A chestplate forged from the ashes of a phoenix, granting immense protection."
+        }
+    ]
+}

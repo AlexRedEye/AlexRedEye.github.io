@@ -1,0 +1,110 @@
+{
+    "monsters": [
+        {
+            "id": 1,
+            "name": "Goblin",
+            "level": 1,
+            "health": 30,
+            "attack": 6,
+            "defense": 2,
+            "speed": 10,
+            "crit_rate": 0.05,
+            "crit_damage": 2.0,
+            "xp_reward": 10,
+            "gold_reward": 5,
+            "description": "A small but vicious creature that roams the dungeon."
+        },
+        {
+            "id": 2,
+            "name": "Skeleton Warrior",
+            "level": 2,
+            "health": 50,
+            "attack": 8,
+            "defense": 3,
+            "speed": 8,
+            "crit_rate": 0.1,
+            "crit_damage": 2.5,
+            "xp_reward": 20,
+            "gold_reward": 10,
+            "description": "A reanimated skeleton that fights with a rusty sword."
+        },
+        {
+            "id": 3,
+            "name": "Troll",
+            "level": 3,
+            "health": 80,
+            "attack": 12,
+            "defense": 5,
+            "speed": 5,
+            "crit_rate": 0.15,
+            "crit_damage": 3.0,
+            "xp_reward": 40,
+            "gold_reward": 15,
+            "description": "A large, brutish monster known for its regenerative health."
+        },
+        {
+            "id": 4,
+            "name": "Orc",
+            "level": 4,
+            "health": 100,
+            "attack": 15,
+            "defense": 7,
+            "speed": 6,
+            "crit_rate": 0.1,
+            "crit_damage": 2.5,
+            "xp_reward": 50,
+            "gold_reward": 20,
+            "description": "A fearsome warrior with a strong physique and ruthless combat skills."
+        }
+    ],
+    "bosses": [
+        {
+            "id": 1,
+            "name": "Minotaur",
+            "level": 10,
+            "health": 500,
+            "attack": 50,
+            "defense": 20,
+            "speed": 4,
+            "crit_rate": 0.2,
+            "crit_damage": 3.5,
+            "xp_reward": 200,
+            "gold_reward": 100,
+            "special_ability": "Rampage",
+            "special_ability_effect": "Deals massive area-of-effect damage to all players in range.",
+            "description": "A powerful and aggressive beast that guards the dungeon's deepest levels."
+        },
+        {
+            "id": 2,
+            "name": "Dark Sorcerer",
+            "level": 15,
+            "health": 300,
+            "attack": 25,
+            "defense": 15,
+            "speed": 8,
+            "crit_rate": 0.25,
+            "crit_damage": 4.0,
+            "xp_reward": 300,
+            "gold_reward": 150,
+            "special_ability": "Shadow Bolt",
+            "special_ability_effect": "A powerful bolt of dark energy that damages a single target heavily.",
+            "description": "A master of dark magic, capable of devastating spells and mind control."
+        },
+        {
+            "id": 3,
+            "name": "Dragon King",
+            "level": 20,
+            "health": 1000,
+            "attack": 70,
+            "defense": 40,
+            "speed": 3,
+            "crit_rate": 0.15,
+            "crit_damage": 4.5,
+            "xp_reward": 500,
+            "gold_reward": 250,
+            "special_ability": "Fire Breath",
+            "special_ability_effect": "Breathes fire in a cone, dealing heavy damage to all targets in the area.",
+            "description": "An ancient and mighty dragon who has ruled the dungeon for centuries."
+        }
+    ]
+}

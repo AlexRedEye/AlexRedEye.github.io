@@ -1,0 +1,51 @@
+{
+    "player": {
+        "id": 1,
+        "name": "Hero",
+        "level": 1,
+        "health": 100,
+        "max_health": 100,
+        "attack": 10,
+        "defense": 5,
+        "speed": 8,
+        "crit_rate": 0.05,
+        "crit_damage": 2.0,
+        "xp": 0,
+        "gold": 50,
+        "location": "Dungeon Floor 1",
+        "status": "active",
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "leggings": null,
+            "boots": null
+        },
+        "inventory": [
+            {
+                "id": 1,
+                "name": "Health Potion",
+                "type": "potion",
+                "effect": "Restores 50 health",
+                "quantity": 3,
+                "rarity": "common"
+            },
+            {
+                "id": 2,
+                "name": "Small Health Potion",
+                "type": "potion",
+                "effect": "Restores 25 health",
+                "quantity": 5,
+                "rarity": "common"
+            },
+            {
+                "id": 3,
+                "name": "Scroll of Fireball",
+                "type": "scroll",
+                "effect": "Deals 30 fire damage to all enemies in range",
+                "quantity": 1,
+                "rarity": "uncommon"
+            }
+        ]
+    }
+}

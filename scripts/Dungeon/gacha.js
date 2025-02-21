@@ -5,7 +5,7 @@ export let gachaPool = [];
 
 async function loadItems() {
     try {
-        const response = await fetch('../data/items.json');
+        const response = await fetch('../json/items.json');
         const data = await response.json();
         gachaPool = data.items;  // Store the items in the gacha pool
         console.log("Items loaded:", gachaPool);
