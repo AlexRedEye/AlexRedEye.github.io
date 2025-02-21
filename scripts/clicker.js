@@ -71,6 +71,10 @@ function refreshDisplays() {
     document.getElementById("slotMachineCount").textContent = 'x' + slotMachines;
 }
 
+function deleteSave() {
+    localStorage.clear();
+}
+
 // Add auto-collecting CPS
 setInterval(() => {
     chips += cps;
@@ -84,6 +88,11 @@ document.getElementById("spinButton").addEventListener("click", () => {
 
 document.getElementById("buySlotMachineButton").addEventListener("click", () => {
     buyUnit();
+});
+
+document.getElementById("deleteSave").addEventListener("click", () => {
+    deleteSave();
+    location.reload();
 });
 
 // Load saved data when the page loads
