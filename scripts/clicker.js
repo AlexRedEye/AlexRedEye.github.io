@@ -56,7 +56,7 @@ let upgrades = [
     {
         name: "Personal Slot Upgrade",
         price: 1000,
-        requiredUnits: 10,  // Require at least 10 slot machines
+        requiredUnits: 10,  
         description: "Spinning gains +1% of your CPS",
         effect: () => { 
             cpc += Math.round(cps * 0.01 * 10) / 10; 
@@ -66,23 +66,25 @@ let upgrades = [
     {
         name: "Roullete Upgrade",
         price: 200,
-        requiredUnits: 1,  // Require at least 1 slot machine
+        requiredUnits: 1, 
         description: "Roulletes are twice as efficient.",
         effect: () => {  
             units.roullete.modifier *= 2;
-            cps = units.roullete.count * units.roullete.modifier;
-        },
+            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
+                  (units.roullete.count * units.roullete.modifier);
+        },        
         unlocked: false
     },
     {
         name: "Roullete Upgrade II",
         price: 2000,
-        requiredUnits: 5,  // Require at least 5 slot machines
+        requiredUnits: 5,  
         description: "Roulletes are twice as efficient.",
-        effect: () => { 
+        effect: () => {  
             units.roullete.modifier *= 2;
-            cps = units.roullete.count * units.roullete.modifier;
-        },
+            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
+                  (units.roullete.count * units.roullete.modifier);
+        },        
         unlocked: false
     }
 ];
