@@ -67,11 +67,10 @@ let upgrades = [
         name: "Roullete Upgrade",
         price: 200,
         requiredUnits: 1,  // Require at least 1 slot machine
-        description: "Personal and Casino slot machines are twice as efficient.",
-        effect: () => { 
-            cpc *= 2; 
+        description: "Roulletes are twice as efficient.",
+        effect: () => {  
             units.roullete.modifier *= 2;
-            cps = units.slotMachine.count * units.slotMachine.modifier;
+            cps = units.roullete.count * units.roullete.modifier;
         },
         unlocked: false
     },
@@ -79,11 +78,10 @@ let upgrades = [
         name: "Roullete Upgrade II",
         price: 2000,
         requiredUnits: 5,  // Require at least 5 slot machines
-        description: "Personal and Casino slot machines are twice as efficient.",
+        description: "Roulletes are twice as efficient.",
         effect: () => { 
-            cpc *= 2; 
             units.roullete.modifier *= 2;
-            cps = units.slotMachine.count * units.slotMachine.modifier;
+            cps = units.roullete.count * units.roullete.modifier;
         },
         unlocked: false
     }
