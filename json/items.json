@@ -2,40 +2,16 @@
     "items": [
         {
             "id": 1,
-            "name": "Health Potion",
-            "type": "consumable",
-            "effect": {
-                "type": "heal",
-                "value": 50
-            },
-            "rarity": "common",
-            "price": 10,
-            "description": "Restores 50 health points."
-        },
-        {
-            "id": 2,
-            "name": "Scroll of Fireball",
-            "type": "consumable",
-            "effect": {
-                "type": "damage",
-                "value": 30
-            },
-            "rarity": "uncommon",
-            "price": 15,
-            "description": "Deals 30 damage to the target."
-        },
-        {
-            "id": 3,
             "name": "Iron Sword",
             "type": "weapon",
-            "attack": 15,
+            "attack": 5,
             "defense": 0,
             "rarity": "common",
             "price": 10,
             "description": "A sturdy sword forged from iron."
         },
         {
-            "id": 4,
+            "id": 2,
             "name": "Iron Helmet",
             "type": "armor",
             "slot": "head",
@@ -45,27 +21,27 @@
             "description": "A helmet made of iron for head protection."
         },
         {
-            "id": 5,
+            "id": 3,
             "name": "Iron Chestplate",
             "type": "armor",
             "slot": "chest",
-            "defense": 15,
-            "rarity": "uncommon",
+            "defense": 10,
+            "rarity": "common",
             "price": 10,
             "description": "A chestplate crafted from iron for body protection."
         },
         {
-            "id": 6,
+            "id": 4,
             "name": "Iron Leggings",
             "type": "armor",
             "slot": "legs",
-            "defense": 10,
-            "rarity": "uncommon",
+            "defense": 5,
+            "rarity": "common",
             "price": 10,
             "description": "Leggings made of iron to protect your legs."
         },
         {
-            "id": 7,
+            "id": 5,
             "name": "Iron Boots",
             "type": "armor",
             "slot": "feet",
@@ -75,144 +51,16 @@
             "description": "Boots made from iron to protect your feet."
         },
         {
-            "id": 8,
-            "name": "Silver Sword",
-            "type": "weapon",
-            "attack": 25,
-            "defense": 0,
-            "rarity": "rare",
+            "id": 6,
+            "name": "Health Potion",
+            "type": "consumable",
+            "effect": {
+                "type": "heal",
+                "value": 25
+            },
+            "rarity": "common",
             "price": 10,
-            "description": "A sword made from silver with enhanced sharpness."
-        },
-        {
-            "id": 9,
-            "name": "Dragon Helm",
-            "type": "armor",
-            "slot": "head",
-            "defense": 20,
-            "rarity": "epic",
-            "price": 10,
-            "description": "A legendary helm crafted from dragon scales."
-        },
-        {
-            "id": 10,
-            "name": "Phoenix Armor",
-            "type": "armor",
-            "slot": "chest",
-            "defense": 50,
-            "rarity": "legendary",
-            "price": 10,
-            "description": "A chestplate forged from the ashes of a phoenix, granting immense protection."
-        },
-        {
-            "id": 13,
-            "name": "Steel Sword",
-            "type": "weapon",
-            "attack": 30,
-            "defense": 0,
-            "rarity": "rare",
-            "price": 20,
-            "description": "A sword made of reinforced steel, stronger than iron."
-        },
-        {
-            "id": 14,
-            "name": "Steel Helmet",
-            "type": "armor",
-            "slot": "head",
-            "defense": 10,
-            "rarity": "uncommon",
-            "price": 15,
-            "description": "A helmet crafted from steel, offering solid head protection."
-        },
-        {
-            "id": 15,
-            "name": "Steel Chestplate",
-            "type": "armor",
-            "slot": "chest",
-            "defense": 25,
-            "rarity": "rare",
-            "price": 25,
-            "description": "A chestplate forged from steel, providing excellent defense."
-        },
-        {
-            "id": 16,
-            "name": "Steel Leggings",
-            "type": "armor",
-            "slot": "legs",
-            "defense": 20,
-            "rarity": "rare",
-            "price": 20,
-            "description": "Leggings reinforced with steel for increased durability."
-        },
-        {
-            "id": 17,
-            "name": "Steel Boots",
-            "type": "armor",
-            "slot": "feet",
-            "defense": 10,
-            "rarity": "uncommon",
-            "price": 15,
-            "description": "Sturdy steel boots designed to protect the wearer’s feet."
-        },
-        {
-            "id": 18,
-            "name": "Flaming Sword",
-            "type": "weapon",
-            "attack": 40,
-            "defense": 0,
-            "rarity": "epic",
-            "price": 35,
-            "description": "A magical sword engulfed in flames, burning enemies upon contact."
-        },
-        {
-            "id": 19,
-            "name": "Shadow Dagger",
-            "type": "weapon",
-            "attack": 20,
-            "defense": 5,
-            "rarity": "rare",
-            "price": 22,
-            "description": "A dagger imbued with dark energy, increasing attack speed."
-        },
-        {
-            "id": 20,
-            "name": "Gauntlets of the Titan",
-            "type": "armor",
-            "slot": "hands",
-            "defense": 30,
-            "rarity": "legendary",
-            "price": 40,
-            "description": "Legendary gauntlets granting immense strength and durability."
-        },
-        {
-            "id": 21,
-            "name": "Boots of Swiftness",
-            "type": "armor",
-            "slot": "feet",
-            "defense": 8,
-            "rarity": "rare",
-            "price": 18,
-            "description": "Boots enchanted to increase the wearer’s speed significantly."
-        },
-        {
-            "id": 22,
-            "name": "Helm of the Guardian",
-            "type": "armor",
-            "slot": "head",
-            "defense": 35,
-            "rarity": "epic",
-            "price": 38,
-            "description": "A mystical helm that grants increased resilience against attacks."
-        },
-        {
-            "id": 23,
-            "name": "Arcane Staff",
-            "type": "weapon",
-            "attack": 15,
-            "defense": 5,
-            "rarity": "rare",
-            "price": 28,
-            "description": "A magical staff infused with arcane energy, boosting spell power."
+            "description": "Restores 25 health points."
         }
     ]
 }

@@ -67,23 +67,23 @@ export function generateOpponent() {
     }
 
     const { min, max } = getLevelRange(floor);
-    const monsterLevel = Math.floor(Math.random() * (max - min + 1)) + min; // Random level in range
+    let monsterLevel = Math.floor(Math.random() * (max - min + 1)) + min; // Random level in range
 
     let opponent = null;
 
-    // Boss fight on last monster of the floor
+    // Check if it's a boss fight (last monster of the floor)
     if (monstersDefeated + 1 >= floorCap) {
         const randomIndex = Math.floor(Math.random() * bossPool.length);
         const baseStats = bossPool[randomIndex];
 
         opponent = {
             ...baseStats,
-            level: monsterLevel + 2, // Bosses are 2 levels higher than floor monsters
-            ...scaleMonsterStats(baseStats, monsterLevel + 2),
+            level: monsterLevel, // Boss has the same level as other monsters
+            ...scaleMonsterStats(baseStats, monsterLevel),
             isBoss: true,
         };
 
-        console.log("Boss fight initiated!");
+        console.log(`Boss fight initiated! Boss Level: ${monsterLevel}`);
     } else {
         const randomIndex = Math.floor(Math.random() * monsterPool.length);
         const baseStats = monsterPool[randomIndex];
@@ -142,13 +142,13 @@ function refreshDisplays() {
 document.getElementById("gacha-button").addEventListener("click", () => {
     if (player.gold >= gachaPrice) {
         player.gold -= gachaPrice;
-        const newItem = summonItem();
-        addToInventory(newItem, player);
-    
-        // Update the player's inventory and stats
-        refreshDisplays();
-        updatePlayerStats();
-        console.log(newItem); // For debugging: output the item summoned
+        const newItem = summonItem(floor);  // Pass the floor to scale rarity
+
+        if (newItem) {
+            addToInventory(newItem, player);
+            refreshDisplays();
+            updatePlayerStats();
+        }
     }
 });
 

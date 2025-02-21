@@ -142,6 +142,7 @@ export function equipItem(itemName, player) {
                 player.equipment.feet = item;
                 console.log(`Equipped ${item.name} as your boots.`);
                 player.defense += item.defense || 0;
+                player.speed += item.speed || 0;
             } else {
                 console.log(`You cannot equip ${item.name} in the current slot.`);
                 return; // Do nothing if the slot is already occupied
