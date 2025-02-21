@@ -25,42 +25,52 @@ const units = {
       modifier: 1,
       cps: 1,
       label: "A high-speed spinner that boosts chip production."
-    }
+    },
+    blackjack: {
+        name: "Blackjack",
+        price: 1100,
+        count: 0,
+        modifier: 8,
+        cps: 8,
+        label: "A high-speed spinner that boosts chip production."
+      }
   };  
 
+  function calculateCPS() {
+    cps = (units.slotMachine.count * units.slotMachine.modifier) + 
+          (units.roullete.count * units.roullete.modifier) + 
+          (units.blackjack.count * units.blackjack.modifier);
+}
+
+// Updated Upgrade Effects
 let upgrades = [
     {
         name: "Slot Machine Upgrade",
         price: 100,
-        requiredUnits: 1,  // Require at least 1 slot machine
+        requiredUnits: 1,
         description: "Personal and Casino slot machines are twice as efficient.",
         effect: () => { 
             cpc *= 2; 
             units.slotMachine.modifier *= 2;
-            // Recalculate CPS correctly by including all units
-            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
-                  (units.roullete.count * units.roullete.modifier);
+            calculateCPS();
         },        
         unlocked: false
     },
     {
         name: "Slot Machine Upgrade II",
         price: 500,
-        requiredUnits: 5,  // Require at least 5 slot machines
+        requiredUnits: 5,  
         description: "Personal and Casino slot machines are twice as efficient.",
         effect: () => { 
             cpc *= 2; 
             units.slotMachine.modifier *= 2;
-        
-            // Recalculate CPS correctly by including all units
-            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
-                  (units.roullete.count * units.roullete.modifier);
+            calculateCPS();
         },        
         unlocked: false
     },
     {
         name: "Personal Slot Upgrade",
-        price: 1000,
+        price: 50000,
         requiredUnits: 10,  
         description: "Spinning gains +1% of your CPS",
         effect: () => { 
@@ -69,26 +79,68 @@ let upgrades = [
         unlocked: false
     },
     {
+        name: "Personal Slot Upgrade II",
+        price: 100000,
+        requiredUnits: 10,  
+        description: "Spinning gains +1% of your CPS",
+        effect: () => { 
+            cpc += Math.round(cps * 0.01 * 10) / 10; 
+        },        
+        unlocked: false
+    },
+    {
+        name: "Super Slots Upgrade",
+        price: 10000,
+        requiredUnits: 10,  
+        description: "Personal and Casino slot machines are twice as efficient.",
+        effect: () => { 
+            cpc *= 2; 
+            units.slotMachine.modifier *= 2;
+            calculateCPS();
+        },       
+        unlocked: false
+    },
+    {
         name: "Roullete Upgrade",
-        price: 200,
+        price: 1000,
         requiredUnits: 1, 
         description: "Roulletes are twice as efficient.",
         effect: () => {  
             units.roullete.modifier *= 2;
-            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
-                  (units.roullete.count * units.roullete.modifier);
+            calculateCPS();
         },        
         unlocked: false
     },
     {
         name: "Roullete Upgrade II",
-        price: 2000,
+        price: 5000,
         requiredUnits: 5,  
         description: "Roulletes are twice as efficient.",
         effect: () => {  
             units.roullete.modifier *= 2;
-            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
-                  (units.roullete.count * units.roullete.modifier);
+            calculateCPS();
+        },        
+        unlocked: false
+    },
+    {
+        name: "Blackjack Upgrade",
+        price: 11000,
+        requiredUnits: 5,  
+        description: "Roulletes are twice as efficient.",
+        effect: () => {  
+            units.blackjack.modifier *= 2;
+            calculateCPS();
+        },        
+        unlocked: false
+    },
+    {
+        name: "Blackjack Upgrade II",
+        price: 55000,
+        requiredUnits: 5,  
+        description: "Roulletes are twice as efficient.",
+        effect: () => {  
+            units.blackjack.modifier *= 2;
+            calculateCPS();
         },        
         unlocked: false
     }
@@ -121,53 +173,50 @@ function populateUpgrades() {
     upgradesSection.innerHTML = '<h2>Upgrades</h2>'; // Clear the section before repopulating
 
     upgrades.forEach(upgrade => {
-        // Check if the upgrade is unlocked based on required units and chips
         if (chips >= upgrade.price) {
             let unitsRequiredMet = false;
 
-            // Check if the required units condition is met
             if (upgrade.name.includes("Slot Machine") && units.slotMachine.count >= upgrade.requiredUnits) {
                 unitsRequiredMet = true;
             } else if (upgrade.name.includes("Roullete") && units.roullete.count >= upgrade.requiredUnits) {
                 unitsRequiredMet = true;
+            } else if (upgrade.name.includes("Blackjack") && units.blackjack.count >= upgrade.requiredUnits) {
+                unitsRequiredMet = true;
             }
 
             if (unitsRequiredMet && !upgrade.unlocked) {
-                // Create the upgrade div
                 const upgradeDiv = document.createElement("div");
                 upgradeDiv.classList.add("upgrade");
 
                 const upgradeName = document.createElement("h3");
                 upgradeName.textContent = upgrade.name;
                 const upgradeDesc = document.createElement("p");
-                upgradeDesc.textContent = `${upgrade.description} (Requires ${upgrade.requiredUnits} ${upgrade.name.includes("Slot Machine") ? "Slot Machines" : "Roulletes"})`;
+                upgradeDesc.textContent = `${upgrade.description} (Requires ${upgrade.requiredUnits} ${upgrade.name.includes("Slot Machine") ? "Slot Machines" : upgrade.name.includes("Roullete") ? "Roulletes" : "Blackjacks"})`;
 
                 const upgradeButton = document.createElement("button");
                 upgradeButton.textContent = `Buy for ${upgrade.price} Chips`;
 
-                // Add the button click event
                 upgradeButton.addEventListener("click", () => {
                     if (chips >= upgrade.price) {
                         chips -= upgrade.price;
-                        upgrade.effect();  // Apply the effect of the upgrade
-                        upgrade.unlocked = true;  // Mark the upgrade as unlocked
-                        updateGameState();  // Save the state
-                        populateUpgrades();  // Re-render the upgrades section
+                        upgrade.effect();
+                        upgrade.unlocked = true;
+                        updateGameState();
+                        populateUpgrades();
                     } else {
                         console.log("Not enough chips or units to buy this upgrade.");
                     }
                 });
 
-                // Append the elements to the upgrade div
                 upgradeDiv.appendChild(upgradeName);
                 upgradeDiv.appendChild(upgradeDesc);
                 upgradeDiv.appendChild(upgradeButton);
-
-                // Add the upgrade div to the upgrades section
                 upgradesSection.appendChild(upgradeDiv);
             }
         }
     });
+
+
 }
 
 // Save game state to localStorage
@@ -183,8 +232,51 @@ function saveGame() {
 function updateGameState() {
     saveGame();
     refreshDisplays();
-    populateUpgrades();  // Update the upgrades section after each game state change
+    populateUpgrades();  
+
+    // Check if Blackjack should be unlocked
+    if (chips >= 1100 && !localStorage.getItem('blackjackUnlocked')) {
+        localStorage.setItem('blackjackUnlocked', 'true'); // Store as a string
+        addBlackjackSection(); // Add it immediately after unlocking
+    }
+
+    if (localStorage.getItem('blackjackUnlocked') === 'true') {
+        addBlackjackSection(); // Ensure it stays after refresh
+    }
 }
+
+function addBlackjackSection() {
+    const gamesSection = document.querySelector(".games");
+
+    // Ensure the games section exists before appending
+    if (!gamesSection) {
+        console.error("Games section not found!");
+        return;
+    }
+
+    // Prevent duplicate sections
+    if (!document.getElementById("blackjackSection")) {
+        const blackjackDiv = document.createElement("div");
+        blackjackDiv.id = "blackjackSection"; 
+        blackjackDiv.classList.add("game"); // ✅ Correct way to add class
+        blackjackDiv.innerHTML = `
+            <p>Buy Blackjack ($<span id="blackjackPrice">1100</span>) <span id="blackjackCount">x0</span></p>
+            <button id="buyBlackjackButton">Buy</button>
+        `;
+        gamesSection.appendChild(blackjackDiv);
+
+        document.getElementById("buyBlackjackButton").addEventListener("click", () => {
+            buyUnit(units.blackjack);
+        });
+    }
+}
+
+// Ensure game is loaded after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    loadGame();
+});
+
+
 
 function spin() {
     chips += cpc;
@@ -228,6 +320,12 @@ function refreshDisplays() {
     document.getElementById("slotMachineCount").textContent = 'x' + units.slotMachine.count;
     document.getElementById("roulletePrice").textContent = units.roullete.price;
     document.getElementById("roulleteCount").textContent = 'x' + units.roullete.count;
+
+    // ✅ Blackjack Display Updates
+    if (document.getElementById("blackjackPrice")) {
+        document.getElementById("blackjackPrice").textContent = units.blackjack.price;
+        document.getElementById("blackjackCount").textContent = 'x' + units.blackjack.count;
+    }
 }
 
 function deleteSave() {
