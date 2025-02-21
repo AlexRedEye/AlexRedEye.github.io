@@ -22,8 +22,8 @@ const units = {
       name: "Roullete",
       price: 100,
       count: 0,
-      modifier: 0.5,
-      cps: 0.5,
+      modifier: 1,
+      cps: 1,
       label: "A high-speed spinner that boosts chip production."
     }
   };  
