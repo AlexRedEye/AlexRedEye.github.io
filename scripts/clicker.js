@@ -148,24 +148,30 @@ let upgrades = [
 
 // Load data from localStorage (if available)
 function loadGame() {
-    if (localStorage.getItem('chips')) {
-        chips = parseFloat(localStorage.getItem('chips'));
-    }
-    if (localStorage.getItem('cps')) {
-        cps = parseFloat(localStorage.getItem('cps'));
-    }
-    if (localStorage.getItem('slotMachines')) {
-        slotMachines = parseFloat(localStorage.getItem('slotMachines'));
-    }
-    if (localStorage.getItem('slotMachinePrice')) {
-        slotMachinePrice = parseFloat(localStorage.getItem('slotMachinePrice'));
-    }
-    if (localStorage.getItem('reached100')) {
-        reached100 = JSON.parse(localStorage.getItem('reached100'));
-    }
+    if (localStorage.getItem('chips')) chips = parseFloat(localStorage.getItem('chips'));
+    if (localStorage.getItem('cps')) cps = parseFloat(localStorage.getItem('cps'));
+    if (localStorage.getItem('cpc')) cpc = parseFloat(localStorage.getItem('cpc'));
+    if (localStorage.getItem('reached100')) reached100 = JSON.parse(localStorage.getItem('reached100'));
 
-    refreshDisplays();  // Refresh the display to reflect the loaded values
-    populateUpgrades();  // Populate the upgrades section based on the current state
+    // Load each unit's count and price
+    Object.keys(units).forEach(unit => {
+        if (localStorage.getItem(`${unit}_count`)) {
+            units[unit].count = parseInt(localStorage.getItem(`${unit}_count`));
+        }
+        if (localStorage.getItem(`${unit}_price`)) {
+            units[unit].price = parseInt(localStorage.getItem(`${unit}_price`));
+        }
+    });
+
+    // Load unlocked upgrades
+    upgrades.forEach((upgrade, index) => {
+        if (localStorage.getItem(`upgrade_${index}_unlocked`)) {
+            upgrade.unlocked = JSON.parse(localStorage.getItem(`upgrade_${index}_unlocked`));
+        }
+    });
+
+    refreshDisplays();
+    populateUpgrades();
 }
 
 function populateUpgrades() {
@@ -223,9 +229,19 @@ function populateUpgrades() {
 function saveGame() {
     localStorage.setItem('chips', chips);
     localStorage.setItem('cps', cps);
-    localStorage.setItem('slotMachines', slotMachines);
-    localStorage.setItem('slotMachinePrice', slotMachinePrice);
-    localStorage.setItem('reached100', JSON.stringify(reached100)); // Save achievement status
+    localStorage.setItem('cpc', cpc);
+    localStorage.setItem('reached100', JSON.stringify(reached100)); 
+
+    // Save each unit's count and price
+    Object.keys(units).forEach(unit => {
+        localStorage.setItem(`${unit}_count`, units[unit].count);
+        localStorage.setItem(`${unit}_price`, units[unit].price);
+    });
+
+    // Save unlocked upgrades
+    upgrades.forEach((upgrade, index) => {
+        localStorage.setItem(`upgrade_${index}_unlocked`, upgrade.unlocked);
+    });
 }
 
 // Function to save the game each time the state changes
@@ -356,5 +372,12 @@ document.getElementById("deleteSave").addEventListener("click", () => {
     location.reload();
 });
 
-// Load saved data when the page loads
-loadGame();
+// Auto-save every 10 seconds
+setInterval(() => {
+    saveGame();
+}, 10000);
+
+// Ensure game is loaded after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    loadGame();
+});
