@@ -3,39 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gambling Clicker Game</title>
+    <title>Pocket Friends Casino</title>
     <link rel="stylesheet" href="styles/clicker.css">
 </head>
 <body>
+    <header>
+        <h1>Pocket Friends Casino</h1>
+        <p>Version 0.1.0</p>
+    </header>
 
-    <h1>Gambling Clicker Game</h1>
+    <section class="stats">
+        <h2>Stats</h2>
+        <p><strong>Chips:</strong> <span id="chips">0</span></p>
+        <p><strong>Chips Per Second (CPS):</strong> <span id="cps">0</span></p>
+        <p><strong>Chips Per Click (CPC):</strong> <span id="cpc">1</span></p>
+        <button id="spinButton">Spin</button>
+    </section>
 
-    <div id="auth">
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button class="button" onclick="registerUser()">Register</button>
-        <button class="button" onclick="loginUser()">Login</button>
-        <button class="button" onclick="logout()">Logout</button>
-    </div>
-
-    <h2>Welcome, <span id="player-name">Guest</span></h2>
-    <h2>Chips: <span id="chips">0</span></h2>
-
-    <button class="button click-btn" onclick="earnChips()">Click to Earn Chips</button>
-    <button class="button gacha-btn" onclick="pullGacha()">Gacha Pull (Cost: 10 Chips)</button>
-
-    <h2>Casino Games</h2>
-    <button class="button slot-btn" onclick="playSlotMachine()">Play Slots (Cost: 10 Chips)</button>
-    <button class="button blackjack-btn" onclick="startBlackjack()">Play Blackjack (Cost: 20 Chips)</button>
-
-    <h2>Leaderboard</h2>
-    <ul id="leaderboard"></ul>
-
-    <div class="log" id="log"></div>
-    <div id="inventory"></div>
-    <div id="slot-machine"></div>
-    <div id="blackjack"></div>
-
-    <script src="scripts/clicker.js"></script>
+    <section class="games">
+        <h2>Games</h2>
+        <p>Buy Slot Machine ($<span id="slotMachinePrice">10</span>) <span id="slotMachineCount">x0</span></p>
+        <button id="buySlotMachineButton">Buy</button>
+    </section>
+    <script type="module" src="scripts/clicker.js"></script>
 </body>
 </html>
