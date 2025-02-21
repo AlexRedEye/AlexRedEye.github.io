@@ -31,7 +31,7 @@
             "attack": 15,
             "defense": 0,
             "rarity": "common",
-            "price": 50,
+            "price": 10,
             "description": "A sturdy sword forged from iron."
         },
         {
@@ -41,7 +41,7 @@
             "slot": "head",
             "defense": 5,
             "rarity": "common",
-            "price": 30,
+            "price": 10,
             "description": "A helmet made of iron for head protection."
         },
         {
@@ -51,7 +51,7 @@
             "slot": "chest",
             "defense": 15,
             "rarity": "uncommon",
-            "price": 80,
+            "price": 10,
             "description": "A chestplate crafted from iron for body protection."
         },
         {
@@ -61,7 +61,7 @@
             "slot": "legs",
             "defense": 10,
             "rarity": "uncommon",
-            "price": 70,
+            "price": 10,
             "description": "Leggings made of iron to protect your legs."
         },
         {
@@ -71,7 +71,7 @@
             "slot": "feet",
             "defense": 5,
             "rarity": "common",
-            "price": 40,
+            "price": 10,
             "description": "Boots made from iron to protect your feet."
         },
         {
@@ -81,7 +81,7 @@
             "attack": 25,
             "defense": 0,
             "rarity": "rare",
-            "price": 150,
+            "price": 10,
             "description": "A sword made from silver with enhanced sharpness."
         },
         {
@@ -91,7 +91,7 @@
             "slot": "head",
             "defense": 20,
             "rarity": "epic",
-            "price": 300,
+            "price": 10,
             "description": "A legendary helm crafted from dragon scales."
         },
         {
@@ -101,7 +101,7 @@
             "slot": "chest",
             "defense": 50,
             "rarity": "legendary",
-            "price": 500,
+            "price": 10,
             "description": "A chestplate forged from the ashes of a phoenix, granting immense protection."
         }
     ]
