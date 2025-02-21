@@ -24,7 +24,7 @@
             "speed": 8,
             "crit_rate": 0.1,
             "crit_damage": 2.5,
-            "xp_reward": 20,
+            "xp_reward": 10,
             "gold_reward": 7,
             "description": "A reanimated skeleton that fights with a rusty sword."
         },
@@ -39,7 +39,7 @@
             "crit_rate": 0.15,
             "crit_damage": 3.0,
             "xp_reward": 40,
-            "gold_reward": 10,
+            "gold_reward": 15,
             "description": "A large, brutish monster known for its regenerative health."
         },
         {
@@ -52,7 +52,7 @@
             "speed": 6,
             "crit_rate": 0.1,
             "crit_damage": 2.5,
-            "xp_reward": 50,
+            "xp_reward": 20,
             "gold_reward": 15,
             "description": "A fearsome warrior with a strong physique and ruthless combat skills."
         }
@@ -66,7 +66,7 @@
             "attack": 25,
             "defense": 30,
             "speed": 9,
-            "crit_rate": 0.2,
+            "crit_rate": 0.5,
             "crit_damage": 3.5,
             "xp_reward": 200,
             "gold_reward": 100,

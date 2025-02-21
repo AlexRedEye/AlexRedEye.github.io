@@ -103,6 +103,116 @@
             "rarity": "legendary",
             "price": 10,
             "description": "A chestplate forged from the ashes of a phoenix, granting immense protection."
+        },
+        {
+            "id": 13,
+            "name": "Steel Sword",
+            "type": "weapon",
+            "attack": 30,
+            "defense": 0,
+            "rarity": "rare",
+            "price": 20,
+            "description": "A sword made of reinforced steel, stronger than iron."
+        },
+        {
+            "id": 14,
+            "name": "Steel Helmet",
+            "type": "armor",
+            "slot": "head",
+            "defense": 10,
+            "rarity": "uncommon",
+            "price": 15,
+            "description": "A helmet crafted from steel, offering solid head protection."
+        },
+        {
+            "id": 15,
+            "name": "Steel Chestplate",
+            "type": "armor",
+            "slot": "chest",
+            "defense": 25,
+            "rarity": "rare",
+            "price": 25,
+            "description": "A chestplate forged from steel, providing excellent defense."
+        },
+        {
+            "id": 16,
+            "name": "Steel Leggings",
+            "type": "armor",
+            "slot": "legs",
+            "defense": 20,
+            "rarity": "rare",
+            "price": 20,
+            "description": "Leggings reinforced with steel for increased durability."
+        },
+        {
+            "id": 17,
+            "name": "Steel Boots",
+            "type": "armor",
+            "slot": "feet",
+            "defense": 10,
+            "rarity": "uncommon",
+            "price": 15,
+            "description": "Sturdy steel boots designed to protect the wearer’s feet."
+        },
+        {
+            "id": 18,
+            "name": "Flaming Sword",
+            "type": "weapon",
+            "attack": 40,
+            "defense": 0,
+            "rarity": "epic",
+            "price": 35,
+            "description": "A magical sword engulfed in flames, burning enemies upon contact."
+        },
+        {
+            "id": 19,
+            "name": "Shadow Dagger",
+            "type": "weapon",
+            "attack": 20,
+            "defense": 5,
+            "rarity": "rare",
+            "price": 22,
+            "description": "A dagger imbued with dark energy, increasing attack speed."
+        },
+        {
+            "id": 20,
+            "name": "Gauntlets of the Titan",
+            "type": "armor",
+            "slot": "hands",
+            "defense": 30,
+            "rarity": "legendary",
+            "price": 40,
+            "description": "Legendary gauntlets granting immense strength and durability."
+        },
+        {
+            "id": 21,
+            "name": "Boots of Swiftness",
+            "type": "armor",
+            "slot": "feet",
+            "defense": 8,
+            "rarity": "rare",
+            "price": 18,
+            "description": "Boots enchanted to increase the wearer’s speed significantly."
+        },
+        {
+            "id": 22,
+            "name": "Helm of the Guardian",
+            "type": "armor",
+            "slot": "head",
+            "defense": 35,
+            "rarity": "epic",
+            "price": 38,
+            "description": "A mystical helm that grants increased resilience against attacks."
+        },
+        {
+            "id": 23,
+            "name": "Arcane Staff",
+            "type": "weapon",
+            "attack": 15,
+            "defense": 5,
+            "rarity": "rare",
+            "price": 28,
+            "description": "A magical staff infused with arcane energy, boosting spell power."
         }
     ]
 }

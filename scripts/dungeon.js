@@ -37,58 +37,61 @@ let monstersDefeated = 0;
 let floorCap = 5;
 let gachaPrice = 15;
 
-// Generate opponent
+// Function to determine monster level range per floor
+function getLevelRange(floor) {
+    const minLevel = Math.max(1, Math.floor(floor * 1.5));  // Floor 1 → Level 1-2, Floor 5 → Level 7-8
+    const maxLevel = minLevel + 2; // Monsters can be 2 levels higher than the minimum
+    return { min: minLevel, max: maxLevel };
+}
+
+// Function to scale monster stats based on their level
+function scaleMonsterStats(baseStats, level) {
+    const scalingFactor = 1 + (level * 0.1); // Increase stats by 10% per level
+    return {
+        health: Math.floor(baseStats.health * scalingFactor),
+        attack: Math.floor(baseStats.attack * scalingFactor),
+        defense: Math.floor(baseStats.defense * scalingFactor),
+        speed: Math.floor(baseStats.speed * scalingFactor),
+        crit_rate: baseStats.crit_rate,  // Keep crit rate the same
+        crit_damage: baseStats.crit_damage, // Keep crit damage the same
+        xp_reward: Math.floor(baseStats.xp_reward * scalingFactor),
+        gold_reward: Math.floor(baseStats.gold_reward * scalingFactor),
+    };
+}
+
+// Generate an opponent based on floor difficulty
 export function generateOpponent() {
+    if (monsterPool.length === 0 || bossPool.length === 0) {
+        console.error("Monster or boss pool is empty!");
+        return null;
+    }
+
+    const { min, max } = getLevelRange(floor);
+    const monsterLevel = Math.floor(Math.random() * (max - min + 1)) + min; // Random level in range
+
     let opponent = null;
 
-    // Check if it's the last monster on the floor
+    // Boss fight on last monster of the floor
     if (monstersDefeated + 1 >= floorCap) {
-        if (bossPool.length === 0) {
-            console.error("No bosses available!");
-            return null;
-        }
-        // Select a random boss
         const randomIndex = Math.floor(Math.random() * bossPool.length);
-        const selectedMonster = bossPool[randomIndex];
-        console.log("Boss fight initiated!");
+        const baseStats = bossPool[randomIndex];
 
         opponent = {
-            id: selectedMonster.id,
-            name: selectedMonster.name,
-            level: selectedMonster.level,
-            health: selectedMonster.health,
-            attack: selectedMonster.attack,
-            defense: selectedMonster.defense,
-            speed: selectedMonster.speed,
-            crit_rate: selectedMonster.crit_rate,
-            crit_damage: selectedMonster.crit_damage,
-            xp_reward: selectedMonster.xp_reward,
-            gold_reward: selectedMonster.gold_reward,
-            description: selectedMonster.description,
-            isBoss: false,
+            ...baseStats,
+            level: monsterLevel + 2, // Bosses are 2 levels higher than floor monsters
+            ...scaleMonsterStats(baseStats, monsterLevel + 2),
+            isBoss: true,
         };
+
+        console.log("Boss fight initiated!");
     } else {
-        if (monsterPool.length === 0) {
-            console.error("No monsters available!");
-            return null;
-        }
-        // Select a random monster
         const randomIndex = Math.floor(Math.random() * monsterPool.length);
-        const selectedMonster = monsterPool[randomIndex];
+        const baseStats = monsterPool[randomIndex];
 
         opponent = {
-            id: selectedMonster.id,
-            name: selectedMonster.name,
-            level: selectedMonster.level,
-            health: selectedMonster.health,
-            attack: selectedMonster.attack,
-            defense: selectedMonster.defense,
-            speed: selectedMonster.speed,
-            crit_rate: selectedMonster.crit_rate,
-            crit_damage: selectedMonster.crit_damage,
-            xp_reward: selectedMonster.xp_reward,
-            gold_reward: selectedMonster.gold_reward,
-            description: selectedMonster.description,
+            ...baseStats,
+            level: monsterLevel,
+            ...scaleMonsterStats(baseStats, monsterLevel),
             isBoss: false,
         };
     }
@@ -96,7 +99,6 @@ export function generateOpponent() {
     console.log("Generated Opponent:", opponent);
     return opponent;
 }
-
 
 // Function to display player stats (example usage)
 export function updatePlayerStats() {
@@ -120,7 +122,6 @@ function getStatModifier(stat, baseStat) {
     const modifier = stat - baseStat;
     return modifier > 0 ? `+${modifier}` : (modifier < 0 ? `${modifier}` : ''); // Format as +15 or -5, or nothing if no modifier
 }
-
 
 // Function to display monster stats (example usage)
 export function updateMonsterStats(monster) {
@@ -165,8 +166,6 @@ document.getElementById("attack-button").addEventListener("click", () => {
         }
     }
 });
-
-
 
 // Call this to initially display player stats and inventory and Load Entities
 loadMonsters();
