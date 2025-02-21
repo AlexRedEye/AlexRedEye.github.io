@@ -20,12 +20,25 @@ h1 {
     color: #b88a47; /* Gold color for header text */
 }
 
+/* Main container for sections */
+.main-container {
+    display: flex;
+    justify-content: space-between; /* Spaces out the sections */
+    margin: 20px;
+}
+
+/* Left container for Stats and Games */
+.left-container {
+    display: flex;
+    flex-direction: column; /* Stack Stats and Games vertically */
+    gap: 20px; /* Space between Stats and Games */
+}
+
 /* Stats Section */
 .stats {
     background-color: #1e1e1e; /* Dark black background for the stats section */
     border: 1px solid #b88a47; /* Gold border */
     border-radius: 10px;
-    margin: 20px;
     padding: 20px;
     width: 300px;
     text-align: center;
@@ -58,7 +71,6 @@ button:hover {
     background-color: #1e1e1e;
     border: 1px solid #b88a47;
     border-radius: 10px;
-    margin: 20px;
     padding: 20px;
     width: 300px;
     text-align: center;
@@ -96,10 +108,10 @@ strong {
     background-color: #1e1e1e; /* Dark black background for upgrades section */
     border: 1px solid #b88a47; /* Gold border */
     border-radius: 10px;
-    margin: 20px;
     padding: 20px;
     width: 300px;
     text-align: center;
+    flex-shrink: 0; /* Prevents it from shrinking */
 }
 
 .upgrades h2 {
@@ -145,4 +157,3 @@ strong {
 #deleteSave:hover {
     background-color: #c0392b; /* Darker red for hover effect */
 }
-
