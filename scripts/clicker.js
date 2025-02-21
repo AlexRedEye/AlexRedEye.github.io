@@ -37,8 +37,10 @@ let upgrades = [
         effect: () => { 
             cpc *= 2; 
             units.slotMachine.modifier *= 2;
-            cps = units.slotMachine.count * units.slotMachine.modifier;
-        },
+            // Recalculate CPS correctly by including all units
+            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
+                  (units.roullete.count * units.roullete.modifier);
+        },        
         unlocked: false
     },
     {
@@ -49,8 +51,11 @@ let upgrades = [
         effect: () => { 
             cpc *= 2; 
             units.slotMachine.modifier *= 2;
-            cps = units.slotMachine.count * units.slotMachine.modifier;
-        },
+        
+            // Recalculate CPS correctly by including all units
+            cps = (units.slotMachine.count * units.slotMachine.modifier) + 
+                  (units.roullete.count * units.roullete.modifier);
+        },        
         unlocked: false
     },
     {
