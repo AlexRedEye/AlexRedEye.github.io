@@ -39,36 +39,62 @@ let gachaPrice = 15;
 
 // Generate opponent
 export function generateOpponent() {
-    let monster = null;
-    // Ensure the monster pool is not empty
-    if (monsterPool.length === 0) {
-        console.error("No monsters available!");
-        return null;
+    let opponent = null;
+
+    // Check if it's the last monster on the floor
+    if (monstersDefeated + 1 >= floorCap) {
+        if (bossPool.length === 0) {
+            console.error("No bosses available!");
+            return null;
+        }
+        // Select a random boss
+        const randomIndex = Math.floor(Math.random() * bossPool.length);
+        const selectedMonster = bossPool[randomIndex];
+        console.log("Boss fight initiated!");
+
+        opponent = {
+            id: selectedMonster.id,
+            name: selectedMonster.name,
+            level: selectedMonster.level,
+            health: selectedMonster.health,
+            attack: selectedMonster.attack,
+            defense: selectedMonster.defense,
+            speed: selectedMonster.speed,
+            crit_rate: selectedMonster.crit_rate,
+            crit_damage: selectedMonster.crit_damage,
+            xp_reward: selectedMonster.xp_reward,
+            gold_reward: selectedMonster.gold_reward,
+            description: selectedMonster.description,
+            isBoss: false,
+        };
+    } else {
+        if (monsterPool.length === 0) {
+            console.error("No monsters available!");
+            return null;
+        }
+        // Select a random monster
+        const randomIndex = Math.floor(Math.random() * monsterPool.length);
+        const selectedMonster = monsterPool[randomIndex];
+
+        opponent = {
+            id: selectedMonster.id,
+            name: selectedMonster.name,
+            level: selectedMonster.level,
+            health: selectedMonster.health,
+            attack: selectedMonster.attack,
+            defense: selectedMonster.defense,
+            speed: selectedMonster.speed,
+            crit_rate: selectedMonster.crit_rate,
+            crit_damage: selectedMonster.crit_damage,
+            xp_reward: selectedMonster.xp_reward,
+            gold_reward: selectedMonster.gold_reward,
+            description: selectedMonster.description,
+            isBoss: false,
+        };
     }
-    
-    // Randomly pick a monster from the pool
-    const randomIndex = Math.floor(Math.random() * monsterPool.length);
-    const selectedMonster = monsterPool[randomIndex];
 
-    // Optionally, you can randomize the monster's stats or modify it further
-    monster = {
-        id: selectedMonster.id,                  // Added id
-        name: selectedMonster.name,              // Name
-        level: selectedMonster.level,            // Level
-        health: selectedMonster.health,          // Health
-        attack: selectedMonster.attack,          // Attack
-        defense: selectedMonster.defense,        // Defense
-        speed: selectedMonster.speed,            // Speed
-        crit_rate: selectedMonster.crit_rate,    // Critical hit rate
-        crit_damage: selectedMonster.crit_damage, // Critical damage multiplier
-        xp_reward: selectedMonster.xp_reward,   // XP reward for defeating this monster
-        gold_reward: selectedMonster.gold_reward, // Gold reward for defeating this monster
-        description: selectedMonster.description, // Description of the monster
-    };
-
-    console.log("Generated Monster:", monster);
-
-    return monster;
+    console.log("Generated Opponent:", opponent);
+    return opponent;
 }
 
 

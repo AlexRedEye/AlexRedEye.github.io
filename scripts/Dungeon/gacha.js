@@ -16,11 +16,11 @@ async function loadItems() {
 
 // Weight for each rarity (lower numbers are less likely to be summoned)
 const rarityWeights = {
-    common: 50,
-    uncommon: 30,
+    common: 57,
+    uncommon: 25,
     rare: 15,
-    epic: 4,
-    legendary: 1
+    epic: 2.4,
+    legendary: 0.6
 };
 
 // Function to handle a summon (random item from the pool)

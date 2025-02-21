@@ -94,8 +94,8 @@ export function useItem(itemName, player) {
         
         // Logic to apply item effects
         if (item.type === "consumable") {
-            if (item.name === "Health Potion") {
-                player.health = Math.min(player.max_health, player.health + 50); // Example: Heal by 50
+            if (item.effect.type === "heal") {
+                player.health = Math.min(player.max_health, player.health + item.effect.value); // Example: Heal by 50
                 console.log(`Used a ${item.name}. Health is now ${player.health}.`);
             }
         }
@@ -165,7 +165,7 @@ export function sellItem(itemName, player) {
         
         // Sell the item (this example just removes it from inventory)
         player.inventory.splice(itemIndex, 1);
-        player.gold += 10; // Example: Each item sells for 10 gold
+        player.gold += item.price; // Example: Each item sells for 10 gold
         console.log(`Sold ${item.name} for 10 gold. You now have ${player.gold} gold.`);
         
         updateInventoryDisplay(player); // Update the inventory display
