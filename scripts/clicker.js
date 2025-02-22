@@ -495,6 +495,8 @@ document.getElementById("retryButton").addEventListener("click", function () {
     if (chips >= 500)
     {
         chips -= 500;
+    } else {
+        return document.getElementById("gameStatus").textContent = 'Not Enough Money';;
     }
     // Reset the game logic properly
     game = Blackjack.resetGame(); // Resets game state, deck, hands, etc.
