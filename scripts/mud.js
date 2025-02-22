@@ -3,7 +3,7 @@ const commandInput = document.getElementById("command-input");
 
 let username = "Guest"; // Default username
 
-const socket = new WebSocket('ws://142.196.63.80:5000'); // Connect to WebSocket server
+const socket = new WebSocket('wss://142.196.63.80:5000'); // Connect to WebSocket server
 
 socket.onopen = function () {
     console.log('Connected to the server');
