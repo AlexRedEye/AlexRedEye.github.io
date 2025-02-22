@@ -543,3 +543,35 @@ document.getElementById("startButton").addEventListener("click", function () {
 
     console.log("Game reset. Start a new round!");
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const startButton = document.getElementById("startButton");
+    const volumeSlider = document.getElementById("volumeSlider");
+
+    if (!startButton || !volumeSlider) {
+        console.error("Elements not found.");
+        return;
+    }
+
+    const audio = new Audio("../assets/MAZE.mp3");
+    audio.loop = true; // Enable looping
+    audio.volume = volumeSlider.value; // Set initial volume
+
+    // Play audio when the user clicks "Start Music"
+    startButton.addEventListener("click", function () {
+        audio.play().catch(err => {
+            console.error("Audio play failed:", err);
+        });
+
+        // Hide or disable the button after it's clicked
+        startButton.style.display = "none"; // Option 1: Hide the button
+        // startButton.disabled = true; // Option 2: Disable the button
+    });
+
+    // Update audio volume when the slider changes
+    volumeSlider.addEventListener("input", function () {
+        audio.volume = this.value;
+    });
+});
+
+
