@@ -1,7 +1,7 @@
 const outputDiv = document.getElementById("game-output");
 const commandInput = document.getElementById("command-input");
 
-let username = "Guest"; // Default username
+let username = localStorage.getItem('username') || "Guest"; // Load username from localStorage or use default
 
 const socket = new WebSocket('wss://142.196.63.80:5000'); // Connect to WebSocket server
 
@@ -13,6 +13,9 @@ socket.onmessage = function (event) {
     const message = JSON.parse(event.data);
     appendOutput(`<span class="game-line"><strong>${message.username}:</strong> ${message.message}</span>`);
 };
+
+// Display a welcome message
+appendOutput(`<span class="game-line"><strong>System:</strong> Hello, ${username}! Use /username <name> to set your username.</span>`);
 
 commandInput.addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
@@ -29,6 +32,7 @@ function sendCommand() {
             const newUsername = command.slice(10).trim();
             if (newUsername) {
                 username = newUsername;
+                localStorage.setItem('username', username); // Save the username to localStorage
                 appendOutput(`<span class="game-line"><strong>System:</strong> Your username has been set to: ${username}</span>`);
                 socket.send(JSON.stringify({ type: 'username', username: username }));
             } else {
