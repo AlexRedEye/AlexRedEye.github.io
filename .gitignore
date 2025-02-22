@@ -45,5 +45,5 @@ sessions/
 jwt_secret.txt
 
 # SSL Certificates and Keys
-private.key
-cert.cer
+pfkey.key
+pfcert.cer
