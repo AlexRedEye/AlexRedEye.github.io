@@ -573,5 +573,3 @@ document.addEventListener("DOMContentLoaded", function () {
         audio.volume = this.value;
     });
 });
-
-

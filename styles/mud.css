@@ -1,0 +1,90 @@
+/* General reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #000; /* Black background for the whole page */
+    color: #00ff00; /* Bright green text color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Container for the game */
+#mud-container {
+    background-color: #000; /* Black background for the container */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+    width: 80%;
+    max-width: 900px;
+}
+
+/* Output area (terminal-style) */
+#game-output {
+    height: 300px;
+    overflow-y: auto;
+    background-color: #000; /* Black background for output area */
+    padding: 15px;
+    border-radius: 4px;
+    color: #00ff00; /* Bright green text for output */
+    font-size: 16px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    white-space: pre-wrap; /* Preserve new lines */
+}
+
+/* Command input */
+input[type="text"] {
+    background-color: #000; /* Black background for input */
+    color: #00ff00; /* Bright green text for input */
+    border: 2px solid #00ff00; /* Bright green border */
+    padding: 10px;
+    width: 75%;
+    margin-right: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for focus */
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border: 2px solid #00ff00; /* Bright green border on focus */
+    box-shadow: 0 0 10px #00ff00; /* Bright green glow around input */
+}
+
+/* Button for sending command */
+button {
+    padding: 10px 20px;
+    background-color: #00ff00; /* Bright green button */
+    color: black;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #00cc00; /* Slightly darker green on hover */
+}
+
+button:active {
+    background-color: #009900; /* Even darker green on active */
+}
+
+/* Terminal prompt look */
+.game-line {
+    margin-bottom: 5px;
+    font-family: monospace;
+}
+
+/* Additional accent colors */
+strong {
+    color: #00ff00; /* Bright green for "You:" and "Game:" */
+}
