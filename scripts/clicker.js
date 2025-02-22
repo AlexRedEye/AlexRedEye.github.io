@@ -1,3 +1,10 @@
+import * as Blackjack from './blackjack.js';
+
+// Ensure game is loaded after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    loadGame();
+});
+
 let chips = 0;
 let cps = 0;
 let cpc = 1;
@@ -8,7 +15,192 @@ let slotMachineModifier = 0.1;
 
 let achievement = 100;
 let reached100 = false;
+let bjUnlocked = false;
 
+let game = Blackjack.resetGame(); // Start a new game
+let deck = game.deck;
+let playerHand = game.playerHand;
+let dealerHand = game.dealerHand;
+
+// Save game state to localStorage
+function saveGame() {
+    localStorage.setItem('chips', chips);
+    localStorage.setItem('cps', cps);
+    localStorage.setItem('cpc', cpc);
+    localStorage.setItem('reached100', JSON.stringify(reached100));
+
+    // Save each unit's count, price, and modifier
+    Object.keys(units).forEach(unit => {
+        localStorage.setItem(`${unit}_count`, units[unit].count);
+        localStorage.setItem(`${unit}_price`, units[unit].price);
+        localStorage.setItem(`${unit}_modifier`, units[unit].modifier);  // Save modifier
+    });
+
+    // Save unlocked upgrades and their effects
+    upgrades.forEach((upgrade, index) => {
+        localStorage.setItem(`upgrade_${index}_unlocked`, upgrade.unlocked);
+    });
+}
+
+// Auto-save every 10 seconds
+setInterval(() => {
+    saveGame();
+}, 10000);
+
+// Load data from localStorage (if available)
+function loadGame() {
+    if (localStorage.getItem('chips')) chips = parseFloat(localStorage.getItem('chips'));
+    if (localStorage.getItem('cps')) cps = parseFloat(localStorage.getItem('cps'));
+    if (localStorage.getItem('cpc')) cpc = parseFloat(localStorage.getItem('cpc'));
+    if (localStorage.getItem('reached100')) reached100 = JSON.parse(localStorage.getItem('reached100'));
+
+    // Load each unit's count, price, and modifier
+    Object.keys(units).forEach(unit => {
+        if (localStorage.getItem(`${unit}_count`)) {
+            units[unit].count = parseInt(localStorage.getItem(`${unit}_count`));
+        }
+        if (localStorage.getItem(`${unit}_price`)) {
+            units[unit].price = parseInt(localStorage.getItem(`${unit}_price`));
+        }
+        if (localStorage.getItem(`${unit}_modifier`)) {
+            units[unit].modifier = parseFloat(localStorage.getItem(`${unit}_modifier`));  // Load modifier
+        }
+    });
+
+    // Load unlocked upgrades
+    upgrades.forEach((upgrade, index) => {
+        if (localStorage.getItem(`upgrade_${index}_unlocked`)) {
+            upgrade.unlocked = JSON.parse(localStorage.getItem(`upgrade_${index}_unlocked`));
+        }
+    });
+
+    refreshDisplays();
+    populateUpgrades();
+}
+
+// Delete Save from localStorage
+function deleteSave() {
+    localStorage.clear();
+}
+
+// Update HTML
+function refreshDisplays() {
+    document.getElementById("chips").textContent = Math.floor(chips);
+    
+    // Round cps to the nearest tenth
+    document.getElementById("cps").textContent = cps.toFixed(1);
+    
+    document.getElementById("cpc").textContent = cpc;
+
+    document.getElementById("slotMachinePrice").textContent = units.slotMachine.price;
+    document.getElementById("slotMachineCount").textContent = 'x' + units.slotMachine.count;
+    document.getElementById("roulletePrice").textContent = units.roullete.price;
+    document.getElementById("roulleteCount").textContent = 'x' + units.roullete.count;
+
+    // ✅ Blackjack Display Updates
+    if (document.getElementById("blackjackPrice")) {
+        document.getElementById("blackjackPrice").textContent = units.blackjack.price;
+        document.getElementById("blackjackCount").textContent = 'x' + units.blackjack.count;
+    }
+}
+
+// Function to save the game each time the state changes
+function updateGameState() {
+    saveGame();
+    refreshDisplays();
+    populateUpgrades();  
+
+    // Check if Blackjack should be unlocked
+    if (chips >= 1100 && !localStorage.getItem('blackjackUnlocked')) {
+        localStorage.setItem('blackjackUnlocked', 'true'); // Store as a string
+        addBlackjackSection(); // Add it immediately after unlocking
+    }
+
+    if (localStorage.getItem('blackjackUnlocked') === 'true') {
+        addBlackjackSection(); // Ensure it stays after refresh
+    }
+
+        // Check if Blackjack should be unlocked
+        if (localStorage.getItem(`blackjack_count`) >= 1 && !localStorage.getItem('bjUnlocked')) {
+            localStorage.setItem('bjUnlocked', 'true'); // Store as a string
+            unlockBlackjackGame(); // Add it immediately after unlocking
+        }
+    
+        if (localStorage.getItem('bjUnlocked') === 'true') {
+            unlockBlackjackGame(); // Ensure it stays after refresh
+        }
+}
+
+function updatePlayerHand() {
+    const playerHandElement = document.getElementById('playerHand');
+    const playerHandText = playerHand.map(card => {
+        console.log(card);  // Check the structure of the card
+        return `${card.rank} of ${card.suit}`;  // Accessing the right properties
+    }).join(', ');
+
+    playerHandElement.textContent = `Player's Hand: ${playerHandText} (Score: ${Blackjack.calculateHandValue(playerHand)})`;
+}
+
+function updateDealerHand(reveal = false) {
+    const dealerHandElement = document.getElementById('dealerHand');
+    if (reveal) {
+        const dealerHandText = dealerHand.map(card => {
+            console.log(card);  // Check the structure of the card
+            return `${card.rank} of ${card.suit}`;  // Accessing the right properties
+        }).join(', ');
+        dealerHandElement.textContent = `Dealer's Hand: ${dealerHandText} (Score: ${Blackjack.calculateHandValue(dealerHand)})`;
+    } else {
+        dealerHandElement.textContent = `Dealer's Hand: ${dealerHand[0].rank} of ${dealerHand[0].suit} and a hidden card.`;
+    }
+}
+
+function showGameResult(result) {
+    const gameStatus = document.getElementById('gameStatus');
+    gameStatus.textContent = result;  // Update the existing element with the result
+
+    // Hide game buttons
+    document.getElementById('hitButton').style.display = 'none';
+    document.getElementById('standButton').style.display = 'none';
+
+    console.log(`Chips after result: ${chips}`);
+}
+
+
+// Add Blackjack unit if requirements are met
+function addBlackjackSection() {
+    const gamesSection = document.querySelector(".games");
+
+    // Ensure the games section exists before appending
+    if (!gamesSection) {
+        console.error("Games section not found!");
+        return;
+    }
+
+    // Prevent duplicate sections
+    if (!document.getElementById("blackjackSection")) {
+        const blackjackDiv = document.createElement("div");
+        blackjackDiv.id = "blackjackSection"; 
+        blackjackDiv.classList.add("game");
+        blackjackDiv.innerHTML = `
+            <p>Buy Blackjack ($<span id="blackjackPrice">1100</span>) <span id="blackjackCount">x0</span></p>
+            <button id="buyBlackjackButton">Buy</button>
+        `;
+        gamesSection.appendChild(blackjackDiv);
+
+        document.getElementById("buyBlackjackButton").addEventListener("click", () => {
+            buyUnit(units.blackjack); // Continue allowing Blackjack purchases
+        });
+    }
+}
+
+function checkAchievements() {
+    if (!reached100 && chips >= achievement) {
+        reached100 = true;
+        alert("Achievement Unlocked: 100 Chips!");
+    }
+}
+
+// Units
 const units = {
     slotMachine: {
       name: "Slot Machine",
@@ -33,16 +225,10 @@ const units = {
         modifier: 8,
         cps: 8,
         label: "A high-speed spinner that boosts chip production."
-      }
-  };  
+    }
+};
 
-  function calculateCPS() {
-    cps = (units.slotMachine.count * units.slotMachine.modifier) + 
-          (units.roullete.count * units.roullete.modifier) + 
-          (units.blackjack.count * units.blackjack.modifier);
-}
-
-// Updated Upgrade Effects
+// Upgrades
 let upgrades = [
     {
         name: "Slot Machine Upgrade",
@@ -146,37 +332,14 @@ let upgrades = [
     }
 ];
 
-// Load data from localStorage (if available)
-function loadGame() {
-    if (localStorage.getItem('chips')) chips = parseFloat(localStorage.getItem('chips'));
-    if (localStorage.getItem('cps')) cps = parseFloat(localStorage.getItem('cps'));
-    if (localStorage.getItem('cpc')) cpc = parseFloat(localStorage.getItem('cpc'));
-    if (localStorage.getItem('reached100')) reached100 = JSON.parse(localStorage.getItem('reached100'));
-
-    // Load each unit's count, price, and modifier
-    Object.keys(units).forEach(unit => {
-        if (localStorage.getItem(`${unit}_count`)) {
-            units[unit].count = parseInt(localStorage.getItem(`${unit}_count`));
-        }
-        if (localStorage.getItem(`${unit}_price`)) {
-            units[unit].price = parseInt(localStorage.getItem(`${unit}_price`));
-        }
-        if (localStorage.getItem(`${unit}_modifier`)) {
-            units[unit].modifier = parseFloat(localStorage.getItem(`${unit}_modifier`));  // Load modifier
-        }
-    });
-
-    // Load unlocked upgrades
-    upgrades.forEach((upgrade, index) => {
-        if (localStorage.getItem(`upgrade_${index}_unlocked`)) {
-            upgrade.unlocked = JSON.parse(localStorage.getItem(`upgrade_${index}_unlocked`));
-        }
-    });
-
-    refreshDisplays();
-    populateUpgrades();
+// Calculate total CPS from upgrades
+function calculateCPS() {
+    cps = (units.slotMachine.count * units.slotMachine.modifier) + 
+          (units.roullete.count * units.roullete.modifier) + 
+          (units.blackjack.count * units.blackjack.modifier);
 }
 
+// Add upgrades to the upgrades sections as you unlock them
 function populateUpgrades() {
     const upgradesSection = document.querySelector(".upgrades");
     upgradesSection.innerHTML = '<h2>Upgrades</h2>'; // Clear the section before repopulating
@@ -228,99 +391,31 @@ function populateUpgrades() {
 
 }
 
-// Save game state to localStorage
-function saveGame() {
-    localStorage.setItem('chips', chips);
-    localStorage.setItem('cps', cps);
-    localStorage.setItem('cpc', cpc);
-    localStorage.setItem('reached100', JSON.stringify(reached100));
-
-    // Save each unit's count, price, and modifier
-    Object.keys(units).forEach(unit => {
-        localStorage.setItem(`${unit}_count`, units[unit].count);
-        localStorage.setItem(`${unit}_price`, units[unit].price);
-        localStorage.setItem(`${unit}_modifier`, units[unit].modifier);  // Save modifier
-    });
-
-    // Save unlocked upgrades and their effects
-    upgrades.forEach((upgrade, index) => {
-        localStorage.setItem(`upgrade_${index}_unlocked`, upgrade.unlocked);
-    });
-}
-
-// Function to save the game each time the state changes
-function updateGameState() {
-    saveGame();
-    refreshDisplays();
-    populateUpgrades();  
-
-    // Check if Blackjack should be unlocked
-    if (chips >= 1100 && !localStorage.getItem('blackjackUnlocked')) {
-        localStorage.setItem('blackjackUnlocked', 'true'); // Store as a string
-        addBlackjackSection(); // Add it immediately after unlocking
-    }
-
-    if (localStorage.getItem('blackjackUnlocked') === 'true') {
-        addBlackjackSection(); // Ensure it stays after refresh
-    }
-}
-
-function addBlackjackSection() {
-    const gamesSection = document.querySelector(".games");
-
-    // Ensure the games section exists before appending
-    if (!gamesSection) {
-        console.error("Games section not found!");
-        return;
-    }
-
-    // Prevent duplicate sections
-    if (!document.getElementById("blackjackSection")) {
-        const blackjackDiv = document.createElement("div");
-        blackjackDiv.id = "blackjackSection"; 
-        blackjackDiv.classList.add("game"); // ✅ Correct way to add class
-        blackjackDiv.innerHTML = `
-            <p>Buy Blackjack ($<span id="blackjackPrice">1100</span>) <span id="blackjackCount">x0</span></p>
-            <button id="buyBlackjackButton">Buy</button>
-        `;
-        gamesSection.appendChild(blackjackDiv);
-
-        document.getElementById("buyBlackjackButton").addEventListener("click", () => {
-            buyUnit(units.blackjack);
-        });
-    }
-}
-
-// Ensure game is loaded after DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-    loadGame();
-});
-
-
-
+// Function to increment chips
 function spin() {
     chips += cpc;
     checkAchievements();  // Check if any achievements are reached
     updateGameState(); // Save the state after the spin
 }
 
-function checkAchievements() {
-    if (!reached100 && chips >= achievement) {
-        reached100 = true;
-        alert("Achievement Unlocked: 100 Chips!");
-    }
-}
-
-
+// Function to buy units
 function buyUnit(unit) {
     if (chips >= unit.price) {
         chips -= unit.price;
         unit.count += 1;
         cps += unit.modifier;
 
-        // Exponential increase: Price grows by 1.15 for each slot machine purchase
+        // Exponential increase: Price grows by 1.15 for each unit purchase
         const priceMultiplier = 1.15;  // Price increases by 15% each time
         unit.price = Math.ceil(unit.price * priceMultiplier);
+
+        updateGameState(); // Save the state after purchasing
+
+        // If Blackjack is being purchased for the first time, unlock the game
+        if (unit.name === "Blackjack" && unit.count === 1 && !bjUnlocked) {
+            bjUnlocked = true;  // Set flag to true to indicate Blackjack has been unlocked
+            unlockBlackjackGame(); // Unlock and show Blackjack game UI
+        }
 
         updateGameState(); // Save the state after purchasing
     } else {
@@ -328,28 +423,10 @@ function buyUnit(unit) {
     }
 }
 
-function refreshDisplays() {
-    document.getElementById("chips").textContent = Math.floor(chips);
-    
-    // Round cps to the nearest tenth
-    document.getElementById("cps").textContent = cps.toFixed(1);
-    
-    document.getElementById("cpc").textContent = cpc;
-
-    document.getElementById("slotMachinePrice").textContent = units.slotMachine.price;
-    document.getElementById("slotMachineCount").textContent = 'x' + units.slotMachine.count;
-    document.getElementById("roulletePrice").textContent = units.roullete.price;
-    document.getElementById("roulleteCount").textContent = 'x' + units.roullete.count;
-
-    // ✅ Blackjack Display Updates
-    if (document.getElementById("blackjackPrice")) {
-        document.getElementById("blackjackPrice").textContent = units.blackjack.price;
-        document.getElementById("blackjackCount").textContent = 'x' + units.blackjack.count;
-    }
-}
-
-function deleteSave() {
-    localStorage.clear();
+// Show Blackjack game HTML
+function unlockBlackjackGame() {
+    // Make sure Blackjack game UI is visible
+    document.getElementById("blackjackGameSection").style.display = "block";
 }
 
 // Add auto-collecting CPS
@@ -359,29 +436,106 @@ setInterval(() => {
 }, 1000);
 
 // Event listeners for buttons
+// Spin For Chips Button
 document.getElementById("spinButton").addEventListener("click", () => {
     spin();
 });
 
+// Buy slot machine button
 document.getElementById("buySlotMachineButton").addEventListener("click", () => {
     buyUnit(units.slotMachine);
 });
 
+// Buy roullete button
 document.getElementById("buyRoulleteButton").addEventListener("click", () => {
     buyUnit(units.roullete);
 });
 
+// Delete Save Button
 document.getElementById("deleteSave").addEventListener("click", () => {
     deleteSave();
     location.reload();
 });
 
-// Auto-save every 10 seconds
-setInterval(() => {
-    saveGame();
-}, 10000);
+document.getElementById("hitButton").addEventListener("click", function () {
+    if (!game.gameOver) {
+        Blackjack.dealCard(deck, playerHand);
+        updatePlayerHand(); // Update player hand after hit
+        
+        if (Blackjack.checkForBusted(playerHand)) {
+            console.log("You busted! You lose.");
+            game.gameOver = true;
+            showGameResult("You busted! You lose.");
+        }
+    }
+});
 
-// Ensure game is loaded after DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-    loadGame();
+document.getElementById("standButton").addEventListener("click", function () {
+    if (!game.gameOver) {
+        Blackjack.playDealerTurn(dealerHand, deck);
+        updateDealerHand(true); // Show the dealer's hand
+
+        const result = Blackjack.checkGameResult(playerHand, dealerHand);
+        console.log(result);
+
+        // Payout logic
+        if (result.includes("Win")) {
+            chips += 1000; // 1:1 payout
+        } else if (result.includes("Tie") || result.includes("push")) {
+            chips += 500; // Refund bet on a tie
+        }
+
+        showGameResult(result);
+        game.gameOver = true;
+        updateGameState();
+    }
+});
+
+document.getElementById("retryButton").addEventListener("click", function () {
+    if (chips >= 500)
+    {
+        chips -= 500;
+    }
+    // Reset the game logic properly
+    game = Blackjack.resetGame(); // Resets game state, deck, hands, etc.
+    playerHand = game.playerHand;
+    dealerHand = game.dealerHand;
+    game.gameOver = false;
+
+    // Reset the UI elements
+    updatePlayerHand();           // Refresh the player's hand display
+    updateDealerHand(false);      // Hide the dealer's second card (it will be revealed after the player stands)
+
+    // Optionally, reset any other relevant state or variables here
+    document.getElementById('hitButton').style.display = 'inline-block';
+    document.getElementById('standButton').style.display = 'inline-block';
+    document.getElementById('retryButton').style.display = 'inline-block';
+    document.getElementById("gameStatus").textContent = '';
+
+    console.log("Game reset. Start a new round!");
+});
+
+document.getElementById("startButton").addEventListener("click", function () {
+    // Reset the game logic properly
+    if (chips >= 500)
+    {
+        chips -= 500;
+    }
+    game = Blackjack.resetGame(); // Resets game state, deck, hands, etc.
+    playerHand = game.playerHand;
+    dealerHand = game.dealerHand;
+    game.gameOver = false;
+
+    // Reset the UI elements
+    updatePlayerHand();           // Refresh the player's hand display
+    updateDealerHand(false);      // Hide the dealer's second card (it will be revealed after the player stands)
+
+    // Optionally, reset any other relevant state or variables here
+    document.getElementById('hitButton').style.display = 'inline-block';
+    document.getElementById('standButton').style.display = 'inline-block';
+    document.getElementById('retryButton').style.display = 'inline-block';
+    document.getElementById('startButton').style.display = 'none';
+    document.getElementById("gameStatus").textContent = '';
+
+    console.log("Game reset. Start a new round!");
 });

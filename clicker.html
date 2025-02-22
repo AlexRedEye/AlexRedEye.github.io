@@ -10,7 +10,7 @@
     <header>
         <a href="index.html">Home</a>
         <h1>Pocket Friends Casino</h1>
-        <p>Version 0.10.4</p>
+        <p>Version 0.11.0 - Beta</p>
     </header>
 
     <div class="main-container">
@@ -32,6 +32,19 @@
                 <button id="buyRoulleteButton">Buy</button>
             </section>
         </div>
+
+        <!-- Blackjack Section (Initially hidden) -->
+        <div id="blackjackGameSection" style="display: none;">
+            <h2>Blackjack Game</h2>
+            <p id="playerHand"></p>
+            <p id="dealerHand"></p>
+            <button id="hitButton" style="display: none;">Hit</button>
+            <button id="standButton" style="display: none;">Stand</button>
+            <button id="retryButton" style="display: none;">Retry</button>
+            <button id="startButton">Start</button>
+            <p id="gameStatus"></p>
+        </div>
+
 
         <section class="upgrades">
             <h2>Upgrades</h2>

@@ -141,6 +141,44 @@ strong {
     background-color: #ffae17; /* Darker gold for hover effect */
 }
 
+/* Upgrades Section */
+#blackjackGameSection {
+    background-color: #1e1e1e; /* Dark black background for upgrades section */
+    border: 1px solid #b88a47; /* Gold border */
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    flex-shrink: 0; /* Prevents it from shrinking */
+}
+
+#blackjackGameSection h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #b88a47; /* Gold color for titles */
+}
+
+#blackjackGameSection p {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+#blackjackGameSection button {
+    background-color: #b88a47; /* Gold button for upgrades */
+    color: #1e1e1e;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+
+#blackjackGameSection button:hover {
+    background-color: #ffae17; /* Darker gold for hover effect */
+}
+
 /* Delete Save Button */
 #deleteSave {
     background-color: #e74c3c; /* Red button for delete action */
