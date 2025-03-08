@@ -17,17 +17,18 @@ const wss = new WebSocket.Server({ server });
 wss.on('connection', function connection(ws) {
     let username = "Guest"; // Default username
 
-    // Listen for messages from the client
+    // Set username for each client
     ws.on('message', function incoming(message) {
         let msg = JSON.parse(message); // Parse incoming JSON message
 
         if (msg.type === 'username') {
-            // Set the username
+            // Set the username for the connected client
             username = msg.username;
             console.log(`${username} has joined the game`);
+            ws.username = username; // Store the username on the WebSocket object
             ws.send(JSON.stringify({ username: 'System', message: `Welcome, ${username}!` }));
         } else if (msg.type === 'message') {
-            // Broadcast the message to all other clients
+            // Broadcast regular messages to all clients
             console.log(`${username}: ${msg.message}`);
             wss.clients.forEach(function each(client) {
                 if (client !== ws && client.readyState === WebSocket.OPEN) {
@@ -35,33 +36,34 @@ wss.on('connection', function connection(ws) {
                 }
             });
         } else if (msg.type === 'whisper') {
-            // Handle whisper as before
+            // Handle whisper command
             const { from, to, message } = msg;
             let recipientFound = false;
 
             wss.clients.forEach(function each(client) {
-                if (client !== ws && client.readyState === WebSocket.OPEN) {
-                    if (client.username === to) {
-                        recipientFound = true;
-                        client.send(JSON.stringify({ username: from, message: `[Whisper] ${message}` }));
-                    }
+                // Check if the recipient client matches the "to" user and is connected
+                if (client !== ws && client.readyState === WebSocket.OPEN && client.username === to) {
+                    recipientFound = true;
+                    // Send the private message to the target user (whisper)
+                    client.send(JSON.stringify({ username: from, message: `[Whisper] ${message}` }));
                 }
             });
 
+            // If recipient not found, notify the sender
             if (recipientFound) {
                 ws.send(JSON.stringify({ username: 'System', message: `You whispered to ${to}: ${message}` }));
             } else {
                 ws.send(JSON.stringify({ username: 'System', message: `User ${to} not found.` }));
             }
         } else if (msg.type === 'typing') {
-            // Notify all clients that the user is typing
+            // Notify other clients that the user is typing
             wss.clients.forEach(function each(client) {
                 if (client !== ws && client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify({ type: 'typing', username: username }));
                 }
             });
         } else if (msg.type === 'stoppedTyping') {
-            // Notify all clients that the user stopped typing
+            // Notify other clients that the user stopped typing
             wss.clients.forEach(function each(client) {
                 if (client !== ws && client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify({ type: 'stoppedTyping', username: username }));
@@ -73,6 +75,7 @@ wss.on('connection', function connection(ws) {
     // Optional: Notify new clients when they connect
     ws.send(JSON.stringify({ username: 'System', message: 'Welcome to the chat! Type /help for a list of commands.' }));
 });
+
 
 // Start the server on port 5000
 server.listen(5000, function() {

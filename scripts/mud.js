@@ -7,6 +7,11 @@ const socket = new WebSocket('wss://mud.pocketfriends.org:5000'); // Connect to 
 
 let typingTimeout; // To handle user stop typing after a delay
 
+socket.onopen = function () {
+    console.log('Connected to the server');
+    socket.send(JSON.stringify({ type: 'username', username: username }));
+};
+
 // Notify server when the user is typing
 commandInput.addEventListener("input", function() {
     if (typingTimeout) {
@@ -18,10 +23,6 @@ commandInput.addEventListener("input", function() {
         socket.send(JSON.stringify({ type: 'stoppedTyping', username: username }));
     }, 1000); // User is considered to have stopped typing after 1 second
 });
-
-socket.onopen = function () {
-    console.log('Connected to the server');
-};
 
 socket.onmessage = function (event) {
     const message = JSON.parse(event.data);
@@ -105,6 +106,7 @@ function sendWhisper(args) {
         appendOutput(`<span class="game-line"><strong>System:</strong> Please provide a username and message for whisper.</span>`);
     }
 }
+
 
 function appendOutput(text) {
     outputDiv.innerHTML += text + "<br>";
