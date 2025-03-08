@@ -5,13 +5,33 @@ let username = localStorage.getItem('username') || "Guest"; // Load username fro
 
 const socket = new WebSocket('wss://mud.pocketfriends.org:5000'); // Connect to WebSocket server
 
+let typingTimeout; // To handle user stop typing after a delay
+
+// Notify server when the user is typing
+commandInput.addEventListener("input", function() {
+    if (typingTimeout) {
+        clearTimeout(typingTimeout);
+    }
+    socket.send(JSON.stringify({ type: 'typing', username: username }));
+
+    typingTimeout = setTimeout(function() {
+        socket.send(JSON.stringify({ type: 'stoppedTyping', username: username }));
+    }, 1000); // User is considered to have stopped typing after 1 second
+});
+
 socket.onopen = function () {
     console.log('Connected to the server');
 };
 
 socket.onmessage = function (event) {
     const message = JSON.parse(event.data);
-    appendOutput(`<span class="game-line"><strong>${message.username}:</strong> ${message.message}</span>`);
+    if (message.type === 'typing') {
+        showTyping(message.username);
+    } else if (message.type === 'stoppedTyping') {
+        stopTyping(message.username);
+    } else {
+        appendOutput(`<span class="game-line"><strong>${message.username}:</strong> ${message.message}</span>`);
+    }
 };
 
 commandInput.addEventListener("keydown", function(event) {
@@ -89,4 +109,16 @@ function sendWhisper(args) {
 function appendOutput(text) {
     outputDiv.innerHTML += text + "<br>";
     outputDiv.scrollTop = outputDiv.scrollHeight; // Auto-scroll to the bottom
+}
+
+// Show typing indicator for a user
+function showTyping(username) {
+    const typingIndicator = document.getElementById('typing-indicator');
+    typingIndicator.innerHTML = `${username} is typing...`;
+}
+
+// Stop typing indicator for a user
+function stopTyping(username) {
+    const typingIndicator = document.getElementById('typing-indicator');
+    typingIndicator.innerHTML = '';
 }

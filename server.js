@@ -35,7 +35,7 @@ wss.on('connection', function connection(ws) {
                 }
             });
         } else if (msg.type === 'whisper') {
-            // Send a private message (whisper)
+            // Handle whisper as before
             const { from, to, message } = msg;
             let recipientFound = false;
 
@@ -53,6 +53,20 @@ wss.on('connection', function connection(ws) {
             } else {
                 ws.send(JSON.stringify({ username: 'System', message: `User ${to} not found.` }));
             }
+        } else if (msg.type === 'typing') {
+            // Notify all clients that the user is typing
+            wss.clients.forEach(function each(client) {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: 'typing', username: username }));
+                }
+            });
+        } else if (msg.type === 'stoppedTyping') {
+            // Notify all clients that the user stopped typing
+            wss.clients.forEach(function each(client) {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: 'stoppedTyping', username: username }));
+                }
+            });
         }
     });
 
