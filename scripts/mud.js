@@ -14,9 +14,6 @@ socket.onmessage = function (event) {
     appendOutput(`<span class="game-line"><strong>${message.username}:</strong> ${message.message}</span>`);
 };
 
-// Display a welcome message
-appendOutput(`<span class="game-line"><strong>System:</strong> Hello, ${username}! Use /username <name> to set your username.</span>`);
-
 commandInput.addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
@@ -27,17 +24,8 @@ commandInput.addEventListener("keydown", function(event) {
 function sendCommand() {
     const command = commandInput.value.trim();
     if (command) {
-        if (command.startsWith("/username ")) {
-            // Extract the new username and send it to the server
-            const newUsername = command.slice(10).trim();
-            if (newUsername) {
-                username = newUsername;
-                localStorage.setItem('username', username); // Save the username to localStorage
-                appendOutput(`<span class="game-line"><strong>System:</strong> Your username has been set to: ${username}</span>`);
-                socket.send(JSON.stringify({ type: 'username', username: username }));
-            } else {
-                appendOutput(`<span class="game-line"><strong>System:</strong> Please provide a username after /username.</span>`);
-            }
+        if (command.startsWith("/")) {
+            handleCommand(command);
         } else {
             // Handle regular messages
             socket.send(JSON.stringify({ type: 'message', username: username, message: command }));
@@ -45,6 +33,57 @@ function sendCommand() {
         }
     }
     commandInput.value = ""; // Clear input field
+}
+
+function handleCommand(command) {
+    const [cmd, ...args] = command.split(" ");
+    switch (cmd) {
+        case "/username":
+            changeUsername(args);
+            break;
+        case "/help":
+            showHelp();
+            break;
+        case "/whisper":
+            sendWhisper(args);
+            break;
+        default:
+            appendOutput(`<span class="game-line"><strong>System:</strong> Unknown command: ${cmd}. Type /help for a list of commands.</span>`);
+            break;
+    }
+}
+
+function changeUsername(args) {
+    const newUsername = args.join(" ").trim();
+    if (newUsername) {
+        username = newUsername;
+        localStorage.setItem('username', username); // Save the username to localStorage
+        appendOutput(`<span class="game-line"><strong>System:</strong> Your username has been set to: ${username}</span>`);
+        socket.send(JSON.stringify({ type: 'username', username: username }));
+    } else {
+        appendOutput(`<span class="game-line"><strong>System:</strong> Please provide a username after /username.</span>`);
+    }
+}
+
+function showHelp() {
+    appendOutput(`<span class="game-line"><strong>System:</strong> Available commands:
+        <ul>
+            <li>/username <name> - Set your username</li>
+            <li>/help - Show this help message</li>
+            <li>/whisper <user> <message> - Send a private message to another user</li>
+        </ul>
+    </span>`);
+}
+
+function sendWhisper(args) {
+    const [targetUser, ...messageParts] = args;
+    const message = messageParts.join(" ").trim();
+    if (targetUser && message) {
+        socket.send(JSON.stringify({ type: 'whisper', from: username, to: targetUser, message: message }));
+        appendOutput(`<span class="game-line"><strong>You whispered to ${targetUser}:</strong> ${message}</span>`);
+    } else {
+        appendOutput(`<span class="game-line"><strong>System:</strong> Please provide a username and message for whisper.</span>`);
+    }
 }
 
 function appendOutput(text) {

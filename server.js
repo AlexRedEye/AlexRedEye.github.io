@@ -34,11 +34,30 @@ wss.on('connection', function connection(ws) {
                     client.send(JSON.stringify({ username: username, message: msg.message }));
                 }
             });
+        } else if (msg.type === 'whisper') {
+            // Send a private message (whisper)
+            const { from, to, message } = msg;
+            let recipientFound = false;
+
+            wss.clients.forEach(function each(client) {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    if (client.username === to) {
+                        recipientFound = true;
+                        client.send(JSON.stringify({ username: from, message: `[Whisper] ${message}` }));
+                    }
+                }
+            });
+
+            if (recipientFound) {
+                ws.send(JSON.stringify({ username: 'System', message: `You whispered to ${to}: ${message}` }));
+            } else {
+                ws.send(JSON.stringify({ username: 'System', message: `User ${to} not found.` }));
+            }
         }
     });
 
     // Optional: Notify new clients when they connect
-    ws.send(JSON.stringify({ username: 'System', message: 'Welcome to the chat! Type /username <your_name> to set your username.' }));
+    ws.send(JSON.stringify({ username: 'System', message: 'Welcome to the chat! Type /help for a list of commands.' }));
 });
 
 // Start the server on port 5000
