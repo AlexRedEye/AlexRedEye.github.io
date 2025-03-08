@@ -5,6 +5,25 @@
     box-sizing: border-box;
 }
 
+/* Style for the link */
+a {
+    color: #00ff00; /* Bright green text color */
+    text-decoration: none; /* Remove underline */
+    font-size: 16px;
+    display: inline-block;
+    margin: 20px 0; /* Add space around the link */
+    transition: color 0.3s ease, text-shadow 0.3s ease; /* Smooth transition for hover effect */
+    position: absolute; /* Absolutely position the link */
+    top: 20px; /* Place the link 20px from the top */
+    left: 20px; /* Place the link 20px from the left */
+}
+
+a:hover {
+    color: #00cc00; /* Slightly darker green on hover */
+    text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; /* Green glow effect */
+}
+
+/* Body settings */
 body {
     font-family: "Courier New", Courier, monospace;
     background-color: #000; /* Black background for the whole page */
@@ -14,6 +33,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    flex-direction: column; /* Stack content vertically */
 }
 
 /* Container for the game */
@@ -24,6 +44,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
     width: 80%;
     max-width: 900px;
+    margin-top: 60px; /* Ensure the game content starts after the link */
 }
 
 /* Output area (terminal-style) */

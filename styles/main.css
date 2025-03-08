@@ -1,9 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Concert+One&display=swap');
 :root{
-  --color-1: #0f1016;
-  --text-color: white;
-  --accent-color: rgb(159, 25, 25);
-  --title-color: red;
+  --color-1: #181C14;
+  --color-2: #3C3D37;
+  --text-color: #ECDFCC;
+  --accent-color: #697565;
+  --title-color: var(--text-color);
   --text-color2: #950101;
 }
 *{
@@ -64,7 +65,7 @@ nav label svg{
 }
 
 .portfolio {
-  background-color: var(--color-1);
+  background-color: var(--color-2);
   color: var(--text-color);
   padding: 50px 20px;
   margin: 50px auto;
@@ -81,7 +82,7 @@ nav label svg{
 }
 
 .portfolioDesc {
-  background-color: var(--text-color2);
+  background-color: var(--accent-color);
   color: var(--text-color);
   padding: 20px;
   border-radius: 10px;
@@ -91,6 +92,15 @@ nav label svg{
 .portfolioDesc p {
   font-size: 1.1rem;
   line-height: 1.5;
+}
+
+.portfolio a {
+  color: #181C14;
+  text-decoration-line: none;
+}
+
+.portfolio a:hover {
+  text-decoration: underline;
 }
 
 @media(max-width: 400px){
@@ -133,17 +143,20 @@ nav label svg{
 }
 
 body{
-  background-color: black;
+  background-color: var(--color-1);
 }
 
 .hero{
   display: flex;
-  border: 3px solid white;
   width: 100%;
   height: 300px;
-  color: red;
+  color: var(--text-color);
+
+  justify-content: center;
+  align-items: center;
+  font-size: 50px;
 }
 
 .hero h1{
-  color: red;
+  text-shadow: 0 0 5px #4f4f4a, 0 0 10px #4f4f4a, 0 0 20px #5d5d5a, 0 0 30px #5d5d5a, 0 0 40px #697565, 0 0 50px #697565, 0 0 75px #697565;
 }
