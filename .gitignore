@@ -47,3 +47,9 @@ jwt_secret.txt
 # SSL Certificates and Keys
 pfkey.key
 pfcert.cer
+
+# Daemon
+daemon/
+
+# Sevice
+service.js
