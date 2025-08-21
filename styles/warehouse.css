@@ -1,0 +1,133 @@
+/* Base layout */
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 720px;
+  margin: 2rem auto;
+  line-height: 1.5;
+  background: #fafafa;
+  color: #222;
+}
+
+h1, h2, h3 {
+  margin: 0.4rem 0;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Stats container */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1rem;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+  font-size: 1.3rem;
+  color: #1976d2; /* blue highlight for stat headers */
+}
+
+/* Rows & spacing */
+section { margin: 1.5rem 0; }
+.row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+.upgrades, .automation, .manual, .crit, .skill { margin-top: 1rem; }
+
+p { margin: 0.3rem 0; }
+.muted {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  display: inline-block;
+}
+
+/* Buttons */
+button {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #f5f5f5;
+  font-size: 1rem;
+  transition: background 0.2s, transform 0.1s, border-color 0.2s, color 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  background: #d5d5d5;
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Upgrade state colors (toggled by JS) */
+button.affordable {
+  background: #e8f5e9;      /* light green */
+  border-color: #4caf50;    /* medium green */
+  color: #1b5e20;           /* dark green text */
+}
+
+button.affordable:hover:not(:disabled) {
+  background: #c8e6c9;
+}
+
+button.unaffordable {
+  background: #f9f9f9;
+  border-color: #ccc;
+  color: #777;
+}
+
+/* Bonus label */
+#bonus-txt {
+  font-weight: bold;
+  color: #2e7d32; /* green */
+}
+
+/* Toast container */
+#toast-container {
+  position: relative;
+}
+
+/* Floating toasts for feedback */
+.toast {
+  position: absolute;
+  font-weight: bold;
+  color: #2e7d32; /* default green */
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+  font-size: 0.95rem;
+  user-select: none;
+  transform: translateX(-50%); /* center on origin */
+}
+
+.toast.box { color: #1976d2; }   /* blue = boxes */
+.toast.muns { color: #f57c00; }  /* orange = money */
+
+/* Animation */
+@keyframes floatUp {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to   { opacity: 0; transform: translate(-50%, -40px); }
+}

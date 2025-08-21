@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Warehouse Clicker – MVP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📦 Warehouse Clicker – MVP</h1>
+
+  <!-- Stats -->
+  <section class="stats">
+    <div class="card">
+      <h2 id="box-txt">0 Boxes</h2>
+      <p class="muted">In Storage</p>
+    </div>
+    <div class="card">
+      <h2 id="total-txt">0 Total Boxes</h2>
+      <p class="muted">Produced This Run</p>
+    </div>
+    <div class="card">
+      <h2 id="muns-txt">0 Muns</h2>
+      <p class="muted">Cash</p>
+    </div>
+    <div class="card">
+      <h2>Logistics</h2>
+      <p>Storage: <strong id="storage-txt">10</strong></p>
+      <p>Trucks: <strong id="trucks-txt">1</strong> <span class="muted">(5 capacity each)</span></p>
+    </div>
+  </section>
+
+  <!-- Core actions -->
+  <section>
+    <h3>Actions</h3>
+    <div class="row">
+      <button id="production-btn" type="button">Produce Box</button>
+      <button id="shipping-btn" type="button">Ship Full Trucks</button>
+    </div>
+    <span class="muted">Tip: You can only ship in <strong>full truckloads</strong> (5 boxes per truck).</span>
+  </section>
+
+  <!-- Upgrades -->
+  <section class="upgrades">
+    <h3>Upgrades</h3>
+    <div class="row">
+      <button id="storage-upgrade" type="button">
+        Upgrade Storage (+10) — Cost: <span id="storage-cost">50</span>
+      </button>
+      <button id="trucks-upgrade" type="button">
+        Buy Truck (+1) — Cost: <span id="trucks-cost">100</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Automation -->
+  <section class="automation">
+    <h3>Automation</h3>
+    <div class="row">
+      <button id="worker-upgrade" type="button">
+        Hire Worker (+1) — Cost: <span id="worker-cost">50</span>
+      </button>
+      <p id="worker-count">0 Workers</p>
+    </div>
+  </section>
+
+  <!-- Manual Click Upgrades -->
+  <section class="manual">
+    <h3>Manual Click Power</h3>
+    <div class="row">
+      <button id="click-upgrade" type="button">
+        Stronger Arms (+1 click power) — Cost: <span id="click-cost">30</span>
+      </button>
+      <p id="click-level">Lv 0 (Power: 1)</p>
+    </div>
+  </section>
+
+  <!-- Crit Upgrades -->
+  <section class="crit">
+    <h3>Critical Clicks</h3>
+    <div class="row">
+      <button id="crit-upgrade" type="button">
+        Increase Crit Chance (+1%) — Cost: <span id="crit-cost">100</span>
+      </button>
+      <p id="crit-chance">5% crit</p>
+    </div>
+  </section>
+
+  <!-- Active Skill -->
+  <section class="skill">
+    <h3>Priority Pick (Active Skill)</h3>
+    <div class="row">
+      <button id="skill-btn" type="button">Activate (2× clicks)</button>
+      <span id="skill-timer" class="muted">Ready</span>
+    </div>
+    <div class="row">
+      <button id="skill-upgrade" type="button">
+        Extend Duration (+2s) — Cost: <span id="skill-cost">150</span>
+      </button>
+      <p id="skill-duration">10s duration, 60s CD</p>
+    </div>
+  </section>
+
+  <!-- Reset -->
+  <section>
+    <h3>Reset</h3>
+    <div class="row">
+      <button id="reset-btn" type="button">Reset for Bonus</button>
+      <p id="bonus-txt">Efficiency Bonus: 0%</p>
+    </div>
+  </section>
+
+  <!-- Toast container (for floating +X feedback) -->
+  <div id="toast-container"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
