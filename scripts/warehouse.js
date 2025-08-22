@@ -280,6 +280,64 @@ function treeCost(node) {
   return base * Math.pow(2, lvl);
 }
 
+function playChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(880, ctx.currentTime);          // A5
+    o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15); // quick rise
+    g.gain.setValueAtTime(0.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.42);
+  } catch (_) { /* ignore if blocked */ }
+}
+
+function celebrateContract() {
+  // Status line
+  if (cStatus) {
+    cStatus.textContent = 'Contract Complete!';
+    cStatus.classList.add('success');
+  }
+
+  // Pulse the Contracts tab
+  const tabContracts = document.getElementById('tab-contracts');
+  if (tabContracts) {
+    tabContracts.classList.add('pulse');
+    setTimeout(() => tabContracts.classList.remove('pulse'), 2400);
+  }
+
+  // Confetti inside the contract card
+  const container = document.getElementById('contract-burst');
+  if (container) {
+    const COLORS = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#b388ff', '#ffab91'];
+    const pieces = 40;
+    for (let i = 0; i < pieces; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.background = COLORS[i % COLORS.length];
+      // random start position near top-center
+      const startX = 50 + (Math.random() * 20 - 10);    // percent
+      const startY = 10 + Math.random() * 10;           // percent
+      el.style.left = `${startX}%`;
+      el.style.top = `${startY}%`;
+      // random end delta
+      const dx = (Math.random() * 240 - 120); // px
+      const dy = 180 + Math.random() * 140;   // px
+      el.style.setProperty('--dx', `${dx}px`);
+      el.style.setProperty('--dy', `${dy}px`);
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }
+  }
+
+  // Sound
+  playChime();
+}
+
+
 // Efficiency arrays
 function effAdd(arr, v) { arr.push({ t: nowMs(), v }); }
 function effSumLast60(arr) {
@@ -447,22 +505,35 @@ function produceBox() {
 function onBoxesShipped(count) {
   // Normal shipping already adds muns elsewhere; here we only handle contracts.
   if (!contractState.active) return;
+
   contractState.progress += count;
+
   if (contractState.progress >= contractState.quota) {
-    // Complete immediately
+    // Reward
     gameState.muns += contractState.reward;
-    cStatus.textContent = `Completed! +${contractState.reward} Muns`;
+
+    // Celebrate (confetti + chime + banner + tab pulse)
+    celebrateContract();
+
+    // Optional toast (still fun for consistency)
     showToast(`Contract +${contractState.reward} Muns!`, 'muns', cActiveCard || shipButton);
-    // reset contract
-    contractState.active = false;
-    contractState.progress = 0;
-    contractState.quota = 0;
-    contractState.reward = 0;
-    contractState.timeLimit = 0;
-    contractState.endTime = 0;
+
+    // Let celebration play, then clear the contract
+    setTimeout(() => {
+      if (cStatus) cStatus.classList.remove('success');
+      contractState.active = false;
+      contractState.progress = 0;
+      contractState.quota = 0;
+      contractState.reward = 0;
+      contractState.timeLimit = 0;
+      contractState.endTime = 0;
+      updateUI();
+    }, 900); // matches confetti duration
   }
+
   updateUI();
 }
+
 
 function shipStorage() {
   const capacity = getTruckCapacity();

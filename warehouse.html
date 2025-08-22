@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles/warehouse.css">
 </head>
 <body>
-  <h1>📦 Warehouse Clicker – MVP v0.6.0</h1>
+  <h1>📦 Warehouse Clicker – MVP v0.6.1</h1>
 
   <!-- Tabs -->
   <nav class="tabs">
@@ -196,6 +196,22 @@
           <p><strong id="contract-timer">0s</strong> left</p>
         </div>
         <div id="contract-status" class="muted"></div>
+
+        <div id="contract-active" class="card hidden">
+  <p id="contract-desc">—</p>
+  <div class="progress-bar">
+    <div id="contract-progress"></div>
+  </div>
+  <div class="row" style="justify-content: space-between;">
+    <p><strong id="contract-progress-text">0 / 0</strong></p>
+    <p><strong id="contract-timer">0s</strong> left</p>
+  </div>
+  <div id="contract-status" class="muted" aria-live="polite"></div>
+
+  <!-- ADD THIS: where the confetti pieces will be placed -->
+  <div id="contract-burst" aria-hidden="true"></div>
+</div>
+
       </div>
 
       <div class="row">
