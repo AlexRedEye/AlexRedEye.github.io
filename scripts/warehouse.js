@@ -46,6 +46,12 @@ const skillUpgradeBtn = document.getElementById('skill-upgrade');
 const skillCostTxt = document.getElementById('skill-cost');
 const skillDurationTxt = document.getElementById('skill-duration');
 
+// Efficiency UI
+const effScoreTxt = document.getElementById('eff-score');
+const effProdTxt  = document.getElementById('eff-prod');
+const effShipTxt  = document.getElementById('eff-ship');
+const effBlockTxt = document.getElementById('eff-block');
+
 // Toasts
 const toastContainer = document.getElementById('toast-container');
 
@@ -94,6 +100,9 @@ const SKILL_DURATION_PER_LEVEL = 2;  // +2s per level
 const SKILL_MAX_LEVEL = 5;
 const SKILL_COOLDOWN = 60;           // seconds
 
+// Efficiency window
+const EFF_WINDOW_MS = 60000; // last 60 seconds
+
 /* =======================
    GAME STATE
    ======================= */
@@ -121,6 +130,13 @@ const gameState = {
   totalBoxes: 0,        // cumulative boxes produced this run
   efficiencyBonus: 0,   // % applied to workers
   lifetimeResets: 0     // (optional)
+};
+
+// Efficiency rolling metrics (arrays of {t, v})
+const eff = {
+  produced: [],
+  shipped: [],
+  blocked: []
 };
 
 /* =======================
@@ -238,35 +254,46 @@ function showToast(text, type, originElement) {
   setTimeout(() => div.remove(), 1000);
 }
 
+// Efficiency helpers
+function effAdd(arr, v) {
+  arr.push({ t: nowMs(), v });
+}
+function effSumLast60(arr) {
+  const cutoff = nowMs() - EFF_WINDOW_MS;
+  while (arr.length && arr[0].t < cutoff) arr.shift();
+  return arr.reduce((s, e) => s + e.v, 0);
+}
+
 /* =======================
    CORE ACTIONS
    ======================= */
 function produceBox() {
-  if (gameState.box >= gameState.storage) return;
-
-  // Base amount from click power
+  // Base desired amount
   let amount = clickPower();
-
-  // Skill multiplier
   if (isSkillActive()) amount *= 2;
+  if (Math.random() < critChance()) amount *= CRIT_MULTIPLIER;
+  amount = Math.floor(amount);
 
-  // Crit roll
-  if (Math.random() < critChance()) {
-    amount *= 10; // CRIT_MULTIPLIER
+  // If storage full or near full, some may be blocked
+  const spaceLeft = gameState.storage - gameState.box;
+  const applied = Math.max(0, Math.min(amount, spaceLeft));
+  const blocked = Math.max(0, amount - applied);
+
+  if (applied > 0) {
+    gameState.box += applied;
+    gameState.totalBoxes += applied;
+
+    // efficiency track
+    effAdd(eff.produced, applied);
+
+    showToast(`+${applied} Box${applied === 1 ? '' : 'es'}`, 'box', prodButton);
+    updateUI();
   }
 
-  // Respect storage cap
-  amount = Math.floor(amount);
-  const spaceLeft = gameState.storage - gameState.box;
-  const applied = Math.min(amount, spaceLeft);
-
-  if (applied <= 0) return;
-
-  gameState.box += applied;
-  gameState.totalBoxes += applied;
-
-  showToast(`+${applied} Box${applied === 1 ? '' : 'es'}`, 'box', prodButton);
-  updateUI();
+  if (blocked > 0) {
+    // count blocked production attempts
+    effAdd(eff.blocked, blocked);
+  }
 }
 
 function shipStorage() {
@@ -279,6 +306,9 @@ function shipStorage() {
 
   gameState.box -= boxesToShip;
   gameState.muns += boxesToShip * BOX_VALUE;
+
+  // efficiency track
+  effAdd(eff.shipped, boxesToShip);
 
   showToast(`+${boxesToShip * BOX_VALUE} Muns`, 'muns', shipButton);
   updateUI();
@@ -370,8 +400,12 @@ function doReset() {
   gameState.managerLevel = 0;
   gameState.totalBoxes = 0;
 
+  // efficiency rolling windows reset
+  eff.produced = [];
+  eff.shipped = [];
+  eff.blocked = [];
+
   // Keep manual/crit/skill purchases across resets for MVP
-  // (If you want true prestige, reset those here.)
 
   updateUI();
 }
@@ -381,13 +415,21 @@ function doReset() {
    ======================= */
 // Workers produce boxes
 setInterval(() => {
-  if (gameState.workers > 0 && gameState.box < gameState.storage) {
-    const spaceLeft = gameState.storage - gameState.box;
+  if (gameState.workers > 0) {
     const producedRaw = effectiveWorkerBatch(gameState.workers);
-    const produced = Math.min(producedRaw, spaceLeft);
-    gameState.box += produced;
-    gameState.totalBoxes += produced;
-    updateUI();
+    const spaceLeft = gameState.storage - gameState.box;
+    const applied = Math.max(0, Math.min(producedRaw, spaceLeft));
+    const blocked = Math.max(0, producedRaw - applied);
+
+    if (applied > 0) {
+      gameState.box += applied;
+      gameState.totalBoxes += applied;
+      effAdd(eff.produced, applied);
+      updateUI();
+    }
+    if (blocked > 0) {
+      effAdd(eff.blocked, blocked);
+    }
   }
 }, WORKER_INTERVAL);
 
@@ -405,14 +447,15 @@ setInterval(() => {
   gameState.box -= boxesToShip;
   gameState.muns += boxesToShip * BOX_VALUE;
 
+  effAdd(eff.shipped, boxesToShip);
+
   showToast(`+${boxesToShip * BOX_VALUE} Muns (Auto)`, 'muns', shipButton);
   updateUI();
 }, MANAGER_INTERVAL);
 
-// Skill/cooldown display updater
+// Skill/cooldown display updater + efficiency updater
 setInterval(() => {
-  if (!skillTimerTxt && !skillBtn) return;
-
+  // Skill UI
   if (isSkillActive()) {
     if (skillTimerTxt) skillTimerTxt.textContent = `Priority Pick: ${skillRemainingSec()}s`;
     if (skillBtn) skillBtn.disabled = true;
@@ -423,6 +466,25 @@ setInterval(() => {
     if (skillTimerTxt) skillTimerTxt.textContent = `Ready`;
     if (skillBtn) skillBtn.disabled = false;
   }
+
+  // Efficiency UI
+  const produced60 = effSumLast60(eff.produced);
+  const shipped60  = effSumLast60(eff.shipped);
+  const blocked60  = effSumLast60(eff.blocked);
+
+  // Flow balance: ship what you produce
+  const flow = produced60 > 0 ? Math.min(1, shipped60 / produced60) : 1;
+
+  // Storage discipline: avoid blocked production
+  const attempts = produced60 + blocked60;
+  const discipline = attempts > 0 ? (1 - blocked60 / attempts) : 1;
+
+  const score = Math.round(60 * flow + 40 * discipline);
+
+  if (effScoreTxt) effScoreTxt.textContent = String(score);
+  if (effProdTxt)  effProdTxt.textContent = String(produced60);
+  if (effShipTxt)  effShipTxt.textContent = String(shipped60);
+  if (effBlockTxt) effBlockTxt.textContent = String(blocked60);
 }, 250);
 
 /* =======================
@@ -483,7 +545,7 @@ function updateUI() {
   const canShip = Math.floor(gameState.box / CAPACITY_PER_TRUCK) >= 1;
   if (shipButton) shipButton.disabled = !canShip;
 
-  // Skill button state is also updated by the timer interval
+  // Skill button is also updated by the timer interval
 }
 
 /* =======================

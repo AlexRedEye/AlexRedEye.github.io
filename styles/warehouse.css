@@ -38,6 +38,12 @@ h1 {
   color: #1976d2; /* blue highlight for stat headers */
 }
 
+/* Emphasize efficiency score */
+.score-big {
+  color: #2e7d32; /* green */
+  font-weight: 800;
+}
+
 /* Rows & spacing */
 section { margin: 1.5rem 0; }
 .row {
