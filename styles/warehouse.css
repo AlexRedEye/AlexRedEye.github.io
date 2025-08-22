@@ -47,7 +47,7 @@ section { margin: 1.5rem 0; }
   flex-wrap: wrap;
   margin: 0.5rem 0;
 }
-.upgrades, .automation, .manual, .crit, .skill { margin-top: 1rem; }
+.upgrades, .automation, .manager, .manual, .crit, .skill { margin-top: 1rem; }
 
 p { margin: 0.3rem 0; }
 .muted {

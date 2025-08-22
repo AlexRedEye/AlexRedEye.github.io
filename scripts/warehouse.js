@@ -24,6 +24,11 @@ const workerUpgradeBtn = document.getElementById('worker-upgrade');
 const workerCostTxt = document.getElementById('worker-cost');
 const workerCountTxt = document.getElementById('worker-count');
 
+// Shipping Manager UI
+const managerUpgradeBtn = document.getElementById('manager-upgrade');
+const managerCostTxt    = document.getElementById('manager-cost');
+const managerLevelTxt   = document.getElementById('manager-level');
+
 // Manual Click Upgrades
 const clickUpgradeBtn = document.getElementById('click-upgrade');  // "Stronger Arms"
 const clickCostTxt = document.getElementById('click-cost');
@@ -63,10 +68,15 @@ const WORKER_BASE_COST = 50;
 const WORKER_COST_SCALE = 1.20;
 const WORKER_INTERVAL = 2000; // every 2 seconds
 
+// Shipping Manager
+const MANAGER_BASE_COST = 250;
+const MANAGER_COST_SCALE = 1.35;
+const MANAGER_INTERVAL = 5000; // ms
+
 // Click Power
 const CLICK_BASE_COST = 30;
 const CLICK_COST_SCALE = 1.35;
-const MAX_CLICK_POWER_LEVEL = 10; // soft cap for MVP
+const MAX_CLICK_POWER_LEVEL = 10; // soft cap
 
 // Crit
 const CRIT_BASE_COST = 100;
@@ -96,6 +106,7 @@ const gameState = {
 
   // Automation
   workers: 0,           // number of workers (automation)
+  managerLevel: 0,      // auto-dispatch loads per 5s (capped by trucks & boxes)
 
   // Manual upgrades
   clickPowerLevel: 0,   // each level = +1 box per click (base is 1)
@@ -142,6 +153,10 @@ function truckCost() {
 
 function workerCost() {
   return Math.floor(WORKER_BASE_COST * Math.pow(WORKER_COST_SCALE, gameState.workers));
+}
+
+function managerCost() {
+  return Math.floor(MANAGER_BASE_COST * Math.pow(MANAGER_COST_SCALE, gameState.managerLevel));
 }
 
 function clickCost() {
@@ -237,7 +252,7 @@ function produceBox() {
 
   // Crit roll
   if (Math.random() < critChance()) {
-    amount *= CRIT_MULTIPLIER;
+    amount *= 10; // CRIT_MULTIPLIER
   }
 
   // Respect storage cap
@@ -290,6 +305,13 @@ function upgrade(type) {
     if (gameState.muns < cost) return;
     gameState.muns -= cost;
     gameState.workers += 1;
+  }
+
+  if (type === 'manager') {
+    const cost = managerCost();
+    if (gameState.muns < cost) return;
+    gameState.muns -= cost;
+    gameState.managerLevel += 1;
   }
 
   if (type === 'click') {
@@ -345,6 +367,7 @@ function doReset() {
   gameState.trucks = 1;
   gameState.storageUpgrades = 0;
   gameState.workers = 0;
+  gameState.managerLevel = 0;
   gameState.totalBoxes = 0;
 
   // Keep manual/crit/skill purchases across resets for MVP
@@ -356,8 +379,8 @@ function doReset() {
 /* =======================
    AUTOMATION & TIMERS
    ======================= */
+// Workers produce boxes
 setInterval(() => {
-  // Workers produce boxes every tick, respecting storage cap
   if (gameState.workers > 0 && gameState.box < gameState.storage) {
     const spaceLeft = gameState.storage - gameState.box;
     const producedRaw = effectiveWorkerBatch(gameState.workers);
@@ -367,6 +390,24 @@ setInterval(() => {
     updateUI();
   }
 }, WORKER_INTERVAL);
+
+// Shipping Manager auto-dispatch
+setInterval(() => {
+  if (gameState.managerLevel <= 0) return;
+
+  const fullLoads = Math.floor(gameState.box / CAPACITY_PER_TRUCK);
+  if (fullLoads <= 0) return;
+
+  const loadsToSend = Math.min(fullLoads, gameState.trucks, gameState.managerLevel);
+  if (loadsToSend <= 0) return;
+
+  const boxesToShip = loadsToSend * CAPACITY_PER_TRUCK;
+  gameState.box -= boxesToShip;
+  gameState.muns += boxesToShip * BOX_VALUE;
+
+  showToast(`+${boxesToShip * BOX_VALUE} Muns (Auto)`, 'muns', shipButton);
+  updateUI();
+}, MANAGER_INTERVAL);
 
 // Skill/cooldown display updater
 setInterval(() => {
@@ -400,12 +441,15 @@ function updateUI() {
   if (storageCostTxt) storageCostTxt.innerText = storageCost();
   if (trucksCostTxt)  trucksCostTxt.innerText = truckCost();
   if (workerCostTxt)  workerCostTxt.innerText = workerCost();
+  if (managerCostTxt) managerCostTxt.innerText = managerCost();
   if (clickCostTxt)   clickCostTxt.innerText = (gameState.clickPowerLevel >= MAX_CLICK_POWER_LEVEL) ? 'MAX' : clickCost();
   if (critCostTxt)    critCostTxt.innerText = (gameState.critLevel >= MAX_CRIT_LEVEL) ? 'MAX' : critCost();
   if (skillCostTxt)   skillCostTxt.innerText = (gameState.skillLevel >= SKILL_MAX_LEVEL) ? 'MAX' : skillCost();
 
   // Counts / levels
   if (workerCountTxt) workerCountTxt.innerText = pluralize(gameState.workers, 'Worker');
+  if (managerLevelTxt) managerLevelTxt.innerText =
+    `Lv ${gameState.managerLevel} (Auto: ${gameState.managerLevel} load${gameState.managerLevel===1?'':'s'} / 5s)`;
   if (clickLevelTxt)  clickLevelTxt.innerText = `Lv ${gameState.clickPowerLevel} (Power: ${1 + gameState.clickPowerLevel})`;
   if (critChanceTxt)  critChanceTxt.innerText = `${Math.round(critChance() * 100)}% crit`;
   if (skillDurationTxt) skillDurationTxt.innerText = `${skillDurationSec()}s duration, ${SKILL_COOLDOWN}s CD`;
@@ -414,6 +458,7 @@ function updateUI() {
   const canAffordStorage = gameState.muns >= storageCost();
   const canAffordTruck = gameState.muns >= truckCost();
   const canAffordWorker = gameState.muns >= workerCost();
+  const canAffordManager = gameState.muns >= managerCost();
   const canAffordClick = (gameState.clickPowerLevel < MAX_CLICK_POWER_LEVEL) && gameState.muns >= clickCost();
   const canAffordCrit = (gameState.critLevel < MAX_CRIT_LEVEL) && gameState.muns >= critCost();
   const canAffordSkill = (gameState.skillLevel < SKILL_MAX_LEVEL) && gameState.muns >= skillCost();
@@ -421,6 +466,7 @@ function updateUI() {
   if (storageUpgradeBtn) storageUpgradeBtn.disabled = !canAffordStorage;
   if (trucksUpgradeBtn)  trucksUpgradeBtn.disabled = !canAffordTruck;
   if (workerUpgradeBtn)  workerUpgradeBtn.disabled = !canAffordWorker;
+  if (managerUpgradeBtn) managerUpgradeBtn.disabled = !canAffordManager;
   if (clickUpgradeBtn)   clickUpgradeBtn.disabled = !canAffordClick || gameState.clickPowerLevel >= MAX_CLICK_POWER_LEVEL;
   if (critUpgradeBtn)    critUpgradeBtn.disabled = !canAffordCrit || gameState.critLevel >= MAX_CRIT_LEVEL;
   if (skillUpgradeBtn)   skillUpgradeBtn.disabled = !canAffordSkill || gameState.skillLevel >= SKILL_MAX_LEVEL;
@@ -428,6 +474,7 @@ function updateUI() {
   setButtonState(storageUpgradeBtn, canAffordStorage);
   setButtonState(trucksUpgradeBtn, canAffordTruck);
   setButtonState(workerUpgradeBtn, canAffordWorker);
+  setButtonState(managerUpgradeBtn, canAffordManager);
   setButtonState(clickUpgradeBtn, canAffordClick && gameState.clickPowerLevel < MAX_CLICK_POWER_LEVEL);
   setButtonState(critUpgradeBtn, canAffordCrit && gameState.critLevel < MAX_CRIT_LEVEL);
   setButtonState(skillUpgradeBtn, canAffordSkill && gameState.skillLevel < SKILL_MAX_LEVEL);
@@ -448,6 +495,7 @@ if (shipButton)  shipButton.addEventListener('click', shipStorage);
 if (storageUpgradeBtn) storageUpgradeBtn.addEventListener('click', () => upgrade('storage'));
 if (trucksUpgradeBtn)  trucksUpgradeBtn.addEventListener('click', () => upgrade('truck'));
 if (workerUpgradeBtn)  workerUpgradeBtn.addEventListener('click', () => upgrade('worker'));
+if (managerUpgradeBtn) managerUpgradeBtn.addEventListener('click', () => upgrade('manager'));
 if (clickUpgradeBtn)   clickUpgradeBtn.addEventListener('click', () => upgrade('click'));
 if (critUpgradeBtn)    critUpgradeBtn.addEventListener('click', () => upgrade('crit'));
 if (skillUpgradeBtn)   skillUpgradeBtn.addEventListener('click', () => upgrade('skill'));
