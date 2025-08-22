@@ -2,228 +2,213 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Warehouse Clicker – MVP</title>
   <link rel="stylesheet" href="styles/warehouse.css">
 </head>
 <body>
-  <h1>📦 Warehouse Clicker – MVP v0.6.1</h1>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="brand">📦 Warehouse Clicker</div>
+    <nav class="tabs">
+      <button id="tab-game" class="tab-button active" type="button" data-target="screen-game">Game</button>
+      <button id="tab-prestige" class="tab-button" type="button" data-target="screen-prestige">Prestige</button>
+      <button id="tab-contracts" class="tab-button" type="button" data-target="screen-contracts">Contracts</button>
+      <button id="tab-settings" class="tab-button" type="button" data-target="screen-settings">Settings</button>
+    </nav>
+    <div class="version"><span id="version-txt">v0.1.0-Alpha</span></div>
+  </header>
 
-  <!-- Tabs -->
-  <nav class="tabs">
-    <button id="tab-game" class="tab-button active" type="button" data-target="screen-game">Game</button>
-    <button id="tab-prestige" class="tab-button" type="button" data-target="screen-prestige">Prestige</button>
-    <button id="tab-contracts" class="tab-button" type="button" data-target="screen-contracts">Contracts</button>
-  </nav>
-
-  <!-- ===== GAME SCREEN ===== -->
+  <!-- ===== GAME ===== -->
   <main id="screen-game">
-    <!-- Stats -->
-    <section class="stats">
-      <div class="card">
-        <h2 id="box-txt">0 Boxes</h2>
-        <p class="muted">In Storage</p>
-      </div>
-      <div class="card">
-        <h2 id="total-txt">0 Total Boxes</h2>
-        <p class="muted">Produced This Run</p>
-      </div>
-      <div class="card">
-        <h2 id="muns-txt">0 Muns</h2>
-        <p class="muted">Cash</p>
-      </div>
-      <div class="card">
-        <h2>Logistics</h2>
-        <p>Storage: <strong id="storage-txt">10</strong></p>
-        <p>
-          Trucks: <strong id="trucks-txt">1</strong>
-          <span class="muted">( <span id="cap-txt">5</span> capacity each )</span>
-        </p>
-      </div>
+    <!-- KPI strip -->
+    <section class="kpis">
+      <div class="kpi"><div class="kpi-title">Storage</div><div class="kpi-value"><span id="storage-txt">10</span></div></div>
+      <div class="kpi"><div class="kpi-title">Trucks</div><div class="kpi-value"><span id="trucks-txt">1</span><span class="kpi-sub">cap <span id="cap-txt">5</span></span></div></div>
+      <div class="kpi"><div class="kpi-title">In Storage</div><div class="kpi-value" id="box-txt">0 Boxes</div></div>
+      <div class="kpi"><div class="kpi-title">Cash</div><div class="kpi-value" id="muns-txt">0 Muns</div></div>
+      <div class="kpi"><div class="kpi-title">Produced (Run)</div><div class="kpi-value" id="total-txt">0 Total Boxes</div></div>
+      <div class="kpi"><div class="kpi-title">Efficiency (60s)</div><div class="kpi-value score"><span id="eff-score">100</span><span class="kpi-sub"><span id="eff-prod">0</span>P • <span id="eff-ship">0</span>S • <span id="eff-block">0</span>B</span></div></div>
+    </section>
 
-      <!-- Efficiency -->
-      <div class="card">
-        <h2>Efficiency: <span id="eff-score" class="score-big">100</span></h2>
-        <p class="muted">Last 60s — Produced: <span id="eff-prod">0</span>, Shipped: <span id="eff-ship">0</span>, Blocked: <span id="eff-block">0</span></p>
+    <!-- Controls -->
+    <section class="panel">
+      <div class="panel-title">Actions</div>
+      <div class="btn-row">
+        <button id="production-btn" type="button">Produce</button>
+        <button id="shipping-btn" type="button">Ship (full loads)</button>
       </div>
     </section>
 
-    <!-- Core actions -->
-    <section>
-      <h3>Actions</h3>
-      <div class="row">
-        <button id="production-btn" type="button">Produce Box</button>
-        <button id="shipping-btn" type="button">Ship Full Trucks</button>
+    <!-- Upgrades Grid -->
+    <section class="grid-2">
+      <!-- Storage/Trucks/Value -->
+      <div class="panel">
+        <div class="panel-title">Upgrades</div>
+        <div class="btn-col">
+          <button id="storage-upgrade" type="button">+10 Storage — Cost: <span id="storage-cost">50</span></button>
+          <button id="trucks-upgrade" type="button">+1 Truck — Cost: <span id="trucks-cost">100</span></button>
+          <button id="palletizer-upgrade" type="button">Palletizer (× click) — Cost: <span id="palletizer-cost">90</span></button>
+          <button id="valuation-upgrade" type="button">Box Valuation (↑ price) — Cost: <span id="valuation-cost">200</span></button>
+        </div>
       </div>
-      <span class="muted">Tip: You can only ship in full truckloads.</span>
-    </section>
 
-    <!-- Upgrades -->
-    <section class="upgrades">
-      <h3>Upgrades</h3>
-      <div class="row">
-        <button id="storage-upgrade" type="button">
-          Upgrade Storage (+10) — Cost: <span id="storage-cost">50</span>
-        </button>
-        <button id="trucks-upgrade" type="button">
-          Buy Truck (+1) — Cost: <span id="trucks-cost">100</span>
-        </button>
+      <!-- Automation -->
+      <div class="panel">
+        <div class="panel-title">Automation</div>
+        <div class="btn-col">
+          <button id="worker-upgrade" type="button">+1 Worker — Cost: <span id="worker-cost">50</span></button>
+          <div class="mini-info"><span id="worker-count">0 Workers</span><span class="muted" id="worker-note">Lv 0 (Auto: 0 / 2s)</span></div>
+          <button id="manager-upgrade" type="button">Shipping Manager Lv+1 — Cost: <span id="manager-cost">250</span></button>
+          <div class="mini-info"><span id="manager-level">Lv 0 (Auto: 0 loads / 5s)</span></div>
+          <button id="conveyor-upgrade" type="button">Conveyor Belts (↑ worker rate) — Cost: <span id="conveyor-cost">120</span></button>
+          <div class="mini-info"><span id="conveyor-level">Lv 0 (Workers ×1.00)</span></div>
+          <button id="turbo-upgrade" type="button">Turbo Dispatch (↑ loads/tick) — Cost: <span id="turbo-cost">180</span></button>
+          <div class="mini-info"><span id="turbo-level">Lv 0 (Manager ×1.00)</span></div>
+        </div>
       </div>
-    </section>
 
-    <!-- Automation -->
-    <section class="automation">
-      <h3>Automation</h3>
-      <div class="row">
-        <button id="worker-upgrade" type="button">
-          Hire Worker (+1) — Cost: <span id="worker-cost">50</span>
-        </button>
-        <p id="worker-count">0 Workers</p>
+      <!-- Manual & Crit -->
+      <div class="panel">
+        <div class="panel-title">Manual & Crit</div>
+        <div class="btn-col">
+          <button id="click-upgrade" type="button">+1 Click Power — Cost: <span id="click-cost">30</span></button>
+          <div class="mini-info"><span id="click-level">Lv 0 (Power: 1)</span></div>
+          <button id="crit-upgrade" type="button">+1% Crit — Cost: <span id="crit-cost">100</span></button>
+          <div class="mini-info"><span id="crit-chance">5% crit</span></div>
+        </div>
       </div>
-      <p id="worker-note" class="muted">Lv 0 (Auto: 0 boxes / 2s)</p>
-    </section>
 
-    <!-- Shipping Manager -->
-    <section class="manager">
-      <h3>Shipping Manager (Auto-Dispatch)</h3>
-      <div class="row">
-        <button id="manager-upgrade" type="button">
-          Hire/Level Up — Cost: <span id="manager-cost">250</span>
-        </button>
-        <p id="manager-level">Lv 0 (Auto: 0 loads / 5s)</p>
-      </div>
-    </section>
-
-    <!-- Manual Click Upgrades -->
-    <section class="manual">
-      <h3>Manual Click Power</h3>
-      <div class="row">
-        <button id="click-upgrade" type="button">
-          Stronger Arms (+1 click power) — Cost: <span id="click-cost">30</span>
-        </button>
-        <p id="click-level">Lv 0 (Power: 1)</p>
-      </div>
-    </section>
-
-    <!-- Crit Upgrades -->
-    <section class="crit">
-      <h3>Critical Clicks</h3>
-      <div class="row">
-        <button id="crit-upgrade" type="button">
-          Increase Crit Chance (+1%) — Cost: <span id="crit-cost">100</span>
-        </button>
-        <p id="crit-chance">5% crit</p>
-      </div>
-    </section>
-
-    <!-- Active Skill -->
-    <section class="skill">
-      <h3>Priority Pick (Active Skill)</h3>
-      <div class="row">
-        <button id="skill-btn" type="button">Activate (2× clicks)</button>
-        <span id="skill-timer" class="muted">Ready</span>
-      </div>
-      <div class="row">
-        <button id="skill-upgrade" type="button">
-          Extend Duration (+2s) — Cost: <span id="skill-cost">150</span>
-        </button>
-        <p id="skill-duration">10s duration, 60s CD</p>
+      <!-- Active Skill -->
+      <div class="panel">
+        <div class="panel-title">Active Skill</div>
+        <div class="btn-row">
+          <button id="skill-btn" type="button">Priority Pick (2×)</button>
+          <span class="muted" id="skill-timer">Ready</span>
+        </div>
+        <div class="btn-col">
+          <button id="skill-upgrade" type="button">+2s Duration — Cost: <span id="skill-cost">150</span></button>
+          <div class="mini-info"><span id="skill-duration">10s duration, 60s CD</span></div>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- ===== PRESTIGE SCREEN ===== -->
+  <!-- ===== PRESTIGE ===== -->
   <main id="screen-prestige" class="hidden">
-    <section class="prestige">
-      <div class="row">
-        <h3>Reset & Prestige</h3>
-        <button id="reset-btn" type="button">Reset (Earn Tokens)</button>
-      </div>
-      <p class="muted">
-        Tokens: <strong id="tokens-txt">0</strong> &nbsp;|&nbsp;
-        Next reset (estimate): <strong id="next-tokens-txt">0</strong>
-      </p>
-
-      <h3>Skill Tree</h3>
-
-      <!-- SVG prestige tree -->
-      <section id="prestige-tree" class="tree-wrap">
-        <div class="tree-canvas">
-          <svg id="tree-svg" viewBox="0 0 1000 1200" preserveAspectRatio="xMidYMid meet"></svg>
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-title">Reset & Tokens</div>
+        <div class="btn-row">
+          <button id="reset-btn" type="button">Reset (Earn Tokens)</button>
         </div>
-
-        <aside class="tree-side">
-          <div class="card">
-            <h4 id="node-title">Select a node</h4>
-            <p id="node-desc" class="muted">Click a circle to see details.</p>
-            <p id="node-level" class="muted">Level: —</p>
-            <p id="node-cost" class="muted">Cost: —</p>
-            <button id="node-buy" type="button" disabled>Buy</button>
-          </div>
-
-          <div class="card">
-            <h4>Tokens</h4>
-            <p class="muted">
-              Balance: <strong id="tokens-txt">0</strong><br/>
-              Next reset (estimate): <strong id="next-tokens-txt">0</strong>
-            </p>
-          </div>
-
-          <div class="card">
-            <h4>Legend</h4>
-            <p><span class="dot dot-prod"></span> Production</p>
-            <p><span class="dot dot-log"></span> Logistics</p>
-            <p><span class="dot dot-meta"></span> Meta</p>
-          </div>
-        </aside>
-      </section>
+        <div class="mini-info">
+          <span>Tokens: <strong id="tokens-txt">0</strong></span>
+          <span class="muted">Next reset est: <strong id="next-tokens-txt">0</strong></span>
+        </div>
+      </div>
+      <div class="panel legend">
+        <div class="panel-title">Legend</div>
+        <div class="legend-row"><span class="dot dot-prod"></span> Production</div>
+        <div class="legend-row"><span class="dot dot-log"></span> Logistics</div>
+        <div class="legend-row"><span class="dot dot-meta"></span> Meta</div>
+      </div>
+    </section>
+    <section class="tree-wrap">
+      <div class="tree-canvas"><svg id="tree-svg" viewBox="0 0 1000 1200" preserveAspectRatio="xMidYMid meet"></svg></div>
+      <aside class="side">
+        <div class="panel">
+          <div class="panel-title" id="node-title">Select a node</div>
+          <div class="mini-info" id="node-desc">Click a circle to see details.</div>
+          <div class="mini-info" id="node-level">Level: —</div>
+          <div class="mini-info" id="node-cost">Cost: —</div>
+          <div class="btn-row"><button id="node-buy" type="button" disabled>Buy</button></div>
+        </div>
+      </aside>
     </section>
   </main>
 
-  <!-- ===== CONTRACTS SCREEN ===== -->
+  <!-- ===== CONTRACTS ===== -->
   <main id="screen-contracts" class="hidden">
-    <section class="contracts">
-      <h3>Contracts</h3>
-      <p class="muted">Deliver boxes within the time limit for a bonus payout. Shipped boxes still pay normal muns.</p>
-
-      <div id="contract-active" class="card hidden">
-        <p id="contract-desc">—</p>
-        <div class="progress-bar">
-          <div id="contract-progress"></div>
+    <section class="grid-2 contracts-grid">
+      <div class="panel">
+        <div class="panel-title">Contracts</div>
+        <p class="muted small">Deliver boxes within the time limit for a bonus payout.</p>
+        <div class="btn-row">
+          <button id="contract-generate" type="button">Generate</button>
+          <button id="contract-abandon" type="button" class="hidden">Abandon</button>
         </div>
-        <div class="row" style="justify-content: space-between;">
-          <p><strong id="contract-progress-text">0 / 0</strong></p>
-          <p><strong id="contract-timer">0s</strong> left</p>
-        </div>
-        <div id="contract-status" class="muted"></div>
-
-        <div id="contract-active" class="card hidden">
-  <p id="contract-desc">—</p>
-  <div class="progress-bar">
-    <div id="contract-progress"></div>
-  </div>
-  <div class="row" style="justify-content: space-between;">
-    <p><strong id="contract-progress-text">0 / 0</strong></p>
-    <p><strong id="contract-timer">0s</strong> left</p>
-  </div>
-  <div id="contract-status" class="muted" aria-live="polite"></div>
-
-  <!-- ADD THIS: where the confetti pieces will be placed -->
-  <div id="contract-burst" aria-hidden="true"></div>
-</div>
-
       </div>
-
-      <div class="row">
-        <button id="contract-generate" type="button">Generate Contract</button>
-        <button id="contract-abandon" type="button" class="hidden">Abandon</button>
+      <div class="panel hidden" id="contract-active">
+        <div class="row space-between">
+          <span id="contract-rarity" class="badge badge-common">Common</span>
+          <span id="contract-timer">0s</span>
+        </div>
+        <p id="contract-desc">—</p>
+        <div class="progress"><div id="contract-progress"></div></div>
+        <div class="row space-between mini-info">
+          <strong id="contract-progress-text">0 / 0</strong>
+          <span id="contract-status" class="muted"></span>
+        </div>
+        <p id="contract-meta" class="muted small">—</p>
+        <div id="contract-burst" aria-hidden="true"></div>
       </div>
     </section>
   </main>
 
-  <!-- Toast container -->
+  <!-- ===== SETTINGS ===== -->
+  <main id="screen-settings" class="hidden">
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-title">Gameplay & UX</div>
+
+        <div class="form-row">
+          <label class="form-label" for="set-sound">Sound Effects</label>
+          <label class="switch">
+            <input id="set-sound" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="set-confetti">Confetti Effects</label>
+          <label class="switch">
+            <input id="set-confetti" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="set-toasts">Popup Toasts</label>
+          <label class="switch">
+            <input id="set-toasts" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="set-reduced-motion">Reduced Motion</label>
+          <label class="switch">
+            <input id="set-reduced-motion" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="btn-row" style="margin-top:8px;">
+          <button id="settings-reset" type="button">Reset to Defaults</button>
+        </div>
+        <p class="muted small">Settings are saved automatically.</p>
+      </div>
+    </section>
+  </main>
+
+  
+
+
+  <!-- Toasts -->
   <div id="toast-container"></div>
 
-  <script src="scripts/warehouse.js"></script>
+  <!-- JS entry point -->
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
