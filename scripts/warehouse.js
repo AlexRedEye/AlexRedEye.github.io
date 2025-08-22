@@ -7,11 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabs = document.querySelectorAll('.tab-button');
   tabs.forEach(btn => {
     btn.addEventListener('click', () => {
-      // activate tab button
       tabs.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
-      // show target screen, hide others
       const targetId = btn.dataset.target;
       document.querySelectorAll('main[id^="screen-"]').forEach(m => {
         if (m.id === targetId) m.classList.remove('hidden');
@@ -73,31 +70,12 @@ const effProdTxt  = document.getElementById('eff-prod');
 const effShipTxt  = document.getElementById('eff-ship');
 const effBlockTxt = document.getElementById('eff-block');
 
-// Prestige / Tokens UI
+// Prestige / Tokens UI (also shown on side panel)
 const resetBtn = document.getElementById('reset-btn');
 const tokensTxt = document.getElementById('tokens-txt');
 const nextTokensTxt = document.getElementById('next-tokens-txt');
 
-const nodeWorkerBtn = document.getElementById('node-worker');
-const nodeWorkerCostTxt = document.getElementById('node-worker-cost');
-const nodeWorkerLevelTxt = document.getElementById('node-worker-level');
-
-const nodeTruckBtn = document.getElementById('node-truck');
-const nodeTruckCostTxt = document.getElementById('node-truck-cost');
-const nodeTruckLevelTxt = document.getElementById('node-truck-level');
-
-const nodeManualBtn = document.getElementById('node-manual');
-const nodeManualCostTxt = document.getElementById('node-manual-cost');
-const nodeManualLevelTxt = document.getElementById('node-manual-level');
-
-const nodeCritBtn = document.getElementById('node-crit');
-const nodeCritCostTxt = document.getElementById('node-crit-cost');
-const nodeCritLevelTxt = document.getElementById('node-crit-level');
-
-const nodeManagerBtn = document.getElementById('node-manager');
-const nodeManagerCostTxt = document.getElementById('node-manager-cost');
-const nodeManagerLevelTxt = document.getElementById('node-manager-level');
-
+// SVG Prestige Tree side controls
 const treeSvg = document.getElementById('tree-svg');
 const nodeTitle = document.getElementById('node-title');
 const nodeDesc = document.getElementById('node-desc');
@@ -105,6 +83,15 @@ const nodeLevel = document.getElementById('node-level');
 const nodeCostLine = document.getElementById('node-cost');
 const nodeBuyBtn = document.getElementById('node-buy');
 
+// Contracts UI
+const cActiveCard = document.getElementById('contract-active');
+const cDesc = document.getElementById('contract-desc');
+const cProgressBar = document.getElementById('contract-progress');
+const cProgressText = document.getElementById('contract-progress-text');
+const cTimer = document.getElementById('contract-timer');
+const cStatus = document.getElementById('contract-status');
+const cGenerateBtn = document.getElementById('contract-generate');
+const cAbandonBtn = document.getElementById('contract-abandon');
 
 // Toasts
 const toastContainer = document.getElementById('toast-container');
@@ -137,20 +124,20 @@ const MAX_CLICK_POWER_LEVEL = 10;
 
 const CRIT_BASE_COST = 100;
 const CRIT_COST_SCALE = 1.5;
-const BASE_CRIT_CHANCE = 0.05;     // 5%
-const CRIT_PER_LEVEL = 0.01;       // +1% per level
-const PRESTIGE_CRIT_PER_LVL = 0.005; // +0.5% per prestige level
+const BASE_CRIT_CHANCE = 0.05;
+const CRIT_PER_LEVEL = 0.01;
+const PRESTIGE_CRIT_PER_LVL = 0.005;
 const CRIT_MULTIPLIER = 10;
-const MAX_TOTAL_CRIT = 0.25;       // hard cap 25%
+const MAX_TOTAL_CRIT = 0.25;
 
 const SKILL_BASE_COST = 150;
 const SKILL_COST_SCALE = 1.5;
-const SKILL_BASE_DURATION = 10;    // seconds
+const SKILL_BASE_DURATION = 10;
 const SKILL_DURATION_PER_LEVEL = 2;
 const SKILL_MAX_LEVEL = 5;
-const SKILL_COOLDOWN = 60;         // seconds
+const SKILL_COOLDOWN = 60;
 
-const EFF_WINDOW_MS = 60000;       // 60s
+const EFF_WINDOW_MS = 60000; // 60s
 
 // Prestige base costs (exponential: cost = base * 2^level)
 const TREE_BASE_COST = {
@@ -161,7 +148,7 @@ const TREE_BASE_COST = {
   managerBoost: 4
 };
 
-// --- Prestige Tree Graph ---
+// --- Prestige Tree Graph Layout ---
 const TREE_NODES = [
   // key, label, category, description, x [0..1000], y [0..1200], dependencies
   { key: 'manualBoost',  label: 'M',  cat: 'prod', desc: '+1 click power / level',
@@ -179,10 +166,7 @@ const TREE_NODES = [
   { key: 'critBoost',    label: 'C',  cat: 'meta', desc: '+0.5% crit chance / level',
     x: 300, y: 700,  deps: ['workerBoost'] },
 ];
-
-// map for quick lookup
 const TREE_NODE_MAP = Object.fromEntries(TREE_NODES.map(n => [n.key, n]));
-
 
 /* =======================
    GAME STATE
@@ -214,19 +198,27 @@ const gameState = {
   // Prestige
   tokens: 0,
   tree: {
-    workerBoost: 0, // +1% per level
-    truckBoost: 0,  // +1 capacity per truck per level
-    manualBoost: 0, // +1 click power per level
-    critBoost: 0,   // +0.5% crit per level
-    managerBoost: 0 // +1 load per manager tick per level
+    workerBoost: 0,
+    truckBoost: 0,
+    manualBoost: 0,
+    critBoost: 0,
+    managerBoost: 0
   }
 };
 
 // Efficiency rolling arrays
-const eff = {
-  produced: [],
-  shipped: [],
-  blocked: []
+const eff = { produced: [], shipped: [], blocked: [] };
+
+/* =======================
+   CONTRACT STATE
+   ======================= */
+const contractState = {
+  active: false,
+  quota: 0,
+  reward: 0,
+  timeLimit: 0,  // seconds
+  endTime: 0,    // timestamp
+  progress: 0
 };
 
 /* =======================
@@ -234,12 +226,8 @@ const eff = {
    ======================= */
 try {
   const saved = JSON.parse(localStorage.getItem('save'));
-  if (saved && typeof saved === 'object') {
-    Object.assign(gameState, saved);
-  }
-} catch (_) {
-  // ignore corrupted saves
-}
+  if (saved && typeof saved === 'object') Object.assign(gameState, saved);
+} catch (_) {}
 
 /* =======================
    HELPERS
@@ -249,40 +237,43 @@ const nowMs = () => Date.now();
 function pluralize(n, singular, plural = null) {
   return `${n} ${n === 1 ? singular : (plural ?? singular + 's')}`;
 }
+function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function formatDuration(sec) {
+  sec = Math.max(0, Math.ceil(sec));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
 
 function getTruckCapacity() {
   return BASE_TRUCK_CAPACITY + gameState.tree.truckBoost;
 }
 
 function storageCost() {
-  return Math.floor(STORAGE_BASE_COST * Math.pow(STORAGE_COST_SCALE, Math.floor((gameState.storage - 10) / 10)));
+  return Math.floor(STORAGE_BASE_COST * Math.pow(
+    STORAGE_COST_SCALE, Math.floor((gameState.storage - 10) / 10)
+  ));
 }
-
 function truckCost() {
   const purchased = Math.max(0, gameState.trucks - 1);
   return Math.floor(TRUCK_BASE_COST * Math.pow(TRUCK_COST_SCALE, purchased));
 }
-
 function workerCost() {
   return Math.floor(WORKER_BASE_COST * Math.pow(WORKER_COST_SCALE, gameState.workers));
 }
-
 function managerCost() {
   return Math.floor(MANAGER_BASE_COST * Math.pow(MANAGER_COST_SCALE, gameState.managerLevel));
 }
-
 function clickCost() {
   return Math.floor(CLICK_BASE_COST * Math.pow(CLICK_COST_SCALE, gameState.clickPowerLevel));
 }
-
 function critCost() {
   return Math.floor(CRIT_BASE_COST * Math.pow(CRIT_COST_SCALE, gameState.critLevel));
 }
-
 function skillCost() {
   return Math.floor(SKILL_BASE_COST * Math.pow(SKILL_COST_SCALE, gameState.skillLevel));
 }
-
 function treeCost(node) {
   const base = TREE_BASE_COST[node] || 1;
   const lvl = gameState.tree[node] || 0;
@@ -302,19 +293,13 @@ function effectiveWorkerBatch(workers) {
   const prestige = 1 + (gameState.tree.workerBoost * 0.01);
   return Math.max(1, Math.floor(workers * prestige));
 }
-
 function clickPower() {
   return 1 + gameState.clickPowerLevel + gameState.tree.manualBoost;
 }
-
 function critChance() {
-  const raw =
-    BASE_CRIT_CHANCE +
-    gameState.critLevel * CRIT_PER_LEVEL +
-    gameState.tree.critBoost * 0.005;
+  const raw = BASE_CRIT_CHANCE + gameState.critLevel * CRIT_PER_LEVEL + gameState.tree.critBoost * PRESTIGE_CRIT_PER_LVL;
   return Math.min(raw, MAX_TOTAL_CRIT);
 }
-
 function isSkillActive()   { return nowMs() < gameState.skillActiveUntil; }
 function isSkillOnCooldown(){ return nowMs() < gameState.skillCooldownUntil; }
 function skillDurationSec() { return SKILL_BASE_DURATION + gameState.skillLevel * SKILL_DURATION_PER_LEVEL; }
@@ -325,11 +310,8 @@ function cooldownRemainingSec(){ return Math.max(0, Math.ceil((gameState.skillCo
 function setButtonState(button, affordable) {
   if (!button) return;
   button.classList.remove('affordable', 'unaffordable');
-  if (button.disabled) {
-    button.classList.add('unaffordable');
-  } else if (affordable) {
-    button.classList.add('affordable');
-  }
+  if (button.disabled) button.classList.add('unaffordable');
+  else if (affordable) button.classList.add('affordable');
 }
 
 // Toasts
@@ -337,7 +319,8 @@ function showToast(text, type, originElement) {
   if (!toastContainer) return;
   const div = document.createElement('div');
   div.className = `toast ${type}`;
-  const rect = originElement ? originElement.getBoundingClientRect() : { left: window.innerWidth / 2, top: 0, width: 0 };
+  const rect = originElement ? originElement.getBoundingClientRect()
+                             : { left: window.innerWidth / 2, top: 0, width: 0 };
   div.style.left = rect.left + rect.width / 2 + 'px';
   div.style.top = rect.top + window.scrollY + 'px';
   div.textContent = text;
@@ -345,92 +328,10 @@ function showToast(text, type, originElement) {
   setTimeout(() => div.remove(), 1000);
 }
 
+/* =======================
+   PRESTIGE TREE RENDERING
+   ======================= */
 let selectedNodeKey = null;
-
-function drawPrestigeTree() {
-  if (!treeSvg) return;
-  treeSvg.innerHTML = ''; // clear
-
-  // 1) draw edges
-  TREE_NODES.forEach(n => {
-    n.deps.forEach(parentKey => {
-      const p = TREE_NODE_MAP[parentKey];
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', p.x);
-      line.setAttribute('y1', p.y);
-      line.setAttribute('x2', n.x);
-      line.setAttribute('y2', n.y);
-      line.setAttribute('class', 'edge');
-      treeSvg.appendChild(line);
-    });
-  });
-
-  // 2) draw nodes
-  TREE_NODES.forEach(n => {
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('class', `node ${n.cat} ${selectedNodeKey===n.key?'selected':''}`);
-    g.dataset.key = n.key;
-
-    const r = 56;
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', n.x);
-    circle.setAttribute('cy', n.y);
-    circle.setAttribute('r', r);
-    g.appendChild(circle);
-
-    // label
-    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    txt.setAttribute('x', n.x);
-    txt.setAttribute('y', n.y);
-    txt.setAttribute('font-size', '34');
-    txt.textContent = n.label;
-    g.appendChild(txt);
-
-    // level badge
-    const lvl = (gameState.tree[n.key] || 0);
-    const lvlTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lvlTxt.setAttribute('x', n.x + r - 6);
-    lvlTxt.setAttribute('y', n.y - r + 20);
-    lvlTxt.setAttribute('class', 'lvl');
-    lvlTxt.textContent = `Lv ${lvl}`;
-    g.appendChild(lvlTxt);
-
-    // click handler
-    g.addEventListener('click', () => {
-      selectedNodeKey = n.key;
-      updatePrestigeSide();
-      drawPrestigeTree();
-    });
-
-    treeSvg.appendChild(g);
-  });
-}
-
-function updatePrestigeSide() {
-  if (!selectedNodeKey) {
-    nodeTitle.textContent = 'Select a node';
-    nodeDesc.textContent = 'Click a circle to see details.';
-    nodeLevel.textContent = 'Level: —';
-    nodeCostLine.textContent = 'Cost: —';
-    nodeBuyBtn.disabled = true;
-    return;
-  }
-  const n = TREE_NODE_MAP[selectedNodeKey];
-  const lvl = gameState.tree[selectedNodeKey] || 0;
-  const cost = treeCost(selectedNodeKey);
-
-  // dependency check: require all deps have level >=1
-  const depsMet = (n.deps || []).every(key => (gameState.tree[key] || 0) >= 1);
-
-  nodeTitle.textContent = `${n.label} — ${prettyNodeName(selectedNodeKey)}`;
-  nodeDesc.textContent = n.desc + (n.deps.length ? ` (Requires: ${n.deps.map(prettyNodeName).join(', ')})` : '');
-  nodeLevel.textContent = `Level: ${lvl}`;
-  nodeCostLine.textContent = `Cost: ${cost} token${cost===1?'':'s'}`;
-
-  const canAfford = gameState.tokens >= cost;
-  nodeBuyBtn.disabled = !(canAfford && depsMet);
-  setButtonState(nodeBuyBtn, canAfford && depsMet);
-}
 
 function prettyNodeName(key) {
   return ({
@@ -442,14 +343,91 @@ function prettyNodeName(key) {
   })[key] || key;
 }
 
+function drawPrestigeTree() {
+  if (!treeSvg) return;
+  treeSvg.innerHTML = '';
+
+  // edges
+  TREE_NODES.forEach(n => {
+    n.deps.forEach(parentKey => {
+      const p = TREE_NODE_MAP[parentKey];
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+      line.setAttribute('x2', n.x); line.setAttribute('y2', n.y);
+      line.setAttribute('class', 'edge');
+      treeSvg.appendChild(line);
+    });
+  });
+
+  // nodes
+  TREE_NODES.forEach(n => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', `node ${n.cat} ${selectedNodeKey===n.key?'selected':''}`);
+    g.dataset.key = n.key;
+
+    const r = 56;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', r);
+    g.appendChild(circle);
+
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('x', n.x); txt.setAttribute('y', n.y); txt.setAttribute('font-size', '34');
+    txt.textContent = n.label;
+    g.appendChild(txt);
+
+    const lvl = (gameState.tree[n.key] || 0);
+    const lvlTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lvlTxt.setAttribute('x', n.x + r - 6);
+    lvlTxt.setAttribute('y', n.y - r + 20);
+    lvlTxt.setAttribute('class', 'lvl');
+    lvlTxt.textContent = `Lv ${lvl}`;
+    g.appendChild(lvlTxt);
+
+    g.addEventListener('click', () => {
+      selectedNodeKey = n.key;
+      updatePrestigeSide();
+      drawPrestigeTree();
+    });
+
+    treeSvg.appendChild(g);
+  });
+}
+
+function updatePrestigeSide() {
+  if (!nodeTitle) return;
+  if (!selectedNodeKey) {
+    nodeTitle.textContent = 'Select a node';
+    nodeDesc.textContent = 'Click a circle to see details.';
+    nodeLevel.textContent = 'Level: —';
+    nodeCostLine.textContent = 'Cost: —';
+    if (nodeBuyBtn) nodeBuyBtn.disabled = true;
+    return;
+  }
+
+  const n = TREE_NODE_MAP[selectedNodeKey];
+  const lvl = gameState.tree[selectedNodeKey] || 0;
+  const cost = treeCost(selectedNodeKey);
+  const depsMet = (n.deps || []).every(key => (gameState.tree[key] || 0) >= 1);
+
+  nodeTitle.textContent = `${n.label} — ${prettyNodeName(selectedNodeKey)}`;
+  nodeDesc.textContent = n.desc + (n.deps.length ? ` (Requires: ${n.deps.map(prettyNodeName).join(', ')})` : '');
+  nodeLevel.textContent = `Level: ${lvl}`;
+  nodeCostLine.textContent = `Cost: ${cost} token${cost===1?'':'s'}`;
+
+  const canAfford = gameState.tokens >= cost;
+  if (nodeBuyBtn) {
+    nodeBuyBtn.disabled = !(canAfford && depsMet);
+    setButtonState(nodeBuyBtn, canAfford && depsMet);
+  }
+}
 
 /* =======================
    CORE ACTIONS
    ======================= */
 function produceBox() {
-  let amount = clickPower();
+  let amount = 1 + gameState.clickPowerLevel + gameState.tree.manualBoost;
   if (isSkillActive()) amount *= 2;
-  if (Math.random() < critChance()) amount *= 10;
+  if (Math.random() < critChance()) amount *= CRIT_MULTIPLIER;
   amount = Math.floor(amount);
 
   const spaceLeft = gameState.storage - gameState.box;
@@ -466,6 +444,26 @@ function produceBox() {
   if (blocked > 0) effAdd(eff.blocked, blocked);
 }
 
+function onBoxesShipped(count) {
+  // Normal shipping already adds muns elsewhere; here we only handle contracts.
+  if (!contractState.active) return;
+  contractState.progress += count;
+  if (contractState.progress >= contractState.quota) {
+    // Complete immediately
+    gameState.muns += contractState.reward;
+    cStatus.textContent = `Completed! +${contractState.reward} Muns`;
+    showToast(`Contract +${contractState.reward} Muns!`, 'muns', cActiveCard || shipButton);
+    // reset contract
+    contractState.active = false;
+    contractState.progress = 0;
+    contractState.quota = 0;
+    contractState.reward = 0;
+    contractState.timeLimit = 0;
+    contractState.endTime = 0;
+  }
+  updateUI();
+}
+
 function shipStorage() {
   const capacity = getTruckCapacity();
   const fullLoads = Math.floor(gameState.box / capacity);
@@ -480,62 +478,44 @@ function shipStorage() {
   effAdd(eff.shipped, boxesToShip);
   gameState.runShipped += boxesToShip;
 
+  // Contract progress
+  onBoxesShipped(boxesToShip);
+
   showToast(`+${boxesToShip * BOX_VALUE} Muns`, 'muns', shipButton);
   updateUI();
 }
 
 function upgrade(type) {
   if (type === 'storage') {
-    const cost = storageCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.storage += STORAGE_STEP;
+    const cost = storageCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.storage += STORAGE_STEP;
   }
-
   if (type === 'truck') {
-    const cost = truckCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.trucks += 1;
+    const cost = truckCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.trucks += 1;
   }
-
   if (type === 'worker') {
-    const cost = workerCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.workers += 1;
+    const cost = workerCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.workers += 1;
   }
-
   if (type === 'manager') {
-    const cost = managerCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.managerLevel += 1;
+    const cost = managerCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.managerLevel += 1;
   }
-
   if (type === 'click') {
     if (gameState.clickPowerLevel >= MAX_CLICK_POWER_LEVEL) return;
-    const cost = clickCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.clickPowerLevel += 1;
+    const cost = clickCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.clickPowerLevel += 1;
   }
-
   if (type === 'crit') {
-    const cost = critCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.critLevel += 1;
+    const cost = critCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.critLevel += 1;
   }
-
   if (type === 'skill') {
     if (gameState.skillLevel >= SKILL_MAX_LEVEL) return;
-    const cost = skillCost();
-    if (gameState.muns < cost) return;
-    gameState.muns -= cost;
-    gameState.skillLevel += 1;
+    const cost = skillCost(); if (gameState.muns < cost) return;
+    gameState.muns -= cost; gameState.skillLevel += 1;
   }
-
   updateUI();
 }
 
@@ -551,42 +531,71 @@ function activateSkill() {
    PRESTIGE / SKILL TREE
    ======================= */
 function tokensEarnedThisReset() {
-  // 1 Token per 100 boxes shipped this run
-  return Math.floor(gameState.runShipped / 100);
+  return Math.floor(gameState.runShipped / 100); // 1 token per 100 shipped boxes
 }
 
 function doReset() {
   const tokensEarned = tokensEarnedThisReset();
-  if (tokensEarned <= 0) {
-    alert('Ship more boxes first! You earn 1 Token per 100 boxes shipped.');
-    return;
-  }
-
+  if (tokensEarned <= 0) { alert('Ship more boxes first!'); return; }
   gameState.tokens += tokensEarned;
 
   // Reset run state
-  gameState.box = 0;
-  gameState.muns = 0;
-  gameState.storage = 10;
-  gameState.trucks = 1;
-  gameState.workers = 0;
-  gameState.managerLevel = 0;
-  gameState.totalBoxes = 0;
-  gameState.runShipped = 0;
+  gameState.box = 0; gameState.muns = 0; gameState.storage = 10; gameState.trucks = 1;
+  gameState.workers = 0; gameState.managerLevel = 0;
+  gameState.totalBoxes = 0; gameState.runShipped = 0;
 
-  // Clear rolling efficiency windows
-  eff.produced = [];
-  eff.shipped = [];
-  eff.blocked = [];
+  // Contracts are cancelled on reset
+  contractState.active = false;
+  contractState.progress = 0; contractState.quota = 0; contractState.reward = 0; contractState.endTime = 0;
 
+  eff.produced = []; eff.shipped = []; eff.blocked = [];
   updateUI();
 }
 
 function buyNode(nodeKey) {
   const cost = treeCost(nodeKey);
   if (gameState.tokens < cost) return;
+  // Dependency check
+  const n = TREE_NODE_MAP[nodeKey];
+  const depsMet = (n.deps || []).every(k => (gameState.tree[k] || 0) >= 1);
+  if (!depsMet) return;
+
   gameState.tokens -= cost;
   gameState.tree[nodeKey] += 1;
+  updatePrestigeSide();
+  drawPrestigeTree();
+  updateUI();
+}
+
+/* =======================
+   CONTRACTS
+   ======================= */
+function startRandomContract() {
+  if (contractState.active) return;
+  const quota = randomInt(50, 200);
+  const timeLimit = randomInt(30, 120);      // seconds
+  const reward = quota * 2;                   // simple baseline: 2× better than raw selling
+
+  contractState.active = true;
+  contractState.quota = quota;
+  contractState.timeLimit = timeLimit;
+  contractState.reward = reward;
+  contractState.progress = 0;
+  contractState.endTime = nowMs() + timeLimit * 1000;
+
+  cStatus.textContent = '';
+  updateUI();
+}
+
+function abandonContract() {
+  if (!contractState.active) return;
+  contractState.active = false;
+  contractState.progress = 0;
+  contractState.quota = 0;
+  contractState.reward = 0;
+  contractState.timeLimit = 0;
+  contractState.endTime = 0;
+  cStatus.textContent = 'Abandoned';
   updateUI();
 }
 
@@ -618,7 +627,6 @@ setInterval(() => {
   const fullLoads = Math.floor(gameState.box / capacity);
   if (fullLoads <= 0) return;
 
-  // Manager power is base level + prestige managerBoost
   const managerPower = gameState.managerLevel + gameState.tree.managerBoost;
   const loadsToSend = Math.min(fullLoads, gameState.trucks, managerPower);
   if (loadsToSend <= 0) return;
@@ -630,13 +638,15 @@ setInterval(() => {
   effAdd(eff.shipped, boxesToShip);
   gameState.runShipped += boxesToShip;
 
+  onBoxesShipped(boxesToShip); // contract progress
+
   showToast(`+${boxesToShip * BOX_VALUE} Muns (Auto)`, 'muns', shipButton);
   updateUI();
 }, MANAGER_INTERVAL);
 
-// Skill/cooldown + efficiency + tokens estimate updater
+// Skill/cooldown + efficiency + tokens estimate + contracts timer
 setInterval(() => {
-  // Skill
+  // Skill UI
   if (isSkillActive()) {
     if (skillTimerTxt) skillTimerTxt.textContent = `Priority Pick: ${skillRemainingSec()}s`;
     if (skillBtn) skillBtn.disabled = true;
@@ -665,6 +675,25 @@ setInterval(() => {
 
   // Tokens estimate
   if (nextTokensTxt) nextTokensTxt.textContent = String(tokensEarnedThisReset());
+
+  // Contracts timer
+  if (contractState.active) {
+    const remain = (contractState.endTime - nowMs()) / 1000;
+    if (remain <= 0) {
+      const success = contractState.progress >= contractState.quota;
+      if (!success) cStatus.textContent = 'Failed';
+      // (if success, it would have completed in onBoxesShipped)
+      contractState.active = false;
+      contractState.progress = 0;
+      contractState.quota = 0;
+      contractState.reward = 0;
+      contractState.timeLimit = 0;
+      contractState.endTime = 0;
+      updateUI();
+    } else {
+      if (cTimer) cTimer.textContent = formatDuration(remain);
+    }
+  }
 }, 250);
 
 /* =======================
@@ -677,7 +706,7 @@ function updateUI() {
   if (storageText) storageText.innerText = String(gameState.storage);
   if (trucksText)  trucksText.innerText = String(gameState.trucks);
   if (capText)     capText.innerText = String(getTruckCapacity());
-  if (totalText) totalText.innerText = pluralize(gameState.totalBoxes, 'Total Box', 'Total Boxes');
+  if (totalText)   totalText.innerText = pluralize(gameState.totalBoxes, 'Total Box', 'Total Boxes');
 
   // Costs
   if (storageCostTxt) storageCostTxt.innerText = storageCost();
@@ -692,14 +721,14 @@ function updateUI() {
   if (workerCountTxt) workerCountTxt.innerText = pluralize(gameState.workers, 'Worker');
   if (workerNoteTxt) {
     const perTick = effectiveWorkerBatch(gameState.workers);
-    const secs = WORKER_INTERVAL / 1000;
+    const secs = 2;
     workerNoteTxt.innerText = `Lv ${gameState.workers} (Auto: ${perTick} box${perTick === 1 ? '' : 'es'} / ${secs}s)`;
   }
   if (managerLevelTxt) {
     const power = gameState.managerLevel + gameState.tree.managerBoost;
     managerLevelTxt.innerText = `Lv ${gameState.managerLevel} (Auto: ${power} load${power===1?'':'s'} / ${MANAGER_INTERVAL/1000}s)`;
   }
-  if (clickLevelTxt)  clickLevelTxt.innerText = `Lv ${gameState.clickPowerLevel} (Power: ${clickPower()})`;
+  if (clickLevelTxt)  clickLevelTxt.innerText = `Lv ${gameState.clickPowerLevel} (Power: ${1 + gameState.clickPowerLevel + gameState.tree.manualBoost})`;
   if (critChanceTxt)  critChanceTxt.innerText = `${Math.round(critChance() * 100)}% crit`;
   if (skillDurationTxt) skillDurationTxt.innerText = `${skillDurationSec()}s duration, ${SKILL_COOLDOWN}s CD`;
 
@@ -732,37 +761,31 @@ function updateUI() {
   const canShip = Math.floor(gameState.box / getTruckCapacity()) >= 1;
   if (shipButton) shipButton.disabled = !canShip;
 
-  // Tokens & node UI
+  // Tokens & prestige side
   if (tokensTxt) tokensTxt.textContent = String(gameState.tokens);
-
-  // Node levels
-  if (nodeWorkerLevelTxt) nodeWorkerLevelTxt.textContent = `Lv ${gameState.tree.workerBoost}`;
-  if (nodeTruckLevelTxt)  nodeTruckLevelTxt.textContent  = `Lv ${gameState.tree.truckBoost}`;
-  if (nodeManualLevelTxt) nodeManualLevelTxt.textContent = `Lv ${gameState.tree.manualBoost}`;
-  if (nodeCritLevelTxt)   nodeCritLevelTxt.textContent   = `Lv ${gameState.tree.critBoost}`;
-  if (nodeManagerLevelTxt)nodeManagerLevelTxt.textContent= `Lv ${gameState.tree.managerBoost}`;
-
-  // Node costs
-  const cWorker  = treeCost('workerBoost');
-  const cTruck   = treeCost('truckBoost');
-  const cManual  = treeCost('manualBoost');
-  const cCrit    = treeCost('critBoost');
-  const cManager = treeCost('managerBoost');
-
-  if (nodeWorkerCostTxt)  nodeWorkerCostTxt.textContent  = String(cWorker);
-  if (nodeTruckCostTxt)   nodeTruckCostTxt.textContent   = String(cTruck);
-  if (nodeManualCostTxt)  nodeManualCostTxt.textContent  = String(cManual);
-  if (nodeCritCostTxt)    nodeCritCostTxt.textContent    = String(cCrit);
-  if (nodeManagerCostTxt) nodeManagerCostTxt.textContent = String(cManager);
-
-  // Node button states
-  if (nodeWorkerBtn)  { nodeWorkerBtn.disabled  = gameState.tokens < cWorker;  setButtonState(nodeWorkerBtn,  gameState.tokens >= cWorker); }
-  if (nodeTruckBtn)   { nodeTruckBtn.disabled   = gameState.tokens < cTruck;   setButtonState(nodeTruckBtn,   gameState.tokens >= cTruck); }
-  if (nodeManualBtn)  { nodeManualBtn.disabled  = gameState.tokens < cManual;  setButtonState(nodeManualBtn,  gameState.tokens >= cManual); }
-  if (nodeCritBtn)    { nodeCritBtn.disabled    = gameState.tokens < cCrit;    setButtonState(nodeCritBtn,    gameState.tokens >= cCrit); }
-  if (nodeManagerBtn) { nodeManagerBtn.disabled = gameState.tokens < cManager; setButtonState(nodeManagerBtn, gameState.tokens >= cManager); }
   updatePrestigeSide();
 
+  // Contracts UI
+  if (contractState.active) {
+    cActiveCard.classList.remove('hidden');
+    cAbandonBtn.classList.remove('hidden');
+    cGenerateBtn.disabled = true;
+
+    const remain = Math.max(0, Math.ceil((contractState.endTime - nowMs()) / 1000));
+    if (cTimer) cTimer.textContent = formatDuration(remain);
+
+    const pct = Math.max(0, Math.min(100, (contractState.progress / contractState.quota) * 100));
+    if (cProgressBar) cProgressBar.style.width = pct + '%';
+    if (cProgressText) cProgressText.textContent = `${contractState.progress} / ${contractState.quota}`;
+
+    cDesc.textContent = `Deliver ${contractState.quota} boxes in ${formatDuration(contractState.timeLimit)} for ${contractState.reward} Muns.`;
+  } else {
+    cActiveCard.classList.add('hidden');
+    cAbandonBtn.classList.add('hidden');
+    cGenerateBtn.disabled = false;
+    if (cProgressBar) cProgressBar.style.width = '0%';
+    if (cProgressText) cProgressText.textContent = `0 / 0`;
+  }
 }
 
 /* =======================
@@ -782,21 +805,15 @@ if (skillBtn)          skillBtn.addEventListener('click', () => activateSkill())
 
 if (resetBtn)          resetBtn.addEventListener('click', () => doReset());
 
-// Skill tree buttons
-if (nodeWorkerBtn)  nodeWorkerBtn.addEventListener('click', () => buyNode('workerBoost'));
-if (nodeTruckBtn)   nodeTruckBtn.addEventListener('click', () => buyNode('truckBoost'));
-if (nodeManualBtn)  nodeManualBtn.addEventListener('click', () => buyNode('manualBoost'));
-if (nodeCritBtn)    nodeCritBtn.addEventListener('click', () => buyNode('critBoost'));
-if (nodeManagerBtn) nodeManagerBtn.addEventListener('click', () => buyNode('managerBoost'));
-if (nodeBuyBtn) {
-  nodeBuyBtn.addEventListener('click', () => {
-    if (!selectedNodeKey) return;
-    buyNode(selectedNodeKey);
-    updatePrestigeSide();
-    drawPrestigeTree();
-  });
-}
+// Prestige tree buy button
+if (nodeBuyBtn) nodeBuyBtn.addEventListener('click', () => {
+  if (!selectedNodeKey) return;
+  buyNode(selectedNodeKey);
+});
 
+// Contracts
+if (cGenerateBtn) cGenerateBtn.addEventListener('click', startRandomContract);
+if (cAbandonBtn)  cAbandonBtn.addEventListener('click', abandonContract);
 
 /* =======================
    AUTOSAVE
@@ -813,5 +830,5 @@ window.addEventListener('beforeunload', () => {
    INITIAL RENDER
    ======================= */
 drawPrestigeTree();
-updatePrestigeSide();   
+updatePrestigeSide();
 updateUI();

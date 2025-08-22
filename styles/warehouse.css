@@ -8,14 +8,8 @@ body {
   color: #222;
 }
 
-h1, h2, h3, h4 {
-  margin: 0.4rem 0;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 1rem;
-}
+h1, h2, h3, h4 { margin: 0.4rem 0; }
+h1 { text-align: center; margin-bottom: 1rem; }
 
 /* Tabs */
 .tabs {
@@ -41,7 +35,7 @@ h1 {
 /* Screens */
 .hidden { display: none; }
 
-/* Stats container */
+/* Stats */
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -57,18 +51,12 @@ h1 {
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.card h2 {
-  font-size: 1.3rem;
-  color: #1976d2; /* blue highlight for stat headers */
-}
+.card h2 { font-size: 1.3rem; color: #1976d2; }
 
-/* Emphasize efficiency score */
-.score-big {
-  color: #2e7d32; /* green */
-  font-weight: 800;
-}
+/* Emphasis */
+.score-big { color: #2e7d32; font-weight: 800; }
 
-/* Rows & spacing */
+/* Layout helpers */
 section { margin: 1.5rem 0; }
 .row {
   display: flex;
@@ -79,22 +67,8 @@ section { margin: 1.5rem 0; }
 }
 .upgrades, .automation, .manager, .manual, .crit, .skill, .prestige { margin-top: 1rem; }
 
-.tree-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 1rem;
-  margin-top: 0.75rem;
-}
-
-.node h4 { margin-bottom: 0.25rem; }
-
 p { margin: 0.3rem 0; }
-.muted {
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 0.3rem;
-  display: inline-block;
-}
+.muted { color: #666; font-size: 0.9rem; display: inline-block; }
 
 /* Buttons */
 button {
@@ -106,37 +80,32 @@ button {
   font-size: 1rem;
   transition: background 0.2s, transform 0.1s, border-color 0.2s, color 0.2s;
 }
+button:hover:not(:disabled) { background: #e0e0e0; transform: translateY(-1px); }
+button:active:not(:disabled) { background: #d5d5d5; transform: translateY(0); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-button:hover:not(:disabled) {
-  background: #e0e0e0;
-  transform: translateY(-1px);
+/* Upgrade state colors */
+button.affordable { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+button.affordable:hover:not(:disabled) { background: #c8e6c9; }
+button.unaffordable { background: #f9f9f9; border-color: #ccc; color: #777; }
+
+/* Toasts */
+#toast-container { position: relative; }
+.toast {
+  position: absolute;
+  font-weight: bold;
+  color: #2e7d32;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+  font-size: 0.95rem;
+  user-select: none;
+  transform: translateX(-50%);
 }
-
-button:active:not(:disabled) {
-  background: #d5d5d5;
-  transform: translateY(0);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Upgrade state colors (toggled by JS) */
-button.affordable {
-  background: #e8f5e9;      /* light green */
-  border-color: #4caf50;    /* medium green */
-  color: #1b5e20;           /* dark green text */
-}
-
-button.affordable:hover:not(:disabled) {
-  background: #c8e6c9;
-}
-
-button.unaffordable {
-  background: #f9f9f9;
-  border-color: #ccc;
-  color: #777;
+.toast.box { color: #1976d2; }
+.toast.muns { color: #f57c00; }
+@keyframes floatUp {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to   { opacity: 0; transform: translate(-50%, -40px); }
 }
 
 /* --- Prestige tree layout --- */
@@ -146,7 +115,6 @@ button.unaffordable {
   gap: 1rem;
   align-items: start;
 }
-
 .tree-canvas {
   background: #111;
   border: 1px solid #222;
@@ -154,7 +122,6 @@ button.unaffordable {
   overflow: hidden;
   min-height: 520px;
 }
-
 .tree-side .card { background: #fff; }
 
 /* SVG styling */
@@ -164,16 +131,8 @@ button.unaffordable {
   stroke-linecap: round;
   opacity: 0.85;
 }
-
-#tree-svg .node {
-  cursor: pointer;
-}
-
-#tree-svg .node circle {
-  stroke: #fff;
-  stroke-width: 4;
-}
-
+#tree-svg .node { cursor: pointer; }
+#tree-svg .node circle { stroke: #fff; stroke-width: 4; }
 #tree-svg .node text {
   fill: #fff;
   font-family: system-ui, sans-serif;
@@ -182,19 +141,10 @@ button.unaffordable {
   dominant-baseline: central;
   pointer-events: none;
 }
-
-/* Node colors by category */
-.node.prod circle { fill: #5C6BC0; }  /* production: blue-purple */
-.node.log  circle { fill: #43A047; }  /* logistics: green */
-.node.meta circle { fill: #EF6C00; }  /* meta: orange */
-
-/* Selected */
-#tree-svg .node.selected circle {
-  stroke: #ffeb3b;
-  stroke-width: 6;
-}
-
-/* Level badge */
+.node.prod circle { fill: #5C6BC0; }
+.node.log  circle { fill: #43A047; }
+.node.meta circle { fill: #EF6C00; }
+#tree-svg .node.selected circle { stroke: #ffeb3b; stroke-width: 6; }
 #tree-svg .lvl {
   font-size: 18px;
   fill: #ffeb3b;
@@ -203,38 +153,25 @@ button.unaffordable {
   stroke-width: 3px;
 }
 
-/* Side legend dots */
-.dot {
-  display: inline-block;
-  width: 12px; height: 12px;
-  border-radius: 999px;
-  margin-right: 6px;
-  vertical-align: middle;
-}
+/* Legend dots */
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 999px; margin-right: 6px; }
 .dot-prod { background: #5C6BC0; }
 .dot-log  { background: #43A047; }
 .dot-meta { background: #EF6C00; }
 
-/* Toast container */
-#toast-container { position: relative; }
-
-/* Floating toasts for feedback */
-.toast {
-  position: absolute;
-  font-weight: bold;
-  color: #2e7d32; /* default green */
-  pointer-events: none;
-  animation: floatUp 1s ease-out forwards;
-  font-size: 0.95rem;
-  user-select: none;
-  transform: translateX(-50%); /* center on origin */
+/* Contracts */
+.progress-bar {
+  width: 100%;
+  height: 16px;
+  border-radius: 999px;
+  background: #eee;
+  border: 1px solid #ccc;
+  overflow: hidden;
+  margin: 0.5rem 0;
 }
-
-.toast.box { color: #1976d2; }   /* blue = boxes */
-.toast.muns { color: #f57c00; }  /* orange = money */
-
-/* Animation */
-@keyframes floatUp {
-  from { opacity: 1; transform: translate(-50%, 0); }
-  to   { opacity: 0; transform: translate(-50%, -40px); }
+#contract-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #81c784, #4caf50);
+  transition: width 0.25s ease;
 }

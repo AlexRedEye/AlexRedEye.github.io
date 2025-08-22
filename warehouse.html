@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="styles/warehouse.css">
 </head>
 <body>
-  <h1>📦 Warehouse Clicker – MVP v0.5.0</h1>
+  <h1>📦 Warehouse Clicker – MVP</h1>
 
   <!-- Tabs -->
   <nav class="tabs">
     <button id="tab-game" class="tab-button active" type="button" data-target="screen-game">Game</button>
     <button id="tab-prestige" class="tab-button" type="button" data-target="screen-prestige">Prestige</button>
+    <button id="tab-contracts" class="tab-button" type="button" data-target="screen-contracts">Contracts</button>
   </nav>
 
   <!-- ===== GAME SCREEN ===== -->
@@ -145,40 +146,66 @@
 
       <h3>Skill Tree</h3>
 
-<section id="prestige-tree" class="tree-wrap">
-  <div class="tree-canvas">
-    <svg id="tree-svg" viewBox="0 0 1000 1200" preserveAspectRatio="xMidYMid meet"></svg>
-  </div>
+      <!-- SVG prestige tree -->
+      <section id="prestige-tree" class="tree-wrap">
+        <div class="tree-canvas">
+          <svg id="tree-svg" viewBox="0 0 1000 1200" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
 
-  <aside class="tree-side">
-    <div class="card">
-      <h4 id="node-title">Select a node</h4>
-      <p id="node-desc" class="muted">Click a circle to see details.</p>
-      <p id="node-level" class="muted">Level: —</p>
-      <p id="node-cost" class="muted">Cost: —</p>
-      <button id="node-buy" type="button" disabled>Buy</button>
-    </div>
+        <aside class="tree-side">
+          <div class="card">
+            <h4 id="node-title">Select a node</h4>
+            <p id="node-desc" class="muted">Click a circle to see details.</p>
+            <p id="node-level" class="muted">Level: —</p>
+            <p id="node-cost" class="muted">Cost: —</p>
+            <button id="node-buy" type="button" disabled>Buy</button>
+          </div>
 
-    <div class="card">
-      <h4>Tokens</h4>
-      <p class="muted">
-        Balance: <strong id="tokens-txt">0</strong><br/>
-        Next reset (estimate): <strong id="next-tokens-txt">0</strong>
-      </p>
-    </div>
+          <div class="card">
+            <h4>Tokens</h4>
+            <p class="muted">
+              Balance: <strong id="tokens-txt">0</strong><br/>
+              Next reset (estimate): <strong id="next-tokens-txt">0</strong>
+            </p>
+          </div>
 
-    <div class="card">
-      <h4>Legend</h4>
-      <p><span class="dot dot-prod"></span> Production</p>
-      <p><span class="dot dot-log"></span> Logistics</p>
-      <p><span class="dot dot-meta"></span> Meta</p>
-    </div>
-  </aside>
-</section>
-
+          <div class="card">
+            <h4>Legend</h4>
+            <p><span class="dot dot-prod"></span> Production</p>
+            <p><span class="dot dot-log"></span> Logistics</p>
+            <p><span class="dot dot-meta"></span> Meta</p>
+          </div>
+        </aside>
+      </section>
+    </section>
   </main>
 
-  <!-- Toast container (for floating +X feedback) -->
+  <!-- ===== CONTRACTS SCREEN ===== -->
+  <main id="screen-contracts" class="hidden">
+    <section class="contracts">
+      <h3>Contracts</h3>
+      <p class="muted">Deliver boxes within the time limit for a bonus payout. Shipped boxes still pay normal muns.</p>
+
+      <div id="contract-active" class="card hidden">
+        <p id="contract-desc">—</p>
+        <div class="progress-bar">
+          <div id="contract-progress"></div>
+        </div>
+        <div class="row" style="justify-content: space-between;">
+          <p><strong id="contract-progress-text">0 / 0</strong></p>
+          <p><strong id="contract-timer">0s</strong> left</p>
+        </div>
+        <div id="contract-status" class="muted"></div>
+      </div>
+
+      <div class="row">
+        <button id="contract-generate" type="button">Generate Contract</button>
+        <button id="contract-abandon" type="button" class="hidden">Abandon</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast container -->
   <div id="toast-container"></div>
 
   <script src="scripts/warehouse.js"></script>
