@@ -98,6 +98,14 @@ const nodeManagerBtn = document.getElementById('node-manager');
 const nodeManagerCostTxt = document.getElementById('node-manager-cost');
 const nodeManagerLevelTxt = document.getElementById('node-manager-level');
 
+const treeSvg = document.getElementById('tree-svg');
+const nodeTitle = document.getElementById('node-title');
+const nodeDesc = document.getElementById('node-desc');
+const nodeLevel = document.getElementById('node-level');
+const nodeCostLine = document.getElementById('node-cost');
+const nodeBuyBtn = document.getElementById('node-buy');
+
+
 // Toasts
 const toastContainer = document.getElementById('toast-container');
 
@@ -152,6 +160,29 @@ const TREE_BASE_COST = {
   critBoost: 3,
   managerBoost: 4
 };
+
+// --- Prestige Tree Graph ---
+const TREE_NODES = [
+  // key, label, category, description, x [0..1000], y [0..1200], dependencies
+  { key: 'manualBoost',  label: 'M',  cat: 'prod', desc: '+1 click power / level',
+    x: 500, y: 1100, deps: [] },
+
+  { key: 'workerBoost',  label: 'W',  cat: 'prod', desc: '+1% worker output / level',
+    x: 300, y: 900,  deps: ['manualBoost'] },
+
+  { key: 'truckBoost',   label: 'T',  cat: 'log',  desc: '+1 capacity / truck / level',
+    x: 700, y: 900,  deps: ['manualBoost'] },
+
+  { key: 'managerBoost', label: 'D',  cat: 'log',  desc: 'Manager +1 load / tick / level',
+    x: 700, y: 700,  deps: ['truckBoost'] },
+
+  { key: 'critBoost',    label: 'C',  cat: 'meta', desc: '+0.5% crit chance / level',
+    x: 300, y: 700,  deps: ['workerBoost'] },
+];
+
+// map for quick lookup
+const TREE_NODE_MAP = Object.fromEntries(TREE_NODES.map(n => [n.key, n]));
+
 
 /* =======================
    GAME STATE
@@ -313,6 +344,104 @@ function showToast(text, type, originElement) {
   toastContainer.appendChild(div);
   setTimeout(() => div.remove(), 1000);
 }
+
+let selectedNodeKey = null;
+
+function drawPrestigeTree() {
+  if (!treeSvg) return;
+  treeSvg.innerHTML = ''; // clear
+
+  // 1) draw edges
+  TREE_NODES.forEach(n => {
+    n.deps.forEach(parentKey => {
+      const p = TREE_NODE_MAP[parentKey];
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', p.x);
+      line.setAttribute('y1', p.y);
+      line.setAttribute('x2', n.x);
+      line.setAttribute('y2', n.y);
+      line.setAttribute('class', 'edge');
+      treeSvg.appendChild(line);
+    });
+  });
+
+  // 2) draw nodes
+  TREE_NODES.forEach(n => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', `node ${n.cat} ${selectedNodeKey===n.key?'selected':''}`);
+    g.dataset.key = n.key;
+
+    const r = 56;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', n.x);
+    circle.setAttribute('cy', n.y);
+    circle.setAttribute('r', r);
+    g.appendChild(circle);
+
+    // label
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('x', n.x);
+    txt.setAttribute('y', n.y);
+    txt.setAttribute('font-size', '34');
+    txt.textContent = n.label;
+    g.appendChild(txt);
+
+    // level badge
+    const lvl = (gameState.tree[n.key] || 0);
+    const lvlTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lvlTxt.setAttribute('x', n.x + r - 6);
+    lvlTxt.setAttribute('y', n.y - r + 20);
+    lvlTxt.setAttribute('class', 'lvl');
+    lvlTxt.textContent = `Lv ${lvl}`;
+    g.appendChild(lvlTxt);
+
+    // click handler
+    g.addEventListener('click', () => {
+      selectedNodeKey = n.key;
+      updatePrestigeSide();
+      drawPrestigeTree();
+    });
+
+    treeSvg.appendChild(g);
+  });
+}
+
+function updatePrestigeSide() {
+  if (!selectedNodeKey) {
+    nodeTitle.textContent = 'Select a node';
+    nodeDesc.textContent = 'Click a circle to see details.';
+    nodeLevel.textContent = 'Level: —';
+    nodeCostLine.textContent = 'Cost: —';
+    nodeBuyBtn.disabled = true;
+    return;
+  }
+  const n = TREE_NODE_MAP[selectedNodeKey];
+  const lvl = gameState.tree[selectedNodeKey] || 0;
+  const cost = treeCost(selectedNodeKey);
+
+  // dependency check: require all deps have level >=1
+  const depsMet = (n.deps || []).every(key => (gameState.tree[key] || 0) >= 1);
+
+  nodeTitle.textContent = `${n.label} — ${prettyNodeName(selectedNodeKey)}`;
+  nodeDesc.textContent = n.desc + (n.deps.length ? ` (Requires: ${n.deps.map(prettyNodeName).join(', ')})` : '');
+  nodeLevel.textContent = `Level: ${lvl}`;
+  nodeCostLine.textContent = `Cost: ${cost} token${cost===1?'':'s'}`;
+
+  const canAfford = gameState.tokens >= cost;
+  nodeBuyBtn.disabled = !(canAfford && depsMet);
+  setButtonState(nodeBuyBtn, canAfford && depsMet);
+}
+
+function prettyNodeName(key) {
+  return ({
+    workerBoost: 'Stronger Workers',
+    truckBoost:  'Bigger Trucks',
+    manualBoost: 'Manual Mastery',
+    critBoost:   'Lucky Crits',
+    managerBoost:'Dispatch Pro'
+  })[key] || key;
+}
+
 
 /* =======================
    CORE ACTIONS
@@ -632,6 +761,8 @@ function updateUI() {
   if (nodeManualBtn)  { nodeManualBtn.disabled  = gameState.tokens < cManual;  setButtonState(nodeManualBtn,  gameState.tokens >= cManual); }
   if (nodeCritBtn)    { nodeCritBtn.disabled    = gameState.tokens < cCrit;    setButtonState(nodeCritBtn,    gameState.tokens >= cCrit); }
   if (nodeManagerBtn) { nodeManagerBtn.disabled = gameState.tokens < cManager; setButtonState(nodeManagerBtn, gameState.tokens >= cManager); }
+  updatePrestigeSide();
+
 }
 
 /* =======================
@@ -657,6 +788,15 @@ if (nodeTruckBtn)   nodeTruckBtn.addEventListener('click', () => buyNode('truckB
 if (nodeManualBtn)  nodeManualBtn.addEventListener('click', () => buyNode('manualBoost'));
 if (nodeCritBtn)    nodeCritBtn.addEventListener('click', () => buyNode('critBoost'));
 if (nodeManagerBtn) nodeManagerBtn.addEventListener('click', () => buyNode('managerBoost'));
+if (nodeBuyBtn) {
+  nodeBuyBtn.addEventListener('click', () => {
+    if (!selectedNodeKey) return;
+    buyNode(selectedNodeKey);
+    updatePrestigeSide();
+    drawPrestigeTree();
+  });
+}
+
 
 /* =======================
    AUTOSAVE
@@ -672,4 +812,6 @@ window.addEventListener('beforeunload', () => {
 /* =======================
    INITIAL RENDER
    ======================= */
+drawPrestigeTree();
+updatePrestigeSide();   
 updateUI();

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles/warehouse.css">
 </head>
 <body>
-  <h1>📦 Warehouse Clicker – MVP v0.4.0</h1>
+  <h1>📦 Warehouse Clicker – MVP v0.5.0</h1>
 
   <!-- Tabs -->
   <nav class="tabs">
@@ -144,43 +144,38 @@
       </p>
 
       <h3>Skill Tree</h3>
-      <div class="tree-grid">
-        <div class="node card">
-          <h4>Stronger Workers</h4>
-          <p class="muted">+1% worker output / level</p>
-          <p id="node-worker-level">Lv 0</p>
-          <button id="node-worker" type="button">Buy — Cost: <span id="node-worker-cost">1</span></button>
-        </div>
 
-        <div class="node card">
-          <h4>Bigger Trucks</h4>
-          <p class="muted">+1 capacity per truck / level</p>
-          <p id="node-truck-level">Lv 0</p>
-          <button id="node-truck" type="button">Buy — Cost: <span id="node-truck-cost">2</span></button>
-        </div>
+<section id="prestige-tree" class="tree-wrap">
+  <div class="tree-canvas">
+    <svg id="tree-svg" viewBox="0 0 1000 1200" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
 
-        <div class="node card">
-          <h4>Manual Mastery</h4>
-          <p class="muted">+1 click power / level</p>
-          <p id="node-manual-level">Lv 0</p>
-          <button id="node-manual" type="button">Buy — Cost: <span id="node-manual-cost">1</span></button>
-        </div>
+  <aside class="tree-side">
+    <div class="card">
+      <h4 id="node-title">Select a node</h4>
+      <p id="node-desc" class="muted">Click a circle to see details.</p>
+      <p id="node-level" class="muted">Level: —</p>
+      <p id="node-cost" class="muted">Cost: —</p>
+      <button id="node-buy" type="button" disabled>Buy</button>
+    </div>
 
-        <div class="node card">
-          <h4>Lucky Crits</h4>
-          <p class="muted">+0.5% crit chance / level</p>
-          <p id="node-crit-level">Lv 0</p>
-          <button id="node-crit" type="button">Buy — Cost: <span id="node-crit-cost">3</span></button>
-        </div>
+    <div class="card">
+      <h4>Tokens</h4>
+      <p class="muted">
+        Balance: <strong id="tokens-txt">0</strong><br/>
+        Next reset (estimate): <strong id="next-tokens-txt">0</strong>
+      </p>
+    </div>
 
-        <div class="node card">
-          <h4>Dispatch Pro</h4>
-          <p class="muted">Manager ships +1 load / tick per level</p>
-          <p id="node-manager-level">Lv 0</p>
-          <button id="node-manager" type="button">Buy — Cost: <span id="node-manager-cost">4</span></button>
-        </div>
-      </div>
-    </section>
+    <div class="card">
+      <h4>Legend</h4>
+      <p><span class="dot dot-prod"></span> Production</p>
+      <p><span class="dot dot-log"></span> Logistics</p>
+      <p><span class="dot dot-meta"></span> Meta</p>
+    </div>
+  </aside>
+</section>
+
   </main>
 
   <!-- Toast container (for floating +X feedback) -->

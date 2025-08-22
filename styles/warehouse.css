@@ -139,6 +139,82 @@ button.unaffordable {
   color: #777;
 }
 
+/* --- Prestige tree layout --- */
+.tree-wrap {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.tree-canvas {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 520px;
+}
+
+.tree-side .card { background: #fff; }
+
+/* SVG styling */
+#tree-svg .edge {
+  stroke: #bbb;
+  stroke-width: 10;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+#tree-svg .node {
+  cursor: pointer;
+}
+
+#tree-svg .node circle {
+  stroke: #fff;
+  stroke-width: 4;
+}
+
+#tree-svg .node text {
+  fill: #fff;
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Node colors by category */
+.node.prod circle { fill: #5C6BC0; }  /* production: blue-purple */
+.node.log  circle { fill: #43A047; }  /* logistics: green */
+.node.meta circle { fill: #EF6C00; }  /* meta: orange */
+
+/* Selected */
+#tree-svg .node.selected circle {
+  stroke: #ffeb3b;
+  stroke-width: 6;
+}
+
+/* Level badge */
+#tree-svg .lvl {
+  font-size: 18px;
+  fill: #ffeb3b;
+  stroke: rgba(0,0,0,0.6);
+  paint-order: stroke fill;
+  stroke-width: 3px;
+}
+
+/* Side legend dots */
+.dot {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 999px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.dot-prod { background: #5C6BC0; }
+.dot-log  { background: #43A047; }
+.dot-meta { background: #EF6C00; }
+
 /* Toast container */
 #toast-container { position: relative; }
 
