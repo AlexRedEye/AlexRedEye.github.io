@@ -9,6 +9,7 @@ const storageText = document.getElementById('storage-txt');
 const trucksText = document.getElementById('trucks-txt');
 const totalText = document.getElementById('total-txt');
 const bonusTxt = document.getElementById('bonus-txt');
+const workerNoteTxt = document.getElementById('worker-note');
 
 const prodButton = document.getElementById('production-btn');
 const shipButton = document.getElementById('shipping-btn');
@@ -515,6 +516,13 @@ function updateUI() {
   if (clickLevelTxt)  clickLevelTxt.innerText = `Lv ${gameState.clickPowerLevel} (Power: ${1 + gameState.clickPowerLevel})`;
   if (critChanceTxt)  critChanceTxt.innerText = `${Math.round(critChance() * 100)}% crit`;
   if (skillDurationTxt) skillDurationTxt.innerText = `${skillDurationSec()}s duration, ${SKILL_COOLDOWN}s CD`;
+  if (workerNoteTxt) {
+  const effFactor = 1 + (gameState.efficiencyBonus / 100);
+  const perTick = Math.max(0, Math.floor(gameState.workers * effFactor));
+  const secs = WORKER_INTERVAL / 1000;
+  workerNoteTxt.innerText = `Lv ${gameState.workers} (Auto: ${perTick} box${perTick === 1 ? '' : 'es'} / ${secs}s)`;
+}
+
 
   // Button states (disabled + CSS states)
   const canAffordStorage = gameState.muns >= storageCost();
