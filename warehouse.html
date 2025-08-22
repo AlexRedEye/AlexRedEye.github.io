@@ -4,133 +4,188 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Warehouse Clicker – MVP</title>
-  <link rel="stylesheet" href="styles/warehouse.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>📦 Warehouse Clicker – MVP v0.3.1</h1>
+  <h1>📦 Warehouse Clicker – MVP v0.4.0</h1>
 
-  <!-- Stats -->
-  <section class="stats">
-    <div class="card">
-      <h2 id="box-txt">0 Boxes</h2>
-      <p class="muted">In Storage</p>
-    </div>
-    <div class="card">
-      <h2 id="total-txt">0 Total Boxes</h2>
-      <p class="muted">Produced This Run</p>
-    </div>
-    <div class="card">
-      <h2 id="muns-txt">0 Muns</h2>
-      <p class="muted">Cash</p>
-    </div>
-    <div class="card">
-      <h2>Logistics</h2>
-      <p>Storage: <strong id="storage-txt">10</strong></p>
-      <p>Trucks: <strong id="trucks-txt">1</strong> <span class="muted">(5 capacity each)</span></p>
-    </div>
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button id="tab-game" class="tab-button active" type="button" data-target="screen-game">Game</button>
+    <button id="tab-prestige" class="tab-button" type="button" data-target="screen-prestige">Prestige</button>
+  </nav>
 
-    <!-- NEW: Efficiency -->
-    <div class="card">
-      <h2>Efficiency: <span id="eff-score" class="score-big">100</span></h2>
-      <p class="muted">Last 60s — Produced: <span id="eff-prod">0</span>, Shipped: <span id="eff-ship">0</span>, Blocked: <span id="eff-block">0</span></p>
-    </div>
-  </section>
+  <!-- ===== GAME SCREEN ===== -->
+  <main id="screen-game">
+    <!-- Stats -->
+    <section class="stats">
+      <div class="card">
+        <h2 id="box-txt">0 Boxes</h2>
+        <p class="muted">In Storage</p>
+      </div>
+      <div class="card">
+        <h2 id="total-txt">0 Total Boxes</h2>
+        <p class="muted">Produced This Run</p>
+      </div>
+      <div class="card">
+        <h2 id="muns-txt">0 Muns</h2>
+        <p class="muted">Cash</p>
+      </div>
+      <div class="card">
+        <h2>Logistics</h2>
+        <p>Storage: <strong id="storage-txt">10</strong></p>
+        <p>
+          Trucks: <strong id="trucks-txt">1</strong>
+          <span class="muted">( <span id="cap-txt">5</span> capacity each )</span>
+        </p>
+      </div>
 
-  <!-- Core actions -->
-  <section>
-    <h3>Actions</h3>
-    <div class="row">
-      <button id="production-btn" type="button">Produce Box</button>
-      <button id="shipping-btn" type="button">Ship Full Trucks</button>
-    </div>
-    <span class="muted">Tip: You can only ship in <strong>full truckloads</strong> (5 boxes per truck).</span>
-  </section>
+      <!-- Efficiency -->
+      <div class="card">
+        <h2>Efficiency: <span id="eff-score" class="score-big">100</span></h2>
+        <p class="muted">Last 60s — Produced: <span id="eff-prod">0</span>, Shipped: <span id="eff-ship">0</span>, Blocked: <span id="eff-block">0</span></p>
+      </div>
+    </section>
 
-  <!-- Upgrades -->
-  <section class="upgrades">
-    <h3>Upgrades</h3>
-    <div class="row">
-      <button id="storage-upgrade" type="button">
-        Upgrade Storage (+10) — Cost: <span id="storage-cost">50</span>
-      </button>
-      <button id="trucks-upgrade" type="button">
-        Buy Truck (+1) — Cost: <span id="trucks-cost">100</span>
-      </button>
-    </div>
-  </section>
+    <!-- Core actions -->
+    <section>
+      <h3>Actions</h3>
+      <div class="row">
+        <button id="production-btn" type="button">Produce Box</button>
+        <button id="shipping-btn" type="button">Ship Full Trucks</button>
+      </div>
+      <span class="muted">Tip: You can only ship in full truckloads.</span>
+    </section>
 
-  <!-- Automation -->
-  <section class="automation">
-    <h3>Automation</h3>
-    <div class="row">
-      <button id="worker-upgrade" type="button">
-        Hire Worker (+1) — Cost: <span id="worker-cost">50</span>
-      </button>
-      <p id="worker-count">0 Workers</p>
-    </div>
-    <p id="worker-note" class="muted">Lv 0 (Auto: 0 boxes / 2s)</p>
-  </section>
+    <!-- Upgrades -->
+    <section class="upgrades">
+      <h3>Upgrades</h3>
+      <div class="row">
+        <button id="storage-upgrade" type="button">
+          Upgrade Storage (+10) — Cost: <span id="storage-cost">50</span>
+        </button>
+        <button id="trucks-upgrade" type="button">
+          Buy Truck (+1) — Cost: <span id="trucks-cost">100</span>
+        </button>
+      </div>
+    </section>
 
-  <!-- Shipping Manager -->
-  <section class="manager">
-    <h3>Shipping Manager (Auto-Dispatch)</h3>
-    <div class="row">
-      <button id="manager-upgrade" type="button">
-        Hire/Level Up — Cost: <span id="manager-cost">250</span>
-      </button>
-      <p id="manager-level">Lv 0 (Auto: 0 loads / 5s)</p>
-    </div>
-  </section>
+    <!-- Automation -->
+    <section class="automation">
+      <h3>Automation</h3>
+      <div class="row">
+        <button id="worker-upgrade" type="button">
+          Hire Worker (+1) — Cost: <span id="worker-cost">50</span>
+        </button>
+        <p id="worker-count">0 Workers</p>
+      </div>
+      <p id="worker-note" class="muted">Lv 0 (Auto: 0 boxes / 2s)</p>
+    </section>
 
-  <!-- Manual Click Upgrades -->
-  <section class="manual">
-    <h3>Manual Click Power</h3>
-    <div class="row">
-      <button id="click-upgrade" type="button">
-        Stronger Arms (+1 click power) — Cost: <span id="click-cost">30</span>
-      </button>
-      <p id="click-level">Lv 0 (Power: 1)</p>
-    </div>
-  </section>
+    <!-- Shipping Manager -->
+    <section class="manager">
+      <h3>Shipping Manager (Auto-Dispatch)</h3>
+      <div class="row">
+        <button id="manager-upgrade" type="button">
+          Hire/Level Up — Cost: <span id="manager-cost">250</span>
+        </button>
+        <p id="manager-level">Lv 0 (Auto: 0 loads / 5s)</p>
+      </div>
+    </section>
 
-  <!-- Crit Upgrades -->
-  <section class="crit">
-    <h3>Critical Clicks</h3>
-    <div class="row">
-      <button id="crit-upgrade" type="button">
-        Increase Crit Chance (+1%) — Cost: <span id="crit-cost">100</span>
-      </button>
-      <p id="crit-chance">5% crit</p>
-    </div>
-  </section>
+    <!-- Manual Click Upgrades -->
+    <section class="manual">
+      <h3>Manual Click Power</h3>
+      <div class="row">
+        <button id="click-upgrade" type="button">
+          Stronger Arms (+1 click power) — Cost: <span id="click-cost">30</span>
+        </button>
+        <p id="click-level">Lv 0 (Power: 1)</p>
+      </div>
+    </section>
 
-  <!-- Active Skill -->
-  <section class="skill">
-    <h3>Priority Pick (Active Skill)</h3>
-    <div class="row">
-      <button id="skill-btn" type="button">Activate (2× clicks)</button>
-      <span id="skill-timer" class="muted">Ready</span>
-    </div>
-    <div class="row">
-      <button id="skill-upgrade" type="button">
-        Extend Duration (+2s) — Cost: <span id="skill-cost">150</span>
-      </button>
-      <p id="skill-duration">10s duration, 60s CD</p>
-    </div>
-  </section>
+    <!-- Crit Upgrades -->
+    <section class="crit">
+      <h3>Critical Clicks</h3>
+      <div class="row">
+        <button id="crit-upgrade" type="button">
+          Increase Crit Chance (+1%) — Cost: <span id="crit-cost">100</span>
+        </button>
+        <p id="crit-chance">5% crit</p>
+      </div>
+    </section>
 
-  <!-- Reset -->
-  <section>
-    <h3>Reset</h3>
-    <div class="row">
-      <button id="reset-btn" type="button">Reset for Bonus</button>
-      <p id="bonus-txt">Efficiency Bonus: 0%</p>
-    </div>
-  </section>
+    <!-- Active Skill -->
+    <section class="skill">
+      <h3>Priority Pick (Active Skill)</h3>
+      <div class="row">
+        <button id="skill-btn" type="button">Activate (2× clicks)</button>
+        <span id="skill-timer" class="muted">Ready</span>
+      </div>
+      <div class="row">
+        <button id="skill-upgrade" type="button">
+          Extend Duration (+2s) — Cost: <span id="skill-cost">150</span>
+        </button>
+        <p id="skill-duration">10s duration, 60s CD</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== PRESTIGE SCREEN ===== -->
+  <main id="screen-prestige" class="hidden">
+    <section class="prestige">
+      <div class="row">
+        <h3>Reset & Prestige</h3>
+        <button id="reset-btn" type="button">Reset (Earn Tokens)</button>
+      </div>
+      <p class="muted">
+        Tokens: <strong id="tokens-txt">0</strong> &nbsp;|&nbsp;
+        Next reset (estimate): <strong id="next-tokens-txt">0</strong>
+      </p>
+
+      <h3>Skill Tree</h3>
+      <div class="tree-grid">
+        <div class="node card">
+          <h4>Stronger Workers</h4>
+          <p class="muted">+1% worker output / level</p>
+          <p id="node-worker-level">Lv 0</p>
+          <button id="node-worker" type="button">Buy — Cost: <span id="node-worker-cost">1</span></button>
+        </div>
+
+        <div class="node card">
+          <h4>Bigger Trucks</h4>
+          <p class="muted">+1 capacity per truck / level</p>
+          <p id="node-truck-level">Lv 0</p>
+          <button id="node-truck" type="button">Buy — Cost: <span id="node-truck-cost">2</span></button>
+        </div>
+
+        <div class="node card">
+          <h4>Manual Mastery</h4>
+          <p class="muted">+1 click power / level</p>
+          <p id="node-manual-level">Lv 0</p>
+          <button id="node-manual" type="button">Buy — Cost: <span id="node-manual-cost">1</span></button>
+        </div>
+
+        <div class="node card">
+          <h4>Lucky Crits</h4>
+          <p class="muted">+0.5% crit chance / level</p>
+          <p id="node-crit-level">Lv 0</p>
+          <button id="node-crit" type="button">Buy — Cost: <span id="node-crit-cost">3</span></button>
+        </div>
+
+        <div class="node card">
+          <h4>Dispatch Pro</h4>
+          <p class="muted">Manager ships +1 load / tick per level</p>
+          <p id="node-manager-level">Lv 0</p>
+          <button id="node-manager" type="button">Buy — Cost: <span id="node-manager-cost">4</span></button>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <!-- Toast container (for floating +X feedback) -->
   <div id="toast-container"></div>
 
-  <script src="scripts/warehouse.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
