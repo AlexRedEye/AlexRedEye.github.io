@@ -33,14 +33,10 @@ export function setupIntervals(){
   setInterval(()=>{
     if (gameState.managerLevel<=0 && getManagerPower()<=0) return;
     const cap = getTruckCapacity();
-    const fullLoads = Math.floor(gameState.box / cap);
-    if (fullLoads<=0) return;
-
     const managerPower = getManagerPower();
-    const loads = Math.min(fullLoads, gameState.trucks, managerPower);
-    if (loads<=0) return;
-
-    const boxes = loads * cap;
+    const maxLoads = Math.min(gameState.trucks, managerPower);
+    const boxes = Math.min(gameState.box, cap * maxLoads);
+    if (boxes <= 0) return;
     gameState.box -= boxes;
     gameState.muns += boxes * getBoxValue();
     effAdd(eff.shipped, boxes);
