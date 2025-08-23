@@ -1,5 +1,5 @@
 // Versioning
-export const APP_VERSION = '0.1.2-Alpha';
+export const APP_VERSION = '0.1.3-Alpha';
 export const SAVE_SCHEMA_VERSION = 4; // ⬅ bumped to include settings
 
 // Base economy
