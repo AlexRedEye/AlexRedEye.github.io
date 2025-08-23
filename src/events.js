@@ -40,23 +40,24 @@ export function wireEvents(){
     if (blocked > 0){ /* no-op; efficiency tracked elsewhere */ }
   });
 
-  // ===== Ship (manual) =====
-  ship?.addEventListener('click', ()=>{
-    const capacity = getTruckCapacity();
-    const fullLoads = Math.floor(gameState.box / capacity);
-    if (fullLoads === 0) return;
+// ===== Ship (manual) =====
+ship?.addEventListener('click', ()=>{
+  const capacity = getTruckCapacity();
 
-    const loads = Math.min(fullLoads, gameState.trucks);
-    const boxes = loads * capacity;
+  // Ship whatever you have, up to Trucks × Capacity (allows partial loads)
+  const maxLoads = gameState.trucks;
+  const boxes = Math.min(gameState.box, capacity * maxLoads);
+  if (boxes <= 0) return;
 
-    gameState.box -= boxes;
-    gameState.muns += boxes * getBoxValue();
-    gameState.runShipped += boxes;
+  gameState.box -= boxes;
+  gameState.muns += boxes * getBoxValue();
+  gameState.runShipped += boxes;
 
-    onBoxesShipped(boxes);
-    showToast(`+${boxes * getBoxValue()} Muns`, 'muns', ship);
-    updateUI();
-  });
+  onBoxesShipped(boxes);
+  showToast(`+${boxes * getBoxValue()} Muns`, 'muns', ship);
+  updateUI();
+});
+
 
   // ===== Core Upgrades =====
   $('storage-upgrade')?.addEventListener('click', ()=>{
