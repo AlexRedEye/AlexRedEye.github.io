@@ -1,17 +1,21 @@
-// app.js — client-side logic for the Stock Market Simulator
+// app.js — client-side logic for the Stock Market Simulator (GH Pages + Remote Server)
 
 // --- Helpers ---
 const $ = (id) => document.getElementById(id);
-const fmt = (n) => Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const ts  = (ms) => new Date(ms).toLocaleTimeString();
+const fmt = (n) =>
+  Number(n).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+const ts = (ms) => new Date(ms).toLocaleTimeString();
 
-function setStatus(text, cls='') {
+function setStatus(text, cls = '') {
   const s = $('status');
   s.textContent = text;
   s.className = cls;
 }
 
-function msg(text, level='') {
+function msg(text, level = '') {
   const box = $('messages');
   const p = document.createElement('div');
   p.textContent = text;
@@ -25,15 +29,13 @@ let socket = null;
 let userId = null;
 let symbols = [];
 
-// Optional: if you want to boot UI without a server, set this to true
+// Optional: preview UI without a server
 const USE_MOCK = false;
 
 // Initialize after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Basic UI hooks
   $('join').addEventListener('click', onJoin);
   $('place').addEventListener('click', onPlaceOrder);
-
   if (USE_MOCK) {
     mockBoot();
   } else {
@@ -43,10 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function bootSocket() {
   try {
-    socket = io(); // connects to same-origin server
+    // Default to your Render URL; allow override via ?server=https://foo.onrender.com
+    const p = new URLSearchParams(location.search);
+    const SERVER_URL =
+      p.get('server') || 'https://stockmarket-server.onrender.com';
+
+    // Connect to remote server (works from GitHub Pages)
+    socket = io(SERVER_URL, {
+      transports: ['websocket', 'polling'],
+      withCredentials: false
+    });
   } catch (e) {
     setStatus('Socket.IO not found', 'err');
-    msg('Include <script src="/socket.io/socket.io.js"></script> before app.js', 'err');
+    msg('Could not load Socket.IO client or connect to server', 'err');
     return;
   }
 
@@ -83,7 +94,9 @@ function bootSocket() {
 }
 
 function hydrateSymbols(syms) {
-  $('symbol').innerHTML = syms.map(s => `<option value="${s}">${s}</option>`).join('');
+  $('symbol').innerHTML = syms
+    .map((s) => `<option value="${s}">${s}</option>`)
+    .join('');
 }
 
 // --- UI actions ---
@@ -103,8 +116,8 @@ function onJoin() {
 function onPlaceOrder() {
   const payload = {
     symbol: $('symbol').value,
-    side: $('side').value,     // 'buy' | 'sell'
-    type: $('type').value,     // 'limit' | 'market'
+    side: $('side').value, // 'buy' | 'sell'
+    type: $('type').value, // 'limit' | 'market'
     price: Number($('price').value),
     qty: Number($('qty').value)
   };
@@ -128,13 +141,15 @@ function renderBook(book) {
   asksBody.innerHTML = '';
   bidsBody.innerHTML = '';
 
-  book.asks.forEach(row => {
+  // Asks best-first
+  book.asks.forEach((row) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${fmt(row.price)}</td><td>${row.qty}</td>`;
     asksBody.appendChild(tr);
   });
 
-  book.bids.forEach(row => {
+  // Bids best-first
+  book.bids.forEach((row) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${fmt(row.price)}</td><td>${row.qty}</td>`;
     bidsBody.appendChild(tr);
@@ -152,15 +167,17 @@ function renderTrade(t) {
 function renderLeaderboard(rows) {
   const tb = $('lb').querySelector('tbody');
   tb.innerHTML = '';
-  rows.forEach(r => {
+  rows.forEach((r) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="text-align:left">${escapeHtml(r.name)}</td><td>${fmt(r.netWorth)}</td>`;
+    tr.innerHTML = `<td style="text-align:left">${escapeHtml(
+      r.name
+    )}</td><td>${fmt(r.netWorth)}</td>`;
     tb.appendChild(tr);
   });
 }
 
 // --- Utilities ---
-function escapeHtml(s='') {
+function escapeHtml(s = '') {
   return String(s)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -176,8 +193,16 @@ let mockState = {
   books: {
     ACME: {
       last: 100,
-      bids: [{ price: 100.00, qty: 20 }, { price: 99.90, qty: 40 }, { price: 99.80, qty: 40 }],
-      asks: [{ price: 100.10, qty: 20 }, { price: 100.20, qty: 30 }, { price: 100.25, qty: 50 }]
+      bids: [
+        { price: 100.0, qty: 20 },
+        { price: 99.9, qty: 40 },
+        { price: 99.8, qty: 40 }
+      ],
+      asks: [
+        { price: 100.1, qty: 20 },
+        { price: 100.2, qty: 30 },
+        { price: 100.25, qty: 50 }
+      ]
     }
   },
   leaderboard: [
@@ -194,6 +219,7 @@ function mockBoot() {
   renderBook(mockState.books.ACME);
   renderLeaderboard(mockState.leaderboard);
 
+  // tiny animation so UI looks alive
   setInterval(() => {
     const jitter = (Math.random() - 0.5) * 0.2;
     mockState.books.ACME.last = Math.max(1, mockState.books.ACME.last + jitter);
@@ -217,9 +243,10 @@ function mockJoin(name) {
 
 function mockPlace(p) {
   if (p.type === 'market') {
-    const price = p.side === 'buy'
-      ? mockState.books.ACME.asks[0].price
-      : mockState.books.ACME.bids[0].price;
+    const price =
+      p.side === 'buy'
+        ? mockState.books.ACME.asks[0].price
+        : mockState.books.ACME.bids[0].price;
     renderTrade({
       ts: Date.now(),
       price,
@@ -233,12 +260,15 @@ function mockPlace(p) {
 
   if (p.type === 'limit') {
     const sideKey = p.side === 'buy' ? 'bids' : 'asks';
-    const row = { price: +(+p.price || 100).toFixed(2), qty: Math.max(1, +p.qty || 1) };
+    const row = {
+      price: +(+p.price || 100).toFixed(2),
+      qty: Math.max(1, +p.qty || 1)
+    };
     mockState.books.ACME[sideKey].push(row);
     if (sideKey === 'bids') {
-      mockState.books.ACME.bids.sort((a,b) => b.price - a.price);
+      mockState.books.ACME.bids.sort((a, b) => b.price - a.price);
     } else {
-      mockState.books.ACME.asks.sort((a,b) => a.price - b.price);
+      mockState.books.ACME.asks.sort((a, b) => a.price - b.price);
     }
     renderBook(mockState.books.ACME);
     msg(`(mock) Placed ${p.side} limit ${fmt(row.price)} x ${row.qty}`);
