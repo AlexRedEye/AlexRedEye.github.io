@@ -1,0 +1,97 @@
+/* Base */
+:root {
+  --bg: #0f172a;
+  --card: #111827;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: #1f2937;
+  --input-bg: #0b1220;
+  --accent-ok: #10b981;
+  --accent-warn: #f59e0b;
+  --accent-err: #ef4444;
+  --shadow: rgba(0, 0, 0, 0.2);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+               "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+               "Segoe UI Emoji", "Segoe UI Symbol";
+  line-height: 1.35;
+}
+
+h1, h2, h3 { margin: 8px 0; line-height: 1.2; }
+
+/* Layout */
+.row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 8px var(--shadow);
+  flex: 1;
+  min-width: 280px;
+}
+
+.book-col { flex: 1; min-width: 220px; }
+
+/* Controls */
+input, select, button {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: var(--input-bg);
+  color: var(--text);
+  width: 100%;
+}
+
+button {
+  cursor: pointer;
+  transition: transform 0.05s ease, filter 0.15s ease;
+}
+button:hover { filter: brightness(1.08); }
+button:active { transform: translateY(1px); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+}
+th { text-align: left; }
+td { text-align: right; }
+td:first-child, th:first-child { text-align: left; }
+
+/* Utilities */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.muted { color: var(--muted); font-size: 12px; }
+.ok { color: var(--accent-ok); }
+.warn { color: var(--accent-warn); }
+.err { color: var(--accent-err); }
+.badge {
+  background: #1f2937;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 6px;
+  font-size: 12px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 780px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
