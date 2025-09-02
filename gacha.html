@@ -32,7 +32,7 @@
       <ul>
         <li>Pull <b>Units</b>, <b>Weapons</b>, and <b>Support Cards</b>.</li>
         <li>Run <b>Career Mode</b> (training with time pressure).</li>
-        <li>Use trained units in <b>Memories of Chaos</b> for gems.</li>
+        <li>Use trained units in a <b>hands-on</b> Memories of Chaos mode.</li>
       </ul>
       <button id="btn-grant-starter">Grant Starter Resources</button>
     </section>
@@ -136,7 +136,7 @@
     <!-- CHAOS -->
     <section id="chaos" class="tab">
       <h2>Memories of Chaos</h2>
-      <p class="tiny">Build a team from your trained units. Auto-equips best matching weapons. Clear floors to earn stars and 💎.</p>
+      <p class="tiny">Turn-based. Pick a hero, then a target, and attack. Clear waves to progress and earn 💎.</p>
 
       <div id="chaos-setup" class="picker">
         <h3>Team (up to 3)</h3>
@@ -154,12 +154,24 @@
           </div>
           <div id="chaos-stats"></div>
           <div>
-            <div id="chaos-floor">Floor 1 / 8 • Wave 1 / 2</div>
+            <div id="chaos-floor">Floor 1 / 8 • Wave 1 / 2 • Player Phase</div>
+          </div>
+        </div>
+
+        <div class="chaos-battlefield">
+          <div>
+            <h3>Your Team</h3>
+            <div id="chaos-ally-grid" class="battle-grid"></div>
+          </div>
+          <div>
+            <h3>Enemies</h3>
+            <div id="chaos-enemy-grid" class="battle-grid"></div>
           </div>
         </div>
 
         <div class="run-actions">
-          <button id="chaos-battle" class="primary">Battle Wave</button>
+          <button id="chaos-attack" class="primary" disabled>Attack</button>
+          <button id="chaos-endturn">End Turn</button>
           <button id="chaos-abandon" class="danger">End Chaos</button>
         </div>
 
@@ -188,7 +200,7 @@
     </div>
   </div>
 
-  <footer class="footer">v0.2.1-MVP • All placeholder data/art</footer>
+  <footer class="footer">v0.3.0-MVP • All placeholder data/art</footer>
   <script src="scripts/gacha.js"></script>
 </body>
 </html>
