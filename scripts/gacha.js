@@ -1,9 +1,10 @@
 /* =========================
    PocketFighters — MVP
-   v0.3.0 (full)
+   v0.3.1 (full)
    • Gacha: Units/Weapons/Supports across 2 banners
    • Career Mode: deadline, detailed logs, defeat summary modal w/ confirm
    • Chaos Mode: turn-based (pick hero → pick target → Attack / End Turn)
+     - FIX: one action per hero per player turn (acted flags)
    • Save/Load/Wipe (localStorage)
    • Fix: pickers rebuild immediately after pulls
    ========================= */
@@ -395,12 +396,13 @@ if (abandonCareerBtn) abandonCareerBtn.addEventListener('click', ()=>{
 
 /* ==================================================
    Memories of Chaos — Turn-based hands-on mode
+   (with acted flags to prevent infinite attacking)
    ================================================== */
 const CHAOS_FLOORS = 8;
 const chaos = {
   active:false, floor:1, maxFloor:CHAOS_FLOORS, wave:1, wavesPerFloor:2,
   stars:0, score:0,
-  team:[],     // [{unitMeta, unitDef, weaponMeta, weaponDef, stats, hp, maxHp, atk, def, spd, alive}]
+  team:[],     // [{unitMeta, unitDef, weaponMeta, weaponDef, stats, hp, maxHp, atk, def, spd, alive, acted}]
   enemies:[],  // array of {name, hp, ...}
   phase:'player', // 'player' | 'enemy'
   selection:{allyIdx:null, enemyIdx:null},
@@ -454,7 +456,12 @@ function rebuildChaosPickers(){
         const best = bestWeaponFor(def.arche);
         const s = unitEffectiveStats(def, meta, best);
         const sheet = toSheet(s, def.name, meta.lvl);
-        chaos.team.push({ unitMeta:meta, unitDef:def, weaponMeta:best?.meta||null, weaponDef:best?.def||null, stats:s, ...sheet, alive:true });
+        chaos.team.push({
+          unitMeta: meta, unitDef: def,
+          weaponMeta: best?.meta || null, weaponDef: best?.def || null,
+          stats: s, ...sheet,
+          alive: true, acted: false
+        });
       }
       updateChaosTeamDisplay();
     });
@@ -474,12 +481,13 @@ function updateChaosTeamDisplay(){
 
 /* --- Battlefield UI --- */
 function renderBattlefield(){
+  // Allies
   const ag = q('#chaos-ally-grid'); ag.innerHTML='';
   chaos.team.forEach((a,idx)=>{
     const card = document.createElement('div');
     card.className = 'battle-card' + (a.alive?'':' dead') + (chaos.selection.allyIdx===idx?' selected':'');
     card.innerHTML = `
-      <div class="title">${a.unitDef.name}</div>
+      <div class="title">${a.unitDef.name}${a.acted?' <span class="tiny">(Acted)</span>':''}</div>
       <div class="stat-line">ATK ${a.atk} • DEF ${a.def} • SPD ${a.spd}</div>
       <div class="bar"><span style="width:${(a.hp/a.maxHp)*100}%"></span></div>
       <div class="stat-line">HP ${Math.max(0,Math.ceil(a.hp))}/${a.maxHp}</div>
@@ -495,6 +503,7 @@ function renderBattlefield(){
     ag.appendChild(card);
   });
 
+  // Enemies
   const eg = q('#chaos-enemy-grid'); eg.innerHTML='';
   chaos.enemies.forEach((e,idx)=>{
     const card = document.createElement('div');
@@ -537,11 +546,14 @@ function makeEnemy(floor, idx){
   return { name:`E${floor}-${idx+1}`, ...sheet, alive:true };
 }
 
-/* --- Modifiers --- */
+/* --- Modifiers & helpers --- */
 function chaosFloorModifiers(floor){
   const list = ['Enemy +10% ATK','Enemy +15% DEF','Your SPD +10%','Your POW +10%'];
   return [list[floor%list.length], list[(floor+2)%list.length]];
 }
+function livingAllies(){ return chaos.team.filter(a=>a.alive); }
+function allLivingAlliesActed(){ return livingAllies().every(a=>a.acted); }
+function resetActs(){ chaos.team.forEach(a=>{ if (a.alive) a.acted = false; }); }
 
 /* --- Flow --- */
 function startChaos(){
@@ -550,6 +562,7 @@ function startChaos(){
   chaos.floor = 1; chaos.wave = 1; chaos.stars = 0; chaos.score = 0; chaos.phase='player';
   chaos.modifiers = chaosFloorModifiers(chaos.floor);
   setupEnemies();
+  resetActs(); // ensure fresh player phase
   q('#chaos-setup').classList.add('hidden');
   q('#chaos-run').classList.remove('hidden');
   q('#chaos-log').innerHTML='';
@@ -573,11 +586,15 @@ function updateChaosUI(){
   updateChaosHud();
 }
 function updateChaosHud(){
+  const ai = chaos.selection.allyIdx, ei = chaos.selection.enemyIdx;
+  const ally = ai!=null ? chaos.team[ai] : null;
+  const enemy = ei!=null ? chaos.enemies[ei] : null;
+
   const can = chaos.phase==='player'
-    && chaos.selection.allyIdx!==null
-    && chaos.selection.enemyIdx!==null
-    && chaos.team[chaos.selection.allyIdx]?.alive
-    && (chaos.enemies[chaos.selection.enemyIdx]?.hp>0);
+    && ally && enemy
+    && ally.alive && !ally.acted
+    && enemy.hp>0;
+
   q('#chaos-attack').disabled = !can;
 }
 
@@ -605,22 +622,36 @@ function playerAttack(){
   const ai = chaos.selection.allyIdx, ei = chaos.selection.enemyIdx;
   if (ai==null || ei==null) return;
   const hero = chaos.team[ai]; const foe = chaos.enemies[ei];
-  if (!hero.alive || foe.hp<=0) return;
+  if (!hero.alive || hero.acted || foe.hp<=0 || chaos.phase!=='player') return;
 
   const dmg = calcDamage(hero, foe, false);
   foe.hp -= dmg;
   clog(`🗡️ ${hero.unitDef.name} → ${foe.name}: -${dmg} HP`);
   if (foe.hp<=0){ clog(`💥 ${foe.name} is defeated!`); }
 
+  // mark hero used
+  hero.acted = true;
+
   renderBattlefield();
   updateChaosHud();
 
+  // Wave clear?
   if (chaos.enemies.every(e=>e.hp<=0)){
     clog('✅ Wave cleared.');
     nextWaveOrFloor();
     return;
   }
-  // Player can keep attacking until they End Turn (MVP simple loop)
+
+  // Auto-end if all living allies have acted
+  if (allLivingAlliesActed()){
+    clog('↩️ All allies have acted. Enemy Phase.');
+    enemyTurn();
+    return;
+  }
+
+  // Otherwise let player pick another target
+  chaos.selection.enemyIdx = null;
+  updateChaosHud();
 }
 
 /* --- Enemy turn --- */
@@ -628,8 +659,8 @@ function enemyTurn(){
   chaos.phase='enemy';
   updateChaosUI();
 
-  const livingAllies = chaos.team.filter(a=>a.alive);
-  if (livingAllies.length===0){ defeatChaos('All heroes defeated'); return; }
+  const living = chaos.team.filter(a=>a.alive);
+  if (living.length===0){ defeatChaos('All heroes defeated'); return; }
 
   for (const foe of chaos.enemies){
     if (foe.hp<=0) continue;
@@ -646,6 +677,8 @@ function enemyTurn(){
 
   if (chaos.team.every(a=>!a.alive)){ defeatChaos('All heroes defeated'); return; }
 
+  // New player phase; reset actions
+  resetActs();
   chaos.phase='player';
   updateChaosUI();
 }
@@ -670,11 +703,13 @@ function nextWaveOrFloor(){
     chaos.floor++; chaos.wave=1; chaos.modifiers = chaosFloorModifiers(chaos.floor);
     chaos.team.forEach(a=>{ if(a.alive){ a.hp = Math.min(a.maxHp, a.hp + Math.round(a.maxHp*0.3)); } });
     setupEnemies();
+    resetActs();
     clog(`➡️ Floor ${chaos.floor}. Modifiers: ${chaos.modifiers.join(' • ')}. Survivors healed 30%.`);
   } else {
     chaos.wave++;
     chaos.team.forEach(a=>{ if(a.alive){ a.hp = Math.min(a.maxHp, a.hp + Math.round(a.maxHp*0.1)); } });
     setupEnemies();
+    resetActs();
     clog(`➡️ Wave ${chaos.wave}. Your team healed 10%.`);
   }
 
