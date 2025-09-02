@@ -316,6 +316,29 @@ function trainOnce(which){
   log(`Stats: POW ${before.pow}→${run.stats.pow} | SPD ${before.spd}→${run.stats.spd} | FOC ${before.foc}→${run.stats.foc} | GRT ${before.grt}→${run.stats.grt}`);
   spendTime(run.costTrain, `Training ${which.toUpperCase()}`);
 }
+// Rest: +2 Stamina (to max 5), costs 2 time; supports gain use-EXP
+function restOnce(){
+  if (!run.active) return;
+  if (run.deadline < run.costRest){
+    log('⛔ Not enough time left to Rest.');
+    return;
+  }
+  const before = run.stamina;
+  run.stamina = Math.min(5, run.stamina + 2);
+
+  // supports level by use
+  for (const s of run.supports || []){
+    s.meta.exp += 1;
+    if (tryLevelSupport(s.meta)) {
+      log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`);
+    }
+  }
+
+  updateRunUI();
+  log(`🛌 Rested: Stamina ${before}→${run.stamina}.`);
+  spendTime(run.costRest, 'Rest');
+}
+
 
 /* Career battle: single-check fight per stage (BALANCED) */
 function battleStage(forced=false){
