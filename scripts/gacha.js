@@ -1,12 +1,12 @@
 /* =========================
    PocketFighters — MVP
-   v0.3.1 (full)
-   • Gacha: Units/Weapons/Supports across 2 banners
-   • Career Mode: deadline, detailed logs, defeat summary modal w/ confirm
-   • Chaos Mode: turn-based (pick hero → pick target → Attack / End Turn)
-     - FIX: one action per hero per player turn (acted flags)
-   • Save/Load/Wipe (localStorage)
-   • Fix: pickers rebuild immediately after pulls
+   v0.3.2 (full, balance patch)
+   • Balance: nerf GRT reliance, buff POW/FOC impact
+   • Career: new ATK/DEF coefficients, enemy scaling steeper
+   • Chaos: HP/DEF conversion shifts from GRT→FOC/SPD
+   • Chaos enemies scale harder (quadratic component)
+   • Turn-based Chaos with acted flags (no infinite attacks)
+   • Gacha & pickers refresh, Save/Load/Wipe
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -316,37 +316,51 @@ function trainOnce(which){
   log(`Stats: POW ${before.pow}→${run.stats.pow} | SPD ${before.spd}→${run.stats.spd} | FOC ${before.foc}→${run.stats.foc} | GRT ${before.grt}→${run.stats.grt}`);
   spendTime(run.costTrain, `Training ${which.toUpperCase()}`);
 }
-function restOnce(){
-  if(!run.active) return; if(run.deadline<run.costRest){ log('⛔ Not enough time left to Rest.'); return; }
-  const before=run.stamina; run.stamina=Math.min(5, run.stamina+2);
-  for(const s of run.supports||[]){ s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`); }
-  updateRunUI(); log(`🛌 Rested: Stamina ${before}→${run.stamina}.`);
-  spendTime(run.costRest,'Rest');
-}
 
-/* Career battle: deterministic-ish single-check fight per stage */
+/* Career battle: single-check fight per stage (BALANCED) */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
 
   const d=run.stage;
-  const enemy={ pow:6+d*2, spd:5+d*2, foc:5+Math.floor(d*1.8), grt:7+Math.floor(d*2.2) };
+
+  // --- Enemy scaling: faster POW growth, modest DEF, quadratic push ---
+  const enemy = {
+    pow: 6 + d*2 + Math.floor(d*d*0.3),            // steeper offense
+    spd: 5 + d*2,                                  // keeps pace
+    foc: 5 + Math.floor(d*1.8),
+    grt: 7 + Math.floor(d*1.5 + d*d*0.2),          // DEF grows, but slower than POW
+  };
+
+  // --- Player effective scores (nerf GRT, buff POW/FOC) ---
+  const pAtk = run.stats.pow*1.2 + run.stats.spd*0.6 + run.stats.foc*1.0;
+  const pDef = run.stats.grt*0.9  + run.stats.spd*0.6;
+
   let supDmg=0, dmgPieces=[];
   for(const s of run.supports||[]){ const part=s.def.dmg*(1+0.02*(s.meta.lvl-1)); if(part>0) dmgPieces.push(`${s.def.name}+${Math.round(part*100)}%`); supDmg+=part; s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`); }
-  const atk=run.stats.pow*1 + run.stats.spd*0.6 + run.stats.foc*0.8;
-  const eDef=enemy.grt*1 + enemy.spd*0.4;
-  const pScore=atk*(1+supDmg);
-  const eScore=enemy.pow*1 + enemy.spd*0.6 + enemy.foc*0.8;
-  const pDef=(run.stats.grt*1 + run.stats.spd*0.4);
-  const pEff=pScore - eDef; const eEff=eScore - pDef; const rng=(Math.random()*10-5); const margin=pEff - eEff + rng;
+
+  const pScore = pAtk * (1 + supDmg);
+  const eDef   = enemy.grt*0.9 + enemy.spd*0.6;
+
+  const eAtk   = enemy.pow*1.2 + enemy.spd*0.6 + enemy.foc*1.0;
+  const pDef2  = pDef; // clarity
+  const pEff = pScore - eDef;
+  const eEff = eAtk   - pDef2;
+
+  const rng=(Math.random()*10-5);
+  const margin=pEff - eEff + rng;
 
   log(`⚔️ ${forced?'Forced ':''}Battle — Stage ${run.stage}`);
   if(forced) log('• Reason: Time Left reached 0.');
   log(`• Enemy Stats → POW ${enemy.pow} | SPD ${enemy.spd} | FOC ${enemy.foc} | GRT ${enemy.grt}`);
-  log(`• Player Scores → ATK ${pScore.toFixed(1)} (DMG +${Math.round(supDmg*100)}%${dmgPieces.length?`; ${dmgPieces.join(', ')}`:''}) vs Enemy DEF ${eDef.toFixed(1)}`);
-  log(`• Enemy Score → ${eScore.toFixed(1)} vs Player DEF ${pDef.toFixed(1)}`);
+  log(`• Player Scores → ATK ${pScore.toFixed(1)} (base ${(pAtk).toFixed(1)} • DMG +${Math.round(supDmg*100)}%${dmgPieces.length?`; ${dmgPieces.join(', ')}`:''}) vs Enemy DEF ${eDef.toFixed(1)}`);
+  log(`• Enemy Score → ATK ${eAtk.toFixed(1)} vs Player DEF ${pDef2.toFixed(1)}`);
   log(`• Effective → You ${pEff.toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
 
-  const report={stage:run.stage,victory:margin>=0,margin:+margin.toFixed(1),rng:+rng.toFixed(1),forced,player:{stats:{...run.stats},atkScore:+(atk.toFixed(1)),defScore:+(pDef.toFixed(1)),supDmgPct:Math.round(supDmg*100),supBreakdown:dmgPieces},enemy:{stats:enemy,atkScore:+(eScore.toFixed(1)),defScore:+(eDef.toFixed(1))}};
+  const report={
+    stage:run.stage, victory:margin>=0, margin:+margin.toFixed(1), rng:+rng.toFixed(1), forced,
+    player:{stats:{...run.stats}, atkScore:+(pAtk.toFixed(1)), defScore:+(pDef2.toFixed(1)), supDmgPct:Math.round(supDmg*100), supBreakdown:dmgPieces},
+    enemy:{stats:enemy, atkScore:+(eAtk.toFixed(1)), defScore:+(eDef.toFixed(1))}
+  };
   run.lastReport=report;
 
   if(report.victory){
@@ -372,17 +386,19 @@ Margin: ${report.margin} (RNG ${report.rng})${forced}
 
 Player
 • Stats: POW ${p.stats.pow} | SPD ${p.stats.spd} | FOC ${p.stats.foc} | GRT ${p.stats.grt}
-• ATK Score: ${p.atkScore}  | DEF Score: ${p.defScore}${sup}
+• ATK (base): ${p.atkScore}  | DEF: ${p.defScore}${sup}
 
 Enemy
 • Stats: POW ${e.stats.pow} | SPD ${e.stats.spd} | FOC ${e.stats.foc} | GRT ${e.stats.grt}
-• ATK Score: ${e.atkScore}  | DEF Score: ${e.defScore}`;
+• ATK: ${e.atkScore}  | DEF: ${e.defScore}`;
   const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0))?`\n\nRewards\n• +${rewards.gold} gold, +${rewards.mats} mats`:''; 
+  const atkGap = (p.atkScore - e.defScore);
+  const defGap = (e.atkScore - p.defScore);
   const hint=report.victory?(rewards.final?`\n\nRun complete! Press Confirm to return.`:'')
     :`\n\nWhy you lost
-• Your effective ${p.atkScore - e.defScore >= 0 ? 'defense was lower than enemy attack' : 'attack was lower than enemy defense'}.
-• Consider training ${p.atkScore - e.defScore < e.atkScore - p.defScore ? 'POW/FOC' : 'GRT/SPD'} next time, or slot supports that boost those.
-${report.forced ? '• You ran out of Time. Try battling earlier or spending fewer Rests.' : ''}`;
+• ${atkGap < defGap ? 'Your offense lagged behind enemy defense.' : 'Enemy offense outpaced your defense.'}
+• Try training ${atkGap<defGap?'POW/FOC':'GRT/SPD'} and consider supports that amplify those.
+${report.forced ? '• You ran out of Time. Battle earlier or rest less often.' : ''}`;
   return base+rewardLine+hint;
 }
 
@@ -396,7 +412,7 @@ if (abandonCareerBtn) abandonCareerBtn.addEventListener('click', ()=>{
 
 /* ==================================================
    Memories of Chaos — Turn-based hands-on mode
-   (with acted flags to prevent infinite attacking)
+   (acted flags prevent infinite attacking)
    ================================================== */
 const CHAOS_FLOORS = 8;
 const chaos = {
@@ -526,23 +542,25 @@ function renderBattlefield(){
   });
 }
 
-/* --- Stat sheet conversion (HP/ATK/DEF/SPD) --- */
+/* --- Stat sheet conversion (HP/ATK/DEF/SPD) — BALANCED --- */
 function toSheet(s, label='Unit', lvl=1){
-  const hp   = Math.round(s.grt*6 + s.foc*2 + 30 + lvl*4);
-  const atk  = Math.round(s.pow*1.4 + s.foc*0.8);
-  const def  = Math.round(s.grt*1.2 + s.spd*0.4);
+  // Shift more value into FOC/SPD, reduce GRT dominance
+  const hp   = Math.round(s.grt*4 + s.foc*3 + 30 + lvl*4); // was GRT*6 + FOC*2
+  const atk  = Math.round(s.pow*1.4 + s.foc*1.0);          // buff FOC in damage
+  const def  = Math.round(s.grt*0.9 + s.spd*0.6);          // nerf GRT, buff SPD
   const spd  = Math.max(1, Math.round(s.spd));
   return { maxHp:hp, hp, atk, def, spd, label };
 }
 
-/* --- Enemy generation --- */
+/* --- Enemy generation (harder scaling) --- */
 function makeEnemy(floor, idx){
-  const base = 14 + floor*4;
-  const pow = base + 3 + idx*2;
-  const spd = 12 + floor*3 + idx*1;
-  const foc = 12 + floor*3;
-  const grt = 16 + floor*4 + idx;
-  const sheet = toSheet({pow,spd,foc,grt}, `Enemy ${idx+1}`, floor);
+  // POW grows faster than DEF; quadratic term ensures late-floor pressure
+  const f = floor, i = idx;
+  const pow = Math.round(18 + f*5 + f*f*0.6 + i*2);
+  const spd = Math.round(12 + f*3 + f*f*0.2 + i*1);
+  const foc = Math.round(12 + f*3 + f*f*0.25);
+  const grt = Math.round(14 + f*3 + f*f*0.25 + i*1); // DEF growth slower than POW
+  const sheet = toSheet({pow,spd,foc,grt}, `Enemy ${idx+1}`, f);
   return { name:`E${floor}-${idx+1}`, ...sheet, alive:true };
 }
 
@@ -604,7 +622,7 @@ function withModifiers(type, value){
   for (const m of chaos.modifiers){
     if (m==='Enemy +10% ATK' && type==='enemyAtk') v*=1.10;
     if (m==='Enemy +15% DEF' && type==='enemyDef') v*=1.15;
-    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06;
+    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06; // small indirect bump
     if (m==='Your POW +10%'  && type==='allyAtk') v*=1.08;
   }
   return Math.round(v);
@@ -730,7 +748,7 @@ function buildChaosSummary(final, gems=0, reason=''){
 Stars: ${chaos.stars}
 Score: ${chaos.score}
 Alive Heroes: ${alive}/${chaos.team.length}${reason?`\nReason: ${reason}`:''}${final?`\n\nRewards\n• +${gems} 💎\n\nGreat run! Press Confirm to return.`:''}
-${!final && reason?`\nTip\n• Train more in Career, equip matching weapons, and focus-fire squishier enemies.`:''}`;
+${!final && reason?`\nTip\n• Train more in Career, equip matching weapons, and balance offense/defense (POW/FOC vs GRT/SPD).` : ''}`;
 }
 
 /* ---------- Summary Modal (routing) ---------- */
