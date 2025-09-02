@@ -196,10 +196,16 @@ function rollOne(fromPool){
   const isSupport = SUPPORTS.some(s=>s.id===pick.id);
   const isUnit = UNITS.some(u=>u.id===pick.id);
   const isWeapon = WEAPONS.some(w=>w.id===pick.id);
-  if (isSupport) giveSupport(pick.id);
-  if (isUnit) giveUnit(pick.id);
-  if (isWeapon) giveWeapon(pick.id);
-  renderInventory(); renderWallet(); rebuildChaosPickers();
+
+  if (isSupport) { giveSupport(pick.id); }
+  if (isUnit)    { giveUnit(pick.id); }
+  if (isWeapon)  { giveWeapon(pick.id); }
+
+  renderInventory();
+  renderWallet();
+  rebuildChaosPickers();
+  rebuildPickers();   // <-- NEW: immediately refresh Career pickers so new units show up
+
   return { name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon') };
 }
 function spendGems(cost){ if(profile.gems<cost){alert('Not enough gems!');return false;} profile.gems-=cost; renderWallet(); return true; }
