@@ -149,3 +149,4 @@ footer.footer{padding:var(--sp-4);color:var(--muted);text-align:center;border-to
 .battle-card.selected{ outline:2px solid var(--primary); outline-offset: 2px; }
 .battle-card.target{ outline:2px solid var(--danger); outline-offset: 2px; }
 .stat-line{ font-size: var(--fs-xs); color: var(--muted); margin-top: 4px; }
+.card .badge { font-weight:600; }

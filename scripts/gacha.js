@@ -1,38 +1,57 @@
 /* =========================
    PocketFighters — MVP
-   v0.3.2 (full, balance patch)
-   • Balance: nerf GRT reliance, buff POW/FOC impact
-   • Career: new ATK/DEF coefficients, enemy scaling steeper
-   • Chaos: HP/DEF conversion shifts from GRT→FOC/SPD
-   • Chaos enemies scale harder (quadratic component)
-   • Turn-based Chaos with acted flags (no infinite attacks)
-   • Gacha & pickers refresh, Save/Load/Wipe
+   v0.4.0 (full)
+   • Stat Importance: SPD = accuracy/evasion + career tempo, FOC = crit chance
+   • Balance: preserved GRT nerf & harder enemy scaling from v0.3.2
+   • Content: new Units, Weapons, Supports
+   • Gacha UI: condensed results (duplicates show ×N)
+   • Chaos: acted flags (no infinite attacks)
+   • Save/Load/Wipe; pickers refresh immediately
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
 const ARCH = { BRAWLER:'Brawler', BLADE:'Blade', GUNNER:'Gunner', MAGE:'Mage' };
 
-/* ---------- Catalogs (placeholder data) ---------- */
+/* ---------- Catalogs ---------- */
 const UNITS = [
-  { id:'u_rai',   name:'Rai',   arche:ARCH.BLADE,   rarity:RARITY.SR,  base:{pow:9,  spd:8, foc:5,  grt:7} },
-  { id:'u_nox',   name:'Nox',   arche:ARCH.MAGE,    rarity:RARITY.SSR, base:{pow:7,  spd:7, foc:12, grt:6} },
-  { id:'u_brick', name:'Brick', arche:ARCH.BRAWLER, rarity:RARITY.R,   base:{pow:10, spd:5, foc:3,  grt:10} },
+  // Existing
+  { id:'u_rai',   name:'Rai',     arche:ARCH.BLADE,   rarity:RARITY.SR,  base:{pow:9,  spd:8,  foc:5,  grt:7} },
+  { id:'u_nox',   name:'Nox',     arche:ARCH.MAGE,    rarity:RARITY.SSR, base:{pow:7,  spd:7,  foc:12, grt:6} },
+  { id:'u_brick', name:'Brick',   arche:ARCH.BRAWLER, rarity:RARITY.R,   base:{pow:10, spd:5,  foc:3,  grt:10} },
+  // New
+  { id:'u_kira',  name:'Kira',    arche:ARCH.GUNNER,  rarity:RARITY.SR,  base:{pow:8,  spd:11, foc:6,  grt:5} },
+  { id:'u_zen',   name:'Zen',     arche:ARCH.BLADE,   rarity:RARITY.SSR, base:{pow:11, spd:10, foc:7,  grt:6} },
+  { id:'u_sable', name:'Sable',   arche:ARCH.MAGE,    rarity:RARITY.SR,  base:{pow:6,  spd:8,  foc:11, grt:6} },
+  { id:'u_vex',   name:'Vex',     arche:ARCH.GUNNER,  rarity:RARITY.R,   base:{pow:7,  spd:9,  foc:4,  grt:6} },
+  { id:'u_ursa',  name:'Ursa',    arche:ARCH.BRAWLER, rarity:RARITY.SSR, base:{pow:12, spd:6,  foc:5,  grt:11} },
 ];
 
 const WEAPONS = [
-  { id:'w_katana', name:'Storm Katana',    rarity:RARITY.SR,  pref:ARCH.BLADE,  add:{pow:4, spd:2, foc:0, grt:0}, growth:0.07, max:5 },
-  { id:'w_staff',  name:'Orbweaver Staff', rarity:RARITY.SSR, pref:ARCH.MAGE,   add:{pow:1, spd:1, foc:5, grt:1}, growth:0.08, max:5 },
-  { id:'w_gaunt',  name:'Titan Gauntlets', rarity:RARITY.R,   pref:ARCH.BRAWLER,add:{pow:3, spd:0, foc:0, grt:2}, growth:0.05, max:5 },
-  { id:'w_pistol', name:'Silent Pistol',   rarity:RARITY.R,   pref:ARCH.GUNNER, add:{pow:2, spd:2, foc:0, grt:0}, growth:0.05, max:5 },
+  // Existing
+  { id:'w_katana',  name:'Storm Katana',      rarity:RARITY.SR,  pref:ARCH.BLADE,  add:{pow:4, spd:2, foc:0, grt:0}, growth:0.07, max:5 },
+  { id:'w_staff',   name:'Orbweaver Staff',   rarity:RARITY.SSR, pref:ARCH.MAGE,   add:{pow:1, spd:1, foc:5, grt:1}, growth:0.08, max:5 },
+  { id:'w_gaunt',   name:'Titan Gauntlets',   rarity:RARITY.R,   pref:ARCH.BRAWLER,add:{pow:3, spd:0, foc:0, grt:2}, growth:0.05, max:5 },
+  { id:'w_pistol',  name:'Silent Pistol',     rarity:RARITY.R,   pref:ARCH.GUNNER, add:{pow:2, spd:2, foc:0, grt:0}, growth:0.05, max:5 },
+  // New
+  { id:'w_odachi',  name:'Mooncut Odachi',    rarity:RARITY.SSR, pref:ARCH.BLADE,  add:{pow:6, spd:1, foc:1, grt:0}, growth:0.08, max:5 },
+  { id:'w_tome',    name:'Aether Tome',       rarity:RARITY.SR,  pref:ARCH.MAGE,   add:{pow:0, spd:1, foc:4, grt:0}, growth:0.07, max:5 },
+  { id:'w_revolver',name:'Twin Revolvers',    rarity:RARITY.SR,  pref:ARCH.GUNNER, add:{pow:3, spd:3, foc:1, grt:0}, growth:0.07, max:5 },
+  { id:'w_maul',    name:'Earthsplit Maul',   rarity:RARITY.SR,  pref:ARCH.BRAWLER,add:{pow:5, spd:0, foc:0, grt:2}, growth:0.06, max:5 },
 ];
 
 const SUPPORTS = [
-  { id:'s_cardio', name:'Cardio Coach',    rarity:RARITY.R,   train:{pow:0.00,spd:0.12,foc:0.00,grt:0.00}, dmg:0.00 },
-  { id:'s_brutal', name:'Brutal Sparring', rarity:RARITY.SR,  train:{pow:0.15,spd:0.00,foc:0.00,grt:0.05}, dmg:0.05 },
-  { id:'s_mind',   name:'Mind Palace',     rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.18,grt:0.00}, dmg:0.06 },
-  { id:'s_guard',  name:'Guard Drills',    rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.00,grt:0.15}, dmg:0.02 },
-  { id:'s_aegis',  name:'Aegis Mentor',    rarity:RARITY.SSR, train:{pow:0.05,spd:0.05,foc:0.05,grt:0.10}, dmg:0.10 },
-  { id:'s_split',  name:'Split Focus',     rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00 },
+  // Existing
+  { id:'s_cardio', name:'Cardio Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.12,foc:0.00,grt:0.00}, dmg:0.00 },
+  { id:'s_brutal', name:'Brutal Sparring',  rarity:RARITY.SR,  train:{pow:0.15,spd:0.00,foc:0.00,grt:0.05}, dmg:0.05 },
+  { id:'s_mind',   name:'Mind Palace',      rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.18,grt:0.00}, dmg:0.06 },
+  { id:'s_guard',  name:'Guard Drills',     rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.00,grt:0.15}, dmg:0.02 },
+  { id:'s_aegis',  name:'Aegis Mentor',     rarity:RARITY.SSR, train:{pow:0.05,spd:0.05,foc:0.05,grt:0.10}, dmg:0.10 },
+  { id:'s_split',  name:'Split Focus',      rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00 },
+  // New
+  { id:'s_blitz',  name:'Blitz Tactics',    rarity:RARITY.SR,  train:{pow:0.05,spd:0.18,foc:0.00,grt:0.00}, dmg:0.03 },
+  { id:'s_zenith', name:'Zenith Study',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.05,foc:0.20,grt:0.00}, dmg:0.08 },
+  { id:'s_iron',   name:'Iron Will',        rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.02 },
+  { id:'s_duelist',name:'Duelist Footwork', rarity:RARITY.SR,  train:{pow:0.08,spd:0.15,foc:0.00,grt:0.00}, dmg:0.04 },
 ];
 
 /* ---------- Player Profile ---------- */
@@ -50,6 +69,7 @@ const fmt = n => Number(n).toLocaleString();
 const q = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 const rarityClass = r => r===RARITY.SSR?'ssr':(r===RARITY.SR?'sr':'r');
+const clamp = (v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 
 /* ---------- Save/Load ---------- */
 function save() {
@@ -119,17 +139,17 @@ function tryLevelWeapon(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=tr
 function tryLevelSupport(e){ let up=false; while(e.exp>=e.expNext){e.exp-=e.expNext;e.lvl++;e.expNext=Math.ceil(e.expNext*1.35);up=true;} return up; }
 
 /* ---------- Rendering ---------- */
+function cardHtml({title, subtitle, rarity, body='', badge=''}){
+  return `<div class="card ${rarityClass(rarity)}">
+    <div class="title">${title}${badge?` <span class="chip badge">${badge}</span>`:''}</div>
+    <div class="tiny">${subtitle||''}</div>
+    ${body?`<div class="chips">${body}</div>`:''}
+  </div>`;
+}
 function renderWallet(){
   q('#gold').textContent = `🪙 ${fmt(profile.gold)}`;
   q('#gems').textContent = `💎 ${fmt(profile.gems)}`;
   q('#mats').textContent = `📦 ${fmt(profile.mats)}`;
-}
-function cardHtml({title, subtitle, rarity, body=''}) {
-  return `<div class="card ${rarityClass(rarity)}">
-    <div class="title">${title}</div>
-    <div class="tiny">${subtitle||''}</div>
-    ${body?`<div class="chips">${body}</div>`:''}
-  </div>`;
 }
 function renderInventory(){
   const uCont = q('#inv-units'); if (uCont){ uCont.innerHTML='';
@@ -191,6 +211,7 @@ const RATES = { SSR:0.03, SR:0.17, R:0.80 };
 function pickRarity(){ const r=Math.random(); if(r<RATES.SSR) return RARITY.SSR; if(r<RATES.SSR+RATES.SR) return RARITY.SR; return RARITY.R; }
 function poolCharacterByRarity(r){ return [...UNITS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
 function poolWeaponByRarity(r){ return [...WEAPONS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
+
 function rollOne(fromPool){
   const rarity = pickRarity();
   const pool = fromPool(rarity);
@@ -198,21 +219,52 @@ function rollOne(fromPool){
   const isSupport = SUPPORTS.some(s=>s.id===pick.id);
   const isUnit = UNITS.some(u=>u.id===pick.id);
   const isWeapon = WEAPONS.some(w=>w.id===pick.id);
+
   if (isSupport) giveSupport(pick.id);
   if (isUnit) giveUnit(pick.id);
   if (isWeapon) giveWeapon(pick.id);
+
   renderInventory(); renderWallet(); rebuildChaosPickers(); rebuildPickers(); // refresh pickers immediately
-  return { name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon') };
+  return { id: pick.id, name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon') };
 }
+
+/* Condensed results: collapse duplicates into xN */
+function renderPullResults(containerSel, results){
+  const box = q(containerSel);
+  const counts = new Map(); // key=id => { item, count }
+  for (const r of results){
+    if (!counts.has(r.id)) counts.set(r.id, { item:r, count:1 });
+    else counts.get(r.id).count++;
+  }
+  let html = '';
+  for (const {item,count} of counts.values()){
+    const badge = count>1 ? `×${count}` : '';
+    html += cardHtml({title:item.name, subtitle:item.type, rarity:item.rarity, badge});
+  }
+  box.insertAdjacentHTML('afterbegin', html);
+}
+
 function spendGems(cost){ if(profile.gems<cost){alert('Not enough gems!');return false;} profile.gems-=cost; renderWallet(); return true; }
 function attachGacha(){
-  q('[data-pull="char-1"]')?.addEventListener('click', ()=>{ if(!spendGems(30))return; const r=rollOne(poolCharacterByRarity); q('#char-results').insertAdjacentHTML('afterbegin', cardHtml({title:r.name, subtitle:r.type, rarity:r.rarity})); });
-  q('[data-pull="char-10"]')?.addEventListener('click', ()=>{
-    if(!spendGems(300))return; const box=q('#char-results'); let html=''; for(let i=0;i<10;i++){ const r=rollOne(poolCharacterByRarity); html+=cardHtml({title:r.name, subtitle:r.type, rarity:r.rarity}); } box.insertAdjacentHTML('afterbegin', html);
+  q('[data-pull="char-1"]')?.addEventListener('click', ()=>{
+    if(!spendGems(30))return;
+    const r=rollOne(poolCharacterByRarity);
+    renderPullResults('#char-results',[r]);
   });
-  q('[data-pull="weap-1"]')?.addEventListener('click', ()=>{ if(!spendGems(30))return; const r=rollOne(poolWeaponByRarity); q('#weap-results').insertAdjacentHTML('afterbegin', cardHtml({title:r.name, subtitle:r.type, rarity:r.rarity})); });
+  q('[data-pull="char-10"]')?.addEventListener('click', ()=>{
+    if(!spendGems(300))return;
+    const results=[]; for(let i=0;i<10;i++) results.push(rollOne(poolCharacterByRarity));
+    renderPullResults('#char-results',results);
+  });
+  q('[data-pull="weap-1"]')?.addEventListener('click', ()=>{
+    if(!spendGems(30))return;
+    const r=rollOne(poolWeaponByRarity);
+    renderPullResults('#weap-results',[r]);
+  });
   q('[data-pull="weap-10"]')?.addEventListener('click', ()=>{
-    if(!spendGems(300))return; const box=q('#weap-results'); let html=''; for(let i=0;i<10;i++){ const r=rollOne(poolWeaponByRarity); html+=cardHtml({title:r.name, subtitle:r.type, rarity:r.rarity}); } box.insertAdjacentHTML('afterbegin', html);
+    if(!spendGems(300))return;
+    const results=[]; for(let i=0;i<10;i++) results.push(rollOne(poolWeaponByRarity));
+    renderPullResults('#weap-results',results);
   });
 }
 
@@ -325,59 +377,63 @@ function restOnce(){
   }
   const before = run.stamina;
   run.stamina = Math.min(5, run.stamina + 2);
-
-  // supports level by use
   for (const s of run.supports || []){
     s.meta.exp += 1;
-    if (tryLevelSupport(s.meta)) {
-      log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`);
-    }
+    if (tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`);
   }
-
   updateRunUI();
   log(`🛌 Rested: Stamina ${before}→${run.stamina}.`);
   spendTime(run.costRest, 'Rest');
 }
 
-
-/* Career battle: single-check fight per stage (BALANCED) */
+/* Career battle: single-check fight per stage (BALANCED + SPD tempo) */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
-
   const d=run.stage;
 
-  // --- Enemy scaling: faster POW growth, modest DEF, quadratic push ---
+  // Enemy scaling: offense outpaces defense
   const enemy = {
-    pow: 6 + d*2 + Math.floor(d*d*0.3),            // steeper offense
-    spd: 5 + d*2,                                  // keeps pace
+    pow: 6 + d*2 + Math.floor(d*d*0.3),
+    spd: 5 + d*2,
     foc: 5 + Math.floor(d*1.8),
-    grt: 7 + Math.floor(d*1.5 + d*d*0.2),          // DEF grows, but slower than POW
+    grt: 7 + Math.floor(d*1.5 + d*d*0.2),
   };
 
-  // --- Player effective scores (nerf GRT, buff POW/FOC) ---
+  // Player effective scores (nerf GRT, buff POW/FOC)
   const pAtk = run.stats.pow*1.2 + run.stats.spd*0.6 + run.stats.foc*1.0;
   const pDef = run.stats.grt*0.9  + run.stats.spd*0.6;
 
   let supDmg=0, dmgPieces=[];
-  for(const s of run.supports||[]){ const part=s.def.dmg*(1+0.02*(s.meta.lvl-1)); if(part>0) dmgPieces.push(`${s.def.name}+${Math.round(part*100)}%`); supDmg+=part; s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`); }
+  for(const s of run.supports||[]){
+    const part=s.def.dmg*(1+0.02*(s.meta.lvl-1));
+    if(part>0) dmgPieces.push(`${s.def.name}+${Math.round(part*100)}%`);
+    supDmg+=part; s.meta.exp+=1;
+    if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`);
+  }
 
   const pScore = pAtk * (1 + supDmg);
   const eDef   = enemy.grt*0.9 + enemy.spd*0.6;
 
   const eAtk   = enemy.pow*1.2 + enemy.spd*0.6 + enemy.foc*1.0;
-  const pDef2  = pDef; // clarity
+  const pDef2  = pDef;
+
+  // NEW: SPD Tempo (small capped swing based on SPD difference)
+  const spdDiff = (run.stats.spd - enemy.spd);
+  const tempo = clamp(spdDiff * 0.3, -6, 6);
+
   const pEff = pScore - eDef;
   const eEff = eAtk   - pDef2;
 
   const rng=(Math.random()*10-5);
-  const margin=pEff - eEff + rng;
+  const margin=pEff - eEff + rng + tempo;
 
   log(`⚔️ ${forced?'Forced ':''}Battle — Stage ${run.stage}`);
   if(forced) log('• Reason: Time Left reached 0.');
   log(`• Enemy Stats → POW ${enemy.pow} | SPD ${enemy.spd} | FOC ${enemy.foc} | GRT ${enemy.grt}`);
   log(`• Player Scores → ATK ${pScore.toFixed(1)} (base ${(pAtk).toFixed(1)} • DMG +${Math.round(supDmg*100)}%${dmgPieces.length?`; ${dmgPieces.join(', ')}`:''}) vs Enemy DEF ${eDef.toFixed(1)}`);
   log(`• Enemy Score → ATK ${eAtk.toFixed(1)} vs Player DEF ${pDef2.toFixed(1)}`);
-  log(`• Effective → You ${pEff.toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
+  log(`• Tempo (SPD diff ${spdDiff>=0?'+':''}${spdDiff}) contributes ${tempo.toFixed(1)} to margin.`);
+  log(`• Effective → You ${(pEff+tempo).toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
 
   const report={
     stage:run.stage, victory:margin>=0, margin:+margin.toFixed(1), rng:+rng.toFixed(1), forced,
@@ -420,7 +476,7 @@ Enemy
   const hint=report.victory?(rewards.final?`\n\nRun complete! Press Confirm to return.`:'')
     :`\n\nWhy you lost
 • ${atkGap < defGap ? 'Your offense lagged behind enemy defense.' : 'Enemy offense outpaced your defense.'}
-• Try training ${atkGap<defGap?'POW/FOC':'GRT/SPD'} and consider supports that amplify those.
+• Try training ${atkGap<defGap?'POW/FOC (damage & crits)':'GRT/SPD (toughness & tempo)'} and consider supports that amplify those.
 ${report.forced ? '• You ran out of Time. Battle earlier or rest less often.' : ''}`;
   return base+rewardLine+hint;
 }
@@ -435,14 +491,14 @@ if (abandonCareerBtn) abandonCareerBtn.addEventListener('click', ()=>{
 
 /* ==================================================
    Memories of Chaos — Turn-based hands-on mode
-   (acted flags prevent infinite attacking)
+   (acted flags; SPD=acc/evasion, FOC=crit)
    ================================================== */
 const CHAOS_FLOORS = 8;
 const chaos = {
   active:false, floor:1, maxFloor:CHAOS_FLOORS, wave:1, wavesPerFloor:2,
   stars:0, score:0,
   team:[],     // [{unitMeta, unitDef, weaponMeta, weaponDef, stats, hp, maxHp, atk, def, spd, alive, acted}]
-  enemies:[],  // array of {name, hp, ...}
+  enemies:[],  // { name, hp, maxHp, atk, def, spd, alive, raw:{pow,spd,foc,grt} }
   phase:'player', // 'player' | 'enemy'
   selection:{allyIdx:null, enemyIdx:null},
   modifiers:[],
@@ -463,11 +519,11 @@ function unitEffectiveStats(def, meta, w){
   const ul=meta.lvl;
   let pow=def.base.pow, spd=def.base.spd, foc=def.base.foc, grt=def.base.grt;
   if (w){
-    const ws=1 + w.def.growth*(w.meta.lvl-1);
-    pow += Math.round(w.def.add.pow*ws);
-    spd += Math.round(w.def.add.spd*ws);
-    foc += Math.round(w.def.add.foc*ws);
-    grt += Math.round(w.def.add.grt*ws);
+    const ws=1 + w.growth*(w.meta.lvl-1);
+    pow += Math.round(w.add.pow*ws);
+    spd += Math.round(w.add.spd*ws);
+    foc += Math.round(w.add.foc*ws);
+    grt += Math.round(w.add.grt*ws);
   }
   const s=1 + 0.05*(ul-1);
   pow=Math.round(pow*s); spd=Math.round(spd*s); foc=Math.round(foc*s); grt=Math.round(grt*s);
@@ -527,7 +583,7 @@ function renderBattlefield(){
     card.className = 'battle-card' + (a.alive?'':' dead') + (chaos.selection.allyIdx===idx?' selected':'');
     card.innerHTML = `
       <div class="title">${a.unitDef.name}${a.acted?' <span class="tiny">(Acted)</span>':''}</div>
-      <div class="stat-line">ATK ${a.atk} • DEF ${a.def} • SPD ${a.spd}</div>
+      <div class="stat-line">ATK ${a.atk} • DEF ${a.def} • SPD ${a.spd} <span class="tiny">(acc/eva)</span></div>
       <div class="bar"><span style="width:${(a.hp/a.maxHp)*100}%"></span></div>
       <div class="stat-line">HP ${Math.max(0,Math.ceil(a.hp))}/${a.maxHp}</div>
     `;
@@ -565,26 +621,24 @@ function renderBattlefield(){
   });
 }
 
-/* --- Stat sheet conversion (HP/ATK/DEF/SPD) — BALANCED --- */
+/* --- Stat sheet conversion (HP/ATK/DEF/SPD) — balanced --- */
 function toSheet(s, label='Unit', lvl=1){
-  // Shift more value into FOC/SPD, reduce GRT dominance
-  const hp   = Math.round(s.grt*4 + s.foc*3 + 30 + lvl*4); // was GRT*6 + FOC*2
-  const atk  = Math.round(s.pow*1.4 + s.foc*1.0);          // buff FOC in damage
-  const def  = Math.round(s.grt*0.9 + s.spd*0.6);          // nerf GRT, buff SPD
+  const hp   = Math.round(s.grt*4 + s.foc*3 + 30 + lvl*4); // GRT nerfed, FOC buffed
+  const atk  = Math.round(s.pow*1.4 + s.foc*1.0);          // FOC adds damage
+  const def  = Math.round(s.grt*0.9 + s.spd*0.6);          // SPD contributes to DEF
   const spd  = Math.max(1, Math.round(s.spd));
   return { maxHp:hp, hp, atk, def, spd, label };
 }
 
-/* --- Enemy generation (harder scaling) --- */
+/* --- Enemy generation (harder scaling) + raw stats snapshot --- */
 function makeEnemy(floor, idx){
-  // POW grows faster than DEF; quadratic term ensures late-floor pressure
   const f = floor, i = idx;
   const pow = Math.round(18 + f*5 + f*f*0.6 + i*2);
   const spd = Math.round(12 + f*3 + f*f*0.2 + i*1);
   const foc = Math.round(12 + f*3 + f*f*0.25);
-  const grt = Math.round(14 + f*3 + f*f*0.25 + i*1); // DEF growth slower than POW
+  const grt = Math.round(14 + f*3 + f*f*0.25 + i*1);
   const sheet = toSheet({pow,spd,foc,grt}, `Enemy ${idx+1}`, f);
-  return { name:`E${floor}-${idx+1}`, ...sheet, alive:true };
+  return { name:`E${floor}-${idx+1}`, ...sheet, alive:true, raw:{pow,spd,foc,grt} };
 }
 
 /* --- Modifiers & helpers --- */
@@ -596,7 +650,18 @@ function livingAllies(){ return chaos.team.filter(a=>a.alive); }
 function allLivingAlliesActed(){ return livingAllies().every(a=>a.acted); }
 function resetActs(){ chaos.team.forEach(a=>{ if (a.alive) a.acted = false; }); }
 
-/* --- Flow --- */
+function withModifiers(type, value){
+  let v=value;
+  for (const m of chaos.modifiers){
+    if (m==='Enemy +10% ATK' && type==='enemyAtk') v*=1.10;
+    if (m==='Enemy +15% DEF' && type==='enemyDef') v*=1.15;
+    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06; // small indirect bump
+    if (m==='Your POW +10%'  && type==='allyAtk') v*=1.08;
+  }
+  return Math.round(v);
+}
+
+/* --- Chaos Flow --- */
 function startChaos(){
   if (chaos.team.length===0){ alert('Pick at least one unit.'); return; }
   chaos.active = true; run.mode='chaos';
@@ -639,23 +704,29 @@ function updateChaosHud(){
   q('#chaos-attack').disabled = !can;
 }
 
-/* --- Damage & Modifiers --- */
-function withModifiers(type, value){
-  let v=value;
-  for (const m of chaos.modifiers){
-    if (m==='Enemy +10% ATK' && type==='enemyAtk') v*=1.10;
-    if (m==='Enemy +15% DEF' && type==='enemyDef') v*=1.15;
-    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06; // small indirect bump
-    if (m==='Your POW +10%'  && type==='allyAtk') v*=1.08;
-  }
-  return Math.round(v);
-}
+/* --- Combat math: SPD = acc/evasion, FOC = crit --- */
 function calcDamage(attacker, defender, isEnemy=false){
+  // Accuracy / Evasion from SPD differential
+  const spdDiff = (attacker.spd || 0) - (defender.spd || 0);
+  const baseHit = 0.85 + spdDiff * 0.003;          // ~±30 SPD swings ≈ ±9% hit
+  const hit = clamp(baseHit, 0.60, 0.98);          // always some chance to miss/hit
+  if (Math.random() > hit){
+    return { dmg:0, miss:true, crit:false };
+  }
+
   const atk = withModifiers(isEnemy?'enemyAtk':'allyAtk', attacker.atk);
   const def = withModifiers(isEnemy?'enemyDef':'allyDef', defender.def);
   const base = Math.max(1, Math.round((atk - def*0.55)));
-  const rng = (Math.random()*6 - 3); // -3..+3
-  return Math.max(1, Math.round(base + rng));
+  const rng  = (Math.random()*6 - 3); // -3..+3
+  let dmg = Math.max(1, Math.round(base + rng));
+
+  // Crit chance from FOC (fallback to SPD if FOC unknown)
+  const focLike = (attacker.stats?.foc) ?? (attacker.raw?.foc) ?? (attacker.spd || 0);
+  const critChance = clamp(0.08 + (focLike * 0.004), 0.08, 0.30);  // 8–30%
+  const crit = Math.random() < critChance;
+  if (crit) dmg = Math.round(dmg * 1.5);
+
+  return { dmg, miss:false, crit };
 }
 
 /* --- Player actions --- */
@@ -665,32 +736,29 @@ function playerAttack(){
   const hero = chaos.team[ai]; const foe = chaos.enemies[ei];
   if (!hero.alive || hero.acted || foe.hp<=0 || chaos.phase!=='player') return;
 
-  const dmg = calcDamage(hero, foe, false);
-  foe.hp -= dmg;
-  clog(`🗡️ ${hero.unitDef.name} → ${foe.name}: -${dmg} HP`);
-  if (foe.hp<=0){ clog(`💥 ${foe.name} is defeated!`); }
+  const res = calcDamage(hero, foe, false);
+  if (res.miss){
+    clog(`💨 ${hero.unitDef.name} → ${foe.name}: MISS (SPD diff ${hero.spd - foe.spd >= 0 ? '+' : ''}${hero.spd - foe.spd})`);
+  } else {
+    clog(`${res.crit?'💥 CRIT! ':'🗡️ '}${hero.unitDef.name} → ${foe.name}: -${res.dmg} HP`);
+    foe.hp -= res.dmg;
+    if (foe.hp<=0){ clog(`☠️ ${foe.name} is defeated!`); }
+  }
 
-  // mark hero used
   hero.acted = true;
-
   renderBattlefield();
   updateChaosHud();
 
-  // Wave clear?
   if (chaos.enemies.every(e=>e.hp<=0)){
     clog('✅ Wave cleared.');
     nextWaveOrFloor();
     return;
   }
-
-  // Auto-end if all living allies have acted
   if (allLivingAlliesActed()){
     clog('↩️ All allies have acted. Enemy Phase.');
     enemyTurn();
     return;
   }
-
-  // Otherwise let player pick another target
   chaos.selection.enemyIdx = null;
   updateChaosHud();
 }
@@ -708,17 +776,19 @@ function enemyTurn(){
     const targets = chaos.team.filter(a=>a.alive);
     if (!targets.length) break;
     const tgt = targets[Math.floor(Math.random()*targets.length)];
-    const dmg = calcDamage(foe, tgt, true);
-    tgt.hp -= dmg;
-    clog(`🔥 ${foe.name} → ${tgt.unitDef?.name||tgt.name}: -${dmg} HP`);
-    if (tgt.hp<=0){ tgt.alive=false; clog(`☠️ ${tgt.unitDef?.name||tgt.name} has fallen.`); }
+    const res = calcDamage(foe, tgt, true);
+    if (res.miss){
+      clog(`💨 ${foe.name} → ${tgt.unitDef?.name||tgt.name}: MISS`);
+    } else {
+      tgt.hp -= res.dmg;
+      clog(`${res.crit?'💥 CRIT! ':'🔥 '}${foe.name} → ${tgt.unitDef?.name||tgt.name}: -${res.dmg} HP`);
+      if (tgt.hp<=0){ tgt.alive=false; clog(`☠️ ${tgt.unitDef?.name||tgt.name} has fallen.`); }
+    }
   }
 
   renderBattlefield();
-
   if (chaos.team.every(a=>!a.alive)){ defeatChaos('All heroes defeated'); return; }
 
-  // New player phase; reset actions
   resetActs();
   chaos.phase='player';
   updateChaosUI();
@@ -729,7 +799,7 @@ function nextWaveOrFloor(){
   chaos.score += 2;
 
   if (chaos.wave >= chaos.wavesPerFloor){
-    const floorStars = 2 + (chaos.team.filter(a=>a.alive).length>=3 ? 1 : 0); // 3★ if all alive
+    const floorStars = 2 + (chaos.team.filter(a=>a.alive).length>=3 ? 1 : 0);
     chaos.stars += floorStars;
     clog(`🌟 Floor ${chaos.floor} cleared for ${floorStars}★.`);
 
@@ -771,7 +841,7 @@ function buildChaosSummary(final, gems=0, reason=''){
 Stars: ${chaos.stars}
 Score: ${chaos.score}
 Alive Heroes: ${alive}/${chaos.team.length}${reason?`\nReason: ${reason}`:''}${final?`\n\nRewards\n• +${gems} 💎\n\nGreat run! Press Confirm to return.`:''}
-${!final && reason?`\nTip\n• Train more in Career, equip matching weapons, and balance offense/defense (POW/FOC vs GRT/SPD).` : ''}`;
+${!final && reason?`\nTip\n• Train more in Career, equip matching weapons, and balance offense (POW/FOC) with defense/tempo (GRT/SPD).` : ''}`;
 }
 
 /* ---------- Summary Modal (routing) ---------- */
@@ -820,6 +890,13 @@ q('#chaos-endturn')?.addEventListener('click', enemyTurn);
 q('#chaos-abandon')?.addEventListener('click', ()=>{
   if(!chaos.active){ modal.classList.add('hidden'); q('#chaos-run').classList.add('hidden'); q('#chaos-setup').classList.remove('hidden'); rebuildChaosPickers(); return; }
   defeatChaos('Abandoned');
+});
+
+/* Optional: expose functions if your HTML uses inline onclick="..." */
+Object.assign(window, {
+  restOnce, trainOnce, battleStage, startRun,
+  grantStarter, save, load, wipe,
+  startChaos, playerAttack, enemyTurn
 });
 
 /* ---------- Boot ---------- */
