@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PocketFighters — MVP</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles/gacha.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🧧 PocketFighters — MVP</div>
+    <nav class="tabs">
+      <button data-tab="home" class="active">Home</button>
+      <button data-tab="gacha">Gacha</button>
+      <button data-tab="inventory">Inventory</button>
+      <button data-tab="career">Career Mode</button>
+      <button data-tab="settings">Settings</button>
+    </nav>
+    <div class="wallet">
+      <span id="gold">🪙 0</span>
+      <span id="gems">💎 0</span>
+      <span id="mats">📦 0</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="home" class="tab active">
+      <h2>Welcome</h2>
+      <p>This is a lean HTML/JS/CSS MVP for a gacha + career-mode fighter.</p>
+      <ul>
+        <li>Pull <b>Units</b>, <b>Weapons</b>, and <b>Support Cards</b>.</li>
+        <li>Run Career Mode and see how far you can go in 10 stages.</li>
+        <li>Support cards gain EXP when used; Units/Weapons level up with mats.</li>
+      </ul>
+      <button id="btn-grant-starter">Grant Starter Resources</button>
+    </section>
+
+    <!-- GACHA -->
+    <section id="gacha" class="tab">
+      <h2>Gacha</h2>
+      <div class="banners">
+        <div class="banner">
+          <h3>Character Banner</h3>
+          <p>Units + Support Cards</p>
+          <div class="rates">SSR 3% • SR 17% • R 80%</div>
+          <div class="actions">
+            <button data-pull="char-1">Single Pull (💎 30)</button>
+            <button data-pull="char-10">x10 Pull (💎 300)</button>
+          </div>
+          <div class="results" id="char-results"></div>
+        </div>
+
+        <div class="banner">
+          <h3>Weapon Banner</h3>
+          <p>Weapons + Support Cards</p>
+          <div class="rates">SSR 3% • SR 17% • R 80%</div>
+          <div class="actions">
+            <button data-pull="weap-1">Single Pull (💎 30)</button>
+            <button data-pull="weap-10">x10 Pull (💎 300)</button>
+          </div>
+          <div class="results" id="weap-results"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVENTORY -->
+    <section id="inventory" class="tab">
+      <h2>Inventory</h2>
+
+      <div class="inv-grid">
+        <div>
+          <h3>Units</h3>
+          <div id="inv-units" class="card-grid"></div>
+        </div>
+        <div>
+          <h3>Weapons</h3>
+          <div id="inv-weapons" class="card-grid"></div>
+        </div>
+        <div>
+          <h3>Support Cards</h3>
+          <div id="inv-supports" class="card-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAREER -->
+    <section id="career" class="tab">
+      <h2>Career Mode</h2>
+      <div id="career-setup">
+        <div class="picker">
+          <h3>Choose Unit</h3>
+          <div id="pick-unit" class="pick-grid"></div>
+        </div>
+        <div class="picker">
+          <h3>Choose Weapon</h3>
+          <div id="pick-weapon" class="pick-grid"></div>
+        </div>
+        <div class="picker">
+          <h3>Slot Support (0–2)</h3>
+          <div id="pick-supports" class="pick-grid"></div>
+        </div>
+        <button id="start-run" disabled>Start Run</button>
+      </div>
+
+      <div id="career-run" class="hidden">
+        <div class="run-top">
+          <div id="run-summary"></div>
+          <div id="run-stats"></div>
+          <div>
+            <div id="run-stage">Stage 1 / 10 • Stamina 5</div>
+            <div class="deadline-row">
+              <span id="deadline-label">Time Left: 5</span>
+              <div class="meter" aria-label="Time Left">
+                <span id="deadline-bar" style="width:100%"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="run-actions">
+          <span class="tiny" style="display:block;margin-bottom:6px;">Choose Training:</span>
+          <button data-train="pow">Train POW</button>
+          <button data-train="spd">Train SPD</button>
+          <button data-train="foc">Train FOC</button>
+          <button data-train="grt">Train GRT</button>
+          <button id="btn-rest" title="Costs 2 time">Rest (-2 time)</button>
+          <button id="btn-battle" class="primary">Battle</button>
+          <button id="btn-abandon" class="danger">End Run</button>
+        </div>
+
+        <div class="run-log" id="run-log"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="tab">
+      <h2>Settings & Save</h2>
+      <button id="btn-save">Save</button>
+      <button id="btn-load">Load</button>
+      <button id="btn-wipe" class="danger">Wipe Save</button>
+      <p class="small">Saves to your browser’s localStorage.</p>
+    </section>
+  </main>
+
+  <!-- SUMMARY MODAL -->
+  <div id="summary-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="summary-title">
+    <div class="modal-card">
+      <h3 id="summary-title">Run Summary</h3>
+      <div id="summary-body" class="summary-body"></div>
+      <div class="modal-actions">
+        <button id="btn-summary-confirm" class="primary">Confirm & Return</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">v0.1.2-MVP • All placeholder data/art</footer>
+  <script src="scripts/gacha.js"></script>
+</body>
+</html>
