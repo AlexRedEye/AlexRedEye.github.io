@@ -1,14 +1,17 @@
 /* =========================
-   MVP Data + Systems (no libs)
-   v0.3.0:
-   • Chaos reworked to turn-based: pick hero → pick target → Attack / End Turn
-   • Keeps Career deadline & Summary modal
-   • Fix: pickers rebuild after gacha
+   PocketFighters — MVP
+   v0.3.0 (full)
+   • Gacha: Units/Weapons/Supports across 2 banners
+   • Career Mode: deadline, detailed logs, defeat summary modal w/ confirm
+   • Chaos Mode: turn-based (pick hero → pick target → Attack / End Turn)
+   • Save/Load/Wipe (localStorage)
+   • Fix: pickers rebuild immediately after pulls
    ========================= */
+
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
 const ARCH = { BRAWLER:'Brawler', BLADE:'Blade', GUNNER:'Gunner', MAGE:'Mage' };
 
-// ------- Catalogs (placeholder) -------
+/* ---------- Catalogs (placeholder data) ---------- */
 const UNITS = [
   { id:'u_rai',   name:'Rai',   arche:ARCH.BLADE,   rarity:RARITY.SR,  base:{pow:9,  spd:8, foc:5,  grt:7} },
   { id:'u_nox',   name:'Nox',   arche:ARCH.MAGE,    rarity:RARITY.SSR, base:{pow:7,  spd:7, foc:12, grt:6} },
@@ -31,7 +34,7 @@ const SUPPORTS = [
   { id:'s_split',  name:'Split Focus',     rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00 },
 ];
 
-// ------- Player Profile -------
+/* ---------- Player Profile ---------- */
 const profile = {
   gold: 0, gems: 0, mats: 0,
   units: [],        // {id, lvl, exp}
@@ -40,15 +43,14 @@ const profile = {
   seenIds: new Set(),
 };
 
-// utils
+/* ---------- Helpers ---------- */
 const byId = (arr,id)=>arr.find(x=>x.id===id);
 const fmt = n => Number(n).toLocaleString();
 const q = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 const rarityClass = r => r===RARITY.SSR?'ssr':(r===RARITY.SR?'sr':'r');
 
-// --------------------------------------------------
-// Save/Load
+/* ---------- Save/Load ---------- */
 function save() {
   const copy = {...profile, seenIds: undefined};
   localStorage.setItem('pf_save', JSON.stringify(copy));
@@ -80,7 +82,7 @@ function rebuildSeen(){
   for (const s of profile.supports) profile.seenIds.add(s.id);
 }
 
-// Starter
+/* ---------- Starter ---------- */
 function grantStarter(){
   profile.gold += 1000;
   profile.gems += 600;
@@ -92,7 +94,7 @@ function grantStarter(){
   clog('🎁 Starter granted.');
 }
 
-// Inventory helpers
+/* ---------- Inventory helpers ---------- */
 function giveUnit(id, lvl=1){
   let e = profile.units.find(x=>x.id===id);
   if (!e){ profile.units.push({id, lvl, exp:0}); }
@@ -115,8 +117,7 @@ function tryLevelUnit(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=true
 function tryLevelWeapon(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=true;} return up; }
 function tryLevelSupport(e){ let up=false; while(e.exp>=e.expNext){e.exp-=e.expNext;e.lvl++;e.expNext=Math.ceil(e.expNext*1.35);up=true;} return up; }
 
-// --------------------------------------------------
-// Rendering
+/* ---------- Rendering ---------- */
 function renderWallet(){
   q('#gold').textContent = `🪙 ${fmt(profile.gold)}`;
   q('#gems').textContent = `💎 ${fmt(profile.gems)}`;
@@ -153,7 +154,7 @@ function renderInventory(){
   }
 }
 
-// Tabs
+/* ---------- Tabs ---------- */
 qa('.tabs button').forEach(b=>{
   b.addEventListener('click', ()=>{
     qa('.tabs button').forEach(x=>x.classList.remove('active'));
@@ -164,7 +165,7 @@ qa('.tabs button').forEach(b=>{
   });
 });
 
-// Loggers
+/* ---------- Loggers ---------- */
 function log(msg, quiet=false){
   const el = q('#run-log');
   if (!el || quiet) return;
@@ -184,7 +185,7 @@ function clog(msg){
   while (el.children.length>160) el.removeChild(el.lastChild);
 }
 
-// Gacha
+/* ---------- Gacha ---------- */
 const RATES = { SSR:0.03, SR:0.17, R:0.80 };
 function pickRarity(){ const r=Math.random(); if(r<RATES.SSR) return RARITY.SSR; if(r<RATES.SSR+RATES.SR) return RARITY.SR; return RARITY.R; }
 function poolCharacterByRarity(r){ return [...UNITS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
@@ -199,7 +200,7 @@ function rollOne(fromPool){
   if (isSupport) giveSupport(pick.id);
   if (isUnit) giveUnit(pick.id);
   if (isWeapon) giveWeapon(pick.id);
-  renderInventory(); renderWallet(); rebuildChaosPickers(); rebuildPickers(); // ensure pickers refresh immediately
+  renderInventory(); renderWallet(); rebuildChaosPickers(); rebuildPickers(); // refresh pickers immediately
   return { name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon') };
 }
 function spendGems(cost){ if(profile.gems<cost){alert('Not enough gems!');return false;} profile.gems-=cost; renderWallet(); return true; }
@@ -214,8 +215,9 @@ function attachGacha(){
   });
 }
 
-// --------------------------------------------------
-// Career Mode (unchanged mechanics from v0.2.0, trimmed for space)
+/* ==================================================
+   Career Mode (deadline + detailed fight + modal)
+   ================================================== */
 const run = {
   mode: 'career',
   active:false, stage:1, maxStage:10, stamina:5,
@@ -283,7 +285,8 @@ function startRun(){
   q('#career-setup').classList.add('hidden');
   q('#career-run').classList.remove('hidden');
   resetDeadline(); updateRunUI();
-  log(`▶️ Career started.`);
+  log(`▶️ Career started with ${u.name} (Lv ${ulvl}) + ${w.name} (Lv ${wlvl}).`);
+  log(`Stats → POW ${run.stats.pow} | SPD ${run.stats.spd} | FOC ${run.stats.foc} | GRT ${run.stats.grt}`);
 }
 function updateDeadlineUI(){
   const label=q('#deadline-label'); const bar=q('#deadline-bar');
@@ -300,39 +303,105 @@ function updateRunUI(){
   q('#run-stage').textContent = `Stage ${run.stage} / ${run.maxStage} • Stamina ${run.stamina}`;
   updateDeadlineUI();
 }
-function spendTime(cost,label){ run.deadline -= cost; updateDeadlineUI(); log(`⏳ Time -${cost} (${label}). Left: ${Math.max(0, run.deadline)}.`); if(run.deadline<=0){ log('⏰ Deadline! Forced battle.'); battleStage(true); return false; } return true; }
+function spendTime(cost,label){ run.deadline -= cost; updateDeadlineUI(); log(`⏳ Time -${cost} (${label}). Left: ${Math.max(0, run.deadline)}.`); if(run.deadline<=0){ log('⏰ Deadline reached! Forced battle.'); battleStage(true); return false; } return true; }
 function trainOnce(which){
-  if(!run.active) return; if(run.stamina<=0){ log('😓 Too tired.'); return; }
+  if(!run.active) return; if(run.stamina<=0){ log('😓 Too tired to train. Rest or Battle.'); return; }
   if(!['pow','spd','foc','grt'].includes(which)) which='pow';
   const before={...run.stats}; run.stamina--;
-  const baseGain=2; let boost=0; for(const s of run.supports||[]){ const t=s.def.train; const part=(which==='pow'?t.pow:which==='spd'?t.spd:which==='foc'?t.foc:t.grt)*(1+0.02*(s.meta.lvl-1)); boost+=part; s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} Lv ${s.meta.lvl}.`); }
+  const baseGain=2; let boost=0, pieces=[];
+  for(const s of run.supports||[]){ const t=s.def.train; const part=(which==='pow'?t.pow:which==='spd'?t.spd:which==='foc'?t.foc:t.grt)*(1+0.02*(s.meta.lvl-1)); if(part>0) pieces.push(`${s.def.name}+${Math.round(part*100)}%`); boost+=part; s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`); }
   const gain=Math.round(baseGain*(1+boost)); run.stats[which]+=gain; updateRunUI();
-  log(`💪 Train ${which.toUpperCase()} +${gain}.`); log(`Stats: POW ${before.pow}→${run.stats.pow} | SPD ${before.spd}→${run.stats.spd} | FOC ${before.foc}→${run.stats.foc} | GRT ${before.grt}→${run.stats.grt}`);
-  spendTime(1,`Training ${which.toUpperCase()}`);
+  log(`💪 Training ${which.toUpperCase()}: base +${baseGain}${boost>0?` with +${Math.round(boost*100)}%`:""} → +${gain}${pieces.length?` (boosts: ${pieces.join(', ')})`:''}.`);
+  log(`Stats: POW ${before.pow}→${run.stats.pow} | SPD ${before.spd}→${run.stats.spd} | FOC ${before.foc}→${run.stats.foc} | GRT ${before.grt}→${run.stats.grt}`);
+  spendTime(run.costTrain, `Training ${which.toUpperCase()}`);
 }
 function restOnce(){
-  if(!run.active) return; if(run.deadline<run.costRest){ log('⛔ Not enough time to Rest.'); return; }
+  if(!run.active) return; if(run.deadline<run.costRest){ log('⛔ Not enough time left to Rest.'); return; }
   const before=run.stamina; run.stamina=Math.min(5, run.stamina+2);
-  for(const s of run.supports||[]){ s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} Lv ${s.meta.lvl}.`); }
-  updateRunUI(); log(`🛌 Rest: ${before}→${run.stamina}.`);
-  spendTime(2,'Rest');
-}
-function battleStage(forced=false){
-  if(!run.active && !forced) return;
-  // simplified same as earlier versions (omitted for brevity here)
-  // defeat/victory will show modal; this path remains as in your v0.2.0
-  // ... (to keep focus on Chaos changes)
-  log('⚠️ For brevity, career battle math unchanged from previous step.');
+  for(const s of run.supports||[]){ s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`); }
+  updateRunUI(); log(`🛌 Rested: Stamina ${before}→${run.stamina}.`);
+  spendTime(run.costRest,'Rest');
 }
 
-// --------------------------------------------------
-// Memories of Chaos — TURN-BASED
+/* Career battle: deterministic-ish single-check fight per stage */
+function battleStage(forced=false){
+  if(!run.unit || !run.weapon) return;
+
+  const d=run.stage;
+  const enemy={ pow:6+d*2, spd:5+d*2, foc:5+Math.floor(d*1.8), grt:7+Math.floor(d*2.2) };
+  let supDmg=0, dmgPieces=[];
+  for(const s of run.supports||[]){ const part=s.def.dmg*(1+0.02*(s.meta.lvl-1)); if(part>0) dmgPieces.push(`${s.def.name}+${Math.round(part*100)}%`); supDmg+=part; s.meta.exp+=1; if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`); }
+  const atk=run.stats.pow*1 + run.stats.spd*0.6 + run.stats.foc*0.8;
+  const eDef=enemy.grt*1 + enemy.spd*0.4;
+  const pScore=atk*(1+supDmg);
+  const eScore=enemy.pow*1 + enemy.spd*0.6 + enemy.foc*0.8;
+  const pDef=(run.stats.grt*1 + run.stats.spd*0.4);
+  const pEff=pScore - eDef; const eEff=eScore - pDef; const rng=(Math.random()*10-5); const margin=pEff - eEff + rng;
+
+  log(`⚔️ ${forced?'Forced ':''}Battle — Stage ${run.stage}`);
+  if(forced) log('• Reason: Time Left reached 0.');
+  log(`• Enemy Stats → POW ${enemy.pow} | SPD ${enemy.spd} | FOC ${enemy.foc} | GRT ${enemy.grt}`);
+  log(`• Player Scores → ATK ${pScore.toFixed(1)} (DMG +${Math.round(supDmg*100)}%${dmgPieces.length?`; ${dmgPieces.join(', ')}`:''}) vs Enemy DEF ${eDef.toFixed(1)}`);
+  log(`• Enemy Score → ${eScore.toFixed(1)} vs Player DEF ${pDef.toFixed(1)}`);
+  log(`• Effective → You ${pEff.toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
+
+  const report={stage:run.stage,victory:margin>=0,margin:+margin.toFixed(1),rng:+rng.toFixed(1),forced,player:{stats:{...run.stats},atkScore:+(atk.toFixed(1)),defScore:+(pDef.toFixed(1)),supDmgPct:Math.round(supDmg*100),supBreakdown:dmgPieces},enemy:{stats:enemy,atkScore:+(eScore.toFixed(1)),defScore:+(eDef.toFixed(1))}};
+  run.lastReport=report;
+
+  if(report.victory){
+    const goldGain=80+run.stage*20, matGain=3+Math.floor(run.stage/2);
+    profile.gold+=goldGain; profile.mats+=matGain;
+    run.unit.meta.exp+=2; run.weapon.meta.exp+=2; const uu=tryLevelUnit(run.unit.meta), ww=tryLevelWeapon(run.weapon.meta);
+    renderWallet(); renderInventory(); rebuildChaosPickers();
+    log(`✅ Victory! Rewards → +${goldGain} gold, +${matGain} mats.`); if(uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`); if(ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
+    if(run.stage>=run.maxStage){ showSummary('Victory', buildCareerSummary(report,{gold:goldGain,mats:matGain,final:true}), 'career'); run.active=false; return; }
+    run.stage++; const old=run.stamina; run.stamina=Math.min(5, run.stamina+1); resetDeadline(); updateRunUI(); log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
+  } else {
+    showSummary('Defeat', buildCareerSummary(report,{gold:0,mats:0,final:false}), 'career'); run.active=false;
+  }
+}
+
+function buildCareerSummary(report, rewards){
+  const p=report.player, e=report.enemy;
+  const sup=(p.supBreakdown&&p.supBreakdown.length)?`\n• Support DMG: +${p.supDmgPct}% (${p.supBreakdown.join(', ')})`:`\n• Support DMG: +${p.supDmgPct}%`;
+  const forced=report.forced?`\n• Forced Battle: Time Left reached 0`:'';
+  const base=
+`Stage ${report.stage} — ${report.victory?'VICTORY':'DEFEAT'}
+Margin: ${report.margin} (RNG ${report.rng})${forced}
+
+Player
+• Stats: POW ${p.stats.pow} | SPD ${p.stats.spd} | FOC ${p.stats.foc} | GRT ${p.stats.grt}
+• ATK Score: ${p.atkScore}  | DEF Score: ${p.defScore}${sup}
+
+Enemy
+• Stats: POW ${e.stats.pow} | SPD ${e.stats.spd} | FOC ${e.stats.foc} | GRT ${e.stats.grt}
+• ATK Score: ${e.atkScore}  | DEF Score: ${e.defScore}`;
+  const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0))?`\n\nRewards\n• +${rewards.gold} gold, +${rewards.mats} mats`:''; 
+  const hint=report.victory?(rewards.final?`\n\nRun complete! Press Confirm to return.`:'')
+    :`\n\nWhy you lost
+• Your effective ${p.atkScore - e.defScore >= 0 ? 'defense was lower than enemy attack' : 'attack was lower than enemy defense'}.
+• Consider training ${p.atkScore - e.defScore < e.atkScore - p.defScore ? 'POW/FOC' : 'GRT/SPD'} next time, or slot supports that boost those.
+${report.forced ? '• You ran out of Time. Try battling earlier or spending fewer Rests.' : ''}`;
+  return base+rewardLine+hint;
+}
+
+/* ---------- Career abandon button ---------- */
+const abandonCareerBtn = q('#btn-abandon');
+if (abandonCareerBtn) abandonCareerBtn.addEventListener('click', ()=>{
+  if(!run.active){ q('#career-run').classList.add('hidden'); q('#career-setup').classList.remove('hidden'); rebuildPickers(); renderInventory(); updateRunUI(); return; }
+  const report={stage:run.stage,victory:false,margin:0,rng:0,forced:false,player:{stats:{...run.stats},atkScore:0,defScore:0,supDmgPct:0,supBreakdown:[]},enemy:{stats:{pow:0,spd:0,foc:0,grt:0},atkScore:0,defScore:0}};
+  showSummary('Abandoned', buildCareerSummary(report,{gold:0,mats:0}), 'career'); run.active=false;
+});
+
+/* ==================================================
+   Memories of Chaos — Turn-based hands-on mode
+   ================================================== */
 const CHAOS_FLOORS = 8;
 const chaos = {
   active:false, floor:1, maxFloor:CHAOS_FLOORS, wave:1, wavesPerFloor:2,
   stars:0, score:0,
-  team:[], // [{unitMeta, unitDef, weaponMeta, weaponDef, stats, hp, maxHp, atk, def, spd, alive}]
-  enemies:[], // [{name, stats..., hp...}]
+  team:[],     // [{unitMeta, unitDef, weaponMeta, weaponDef, stats, hp, maxHp, atk, def, spd, alive}]
+  enemies:[],  // array of {name, hp, ...}
   phase:'player', // 'player' | 'enemy'
   selection:{allyIdx:null, enemyIdx:null},
   modifiers:[],
@@ -384,12 +453,8 @@ function rebuildChaosPickers(){
         div.classList.add('selected');
         const best = bestWeaponFor(def.arche);
         const s = unitEffectiveStats(def, meta, best);
-        const sheet = toSheet(s, def.name, meta.lvl); // convert to battle stats
-        chaos.team.push({
-          unitMeta:meta, unitDef:def,
-          weaponMeta:best?.meta||null, weaponDef:best?.def||null,
-          stats:s, ...sheet, alive:true
-        });
+        const sheet = toSheet(s, def.name, meta.lvl);
+        chaos.team.push({ unitMeta:meta, unitDef:def, weaponMeta:best?.meta||null, weaponDef:best?.def||null, stats:s, ...sheet, alive:true });
       }
       updateChaosTeamDisplay();
     });
@@ -409,7 +474,6 @@ function updateChaosTeamDisplay(){
 
 /* --- Battlefield UI --- */
 function renderBattlefield(){
-  // Allies
   const ag = q('#chaos-ally-grid'); ag.innerHTML='';
   chaos.team.forEach((a,idx)=>{
     const card = document.createElement('div');
@@ -431,7 +495,6 @@ function renderBattlefield(){
     ag.appendChild(card);
   });
 
-  // Enemies
   const eg = q('#chaos-enemy-grid'); eg.innerHTML='';
   chaos.enemies.forEach((e,idx)=>{
     const card = document.createElement('div');
@@ -456,7 +519,6 @@ function renderBattlefield(){
 
 /* --- Stat sheet conversion (HP/ATK/DEF/SPD) --- */
 function toSheet(s, label='Unit', lvl=1){
-  // lightweight conversion tuned to feel OK for MVP
   const hp   = Math.round(s.grt*6 + s.foc*2 + 30 + lvl*4);
   const atk  = Math.round(s.pow*1.4 + s.foc*0.8);
   const def  = Math.round(s.grt*1.2 + s.spd*0.4);
@@ -475,16 +537,13 @@ function makeEnemy(floor, idx){
   return { name:`E${floor}-${idx+1}`, ...sheet, alive:true };
 }
 
-/* --- Chaos flow --- */
+/* --- Modifiers --- */
 function chaosFloorModifiers(floor){
   const list = ['Enemy +10% ATK','Enemy +15% DEF','Your SPD +10%','Your POW +10%'];
   return [list[floor%list.length], list[(floor+2)%list.length]];
 }
-function applyFloorModifiers(){
-  // Simple inline effects at battle eval time (handled in damage calc via multipliers)
-  // Kept here for future extension
-}
 
+/* --- Flow --- */
 function startChaos(){
   if (chaos.team.length===0){ alert('Pick at least one unit.'); return; }
   chaos.active = true; run.mode='chaos';
@@ -508,14 +567,12 @@ function updateChaosUI(){
   q('#chaos-mods').textContent = `Modifiers: ${chaos.modifiers.join(' • ')}`;
   q('#chaos-floor').textContent = `Floor ${chaos.floor} / ${chaos.maxFloor} • Wave ${chaos.wave} / ${chaos.wavesPerFloor} • ${chaos.phase==='player'?'Player':'Enemy'} Phase`;
 
-  // aggregate glance
   const agg = chaos.team.reduce((a,t)=>({pow:a.pow+t.atk, def:a.def+t.def, spd:a.spd+t.spd}), {pow:0,def:0,spd:0});
   q('#chaos-stats').innerHTML = `<div>Team ATK ${agg.pow} • Team DEF ${agg.def} • Team SPD ${agg.spd}</div>`;
 
   updateChaosHud();
 }
 function updateChaosHud(){
-  // Attack button only if a living ally & target selected and it's player phase
   const can = chaos.phase==='player'
     && chaos.selection.allyIdx!==null
     && chaos.selection.enemyIdx!==null
@@ -524,17 +581,16 @@ function updateChaosHud(){
   q('#chaos-attack').disabled = !can;
 }
 
-/* --- Damage calculation --- */
+/* --- Damage & Modifiers --- */
 function withModifiers(type, value){
-  // type: 'allyAtk','allyDef','enemyAtk','enemyDef'
   let v=value;
   for (const m of chaos.modifiers){
     if (m==='Enemy +10% ATK' && type==='enemyAtk') v*=1.10;
     if (m==='Enemy +15% DEF' && type==='enemyDef') v*=1.15;
-    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06; // small indirect bump
+    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06;
     if (m==='Your POW +10%'  && type==='allyAtk') v*=1.08;
   }
-  return v;
+  return Math.round(v);
 }
 function calcDamage(attacker, defender, isEnemy=false){
   const atk = withModifiers(isEnemy?'enemyAtk':'allyAtk', attacker.atk);
@@ -559,14 +615,12 @@ function playerAttack(){
   renderBattlefield();
   updateChaosHud();
 
-  // Check wave clear
   if (chaos.enemies.every(e=>e.hp<=0)){
     clog('✅ Wave cleared.');
     nextWaveOrFloor();
     return;
   }
-
-  // Remain in player phase until "End Turn" or all allies have acted? MVP: you can attack multiple times per turn but enemies will answer when you end turn.
+  // Player can keep attacking until they End Turn (MVP simple loop)
 }
 
 /* --- Enemy turn --- */
@@ -574,7 +628,6 @@ function enemyTurn(){
   chaos.phase='enemy';
   updateChaosUI();
 
-  // Each alive enemy attacks once random alive hero
   const livingAllies = chaos.team.filter(a=>a.alive);
   if (livingAllies.length===0){ defeatChaos('All heroes defeated'); return; }
 
@@ -591,17 +644,14 @@ function enemyTurn(){
 
   renderBattlefield();
 
-  // Check defeat
   if (chaos.team.every(a=>!a.alive)){ defeatChaos('All heroes defeated'); return; }
 
-  // Back to player phase
   chaos.phase='player';
   updateChaosUI();
 }
 
 /* --- Progression --- */
 function nextWaveOrFloor(){
-  // score and star progress (simple)
   chaos.score += 2;
 
   if (chaos.wave >= chaos.wavesPerFloor){
@@ -617,13 +667,11 @@ function nextWaveOrFloor(){
       chaos.active=false; return;
     }
 
-    // Next floor: heal 30% HP to survivors
     chaos.floor++; chaos.wave=1; chaos.modifiers = chaosFloorModifiers(chaos.floor);
     chaos.team.forEach(a=>{ if(a.alive){ a.hp = Math.min(a.maxHp, a.hp + Math.round(a.maxHp*0.3)); } });
     setupEnemies();
     clog(`➡️ Floor ${chaos.floor}. Modifiers: ${chaos.modifiers.join(' • ')}. Survivors healed 30%.`);
   } else {
-    // Next wave: small heal 10% to heroes
     chaos.wave++;
     chaos.team.forEach(a=>{ if(a.alive){ a.hp = Math.min(a.maxHp, a.hp + Math.round(a.maxHp*0.1)); } });
     setupEnemies();
@@ -650,7 +698,7 @@ Alive Heroes: ${alive}/${chaos.team.length}${reason?`\nReason: ${reason}`:''}${f
 ${!final && reason?`\nTip\n• Train more in Career, equip matching weapons, and focus-fire squishier enemies.`:''}`;
 }
 
-/* --- Summary Modal (routing) --- */
+/* ---------- Summary Modal (routing) ---------- */
 const modal = q('#summary-modal');
 const modalTitle = q('#summary-title');
 const modalBody = q('#summary-body');
@@ -676,8 +724,10 @@ modalConfirm.addEventListener('click', ()=>{
   }
 });
 
-/* --- Controls wiring --- */
+/* ---------- Wires ---------- */
 q('#btn-grant-starter')?.addEventListener('click', grantStarter);
+
+/* Career */
 q('#start-run')?.addEventListener('click', startRun);
 qa('[data-train]')?.forEach(b=>b.addEventListener('click', ()=>trainOnce(b.getAttribute('data-train'))));
 q('#btn-rest')?.addEventListener('click', restOnce);
@@ -687,7 +737,7 @@ q('#btn-save')?.addEventListener('click', save);
 q('#btn-load')?.addEventListener('click', load);
 q('#btn-wipe')?.addEventListener('click', wipe);
 
-// Chaos
+/* Chaos */
 q('#chaos-start')?.addEventListener('click', startChaos);
 q('#chaos-attack')?.addEventListener('click', playerAttack);
 q('#chaos-endturn')?.addEventListener('click', enemyTurn);
@@ -696,7 +746,7 @@ q('#chaos-abandon')?.addEventListener('click', ()=>{
   defeatChaos('Abandoned');
 });
 
-/* --- Boot --- */
+/* ---------- Boot ---------- */
 attachGacha();
 renderWallet();
 renderInventory();
