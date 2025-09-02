@@ -1,12 +1,9 @@
 /* =========================
    PocketFighters — MVP
-   v0.4.0 (full)
-   • Stat Importance: SPD = accuracy/evasion + career tempo, FOC = crit chance
-   • Balance: preserved GRT nerf & harder enemy scaling from v0.3.2
-   • Content: new Units, Weapons, Supports
-   • Gacha UI: condensed results (duplicates show ×N)
-   • Chaos: acted flags (no infinite attacks)
-   • Save/Load/Wipe; pickers refresh immediately
+   v0.4.1 (full)
+   • Chaos picker fix: toggle select, cap at 3
+   • Gacha: clears per roll + duplicate → gems (R:10, SR:30, SSR:90)
+   • Keeps v0.4.0 systems: SPD acc/evasion + tempo, FOC crits, balance/content
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -108,35 +105,37 @@ function grantStarter(){
   profile.gold += 1000;
   profile.gems += 600;
   profile.mats += 50;
-  giveUnit('u_brick', 1);
-  giveWeapon('w_pistol', 1);
-  giveSupport('s_cardio');
+  acquireUnit('u_brick', RARITY.R);
+  acquireWeapon('w_pistol', RARITY.R);
+  acquireSupport('s_cardio', RARITY.R);
   renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers();
   clog('🎁 Starter granted.');
 }
 
 /* ---------- Inventory helpers ---------- */
-function giveUnit(id, lvl=1){
-  let e = profile.units.find(x=>x.id===id);
-  if (!e){ profile.units.push({id, lvl, exp:0}); }
-  else { e.exp += 1; if (tryLevelUnit(e)) log(`⬆️ Unit ${byId(UNITS,id).name} leveled to Lv ${e.lvl}.`); }
-  profile.seenIds.add(id);
-}
-function giveWeapon(id, lvl=1){
-  let e = profile.weapons.find(x=>x.id===id);
-  if (!e){ profile.weapons.push({id, lvl, exp:0}); }
-  else { e.exp += 1; if (tryLevelWeapon(e)) log(`⬆️ Weapon ${byId(WEAPONS,id).name} leveled to Lv ${e.lvl}.`); }
-  profile.seenIds.add(id);
-}
-function giveSupport(id){
-  let e = profile.supports.find(x=>x.id===id);
-  if (!e){ profile.supports.push({id, lvl:1, exp:0, expNext:5}); }
-  else { e.exp += 1; if (tryLevelSupport(e)) log(`⬆️ Support ${byId(SUPPORTS,id).name} leveled to Lv ${e.lvl}.`); }
-  profile.seenIds.add(id);
-}
 function tryLevelUnit(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=true;} return up; }
 function tryLevelWeapon(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=true;} return up; }
 function tryLevelSupport(e){ let up=false; while(e.exp>=e.expNext){e.exp-=e.expNext;e.lvl++;e.expNext=Math.ceil(e.expNext*1.35);up=true;} return up; }
+
+/* Duplicate compensation table (gems) */
+const DUP_GEM = { [RARITY.R]:10, [RARITY.SR]:30, [RARITY.SSR]:90 };
+
+/* Acquisition that respects duplicate→gems (no level-ups from gacha) */
+function acquireUnit(id, rarity){
+  let e = profile.units.find(x=>x.id===id);
+  if (!e){ profile.units.push({id, lvl:1, exp:0}); profile.seenIds.add(id); return {added:true, gems:0}; }
+  const g = DUP_GEM[rarity]||10; profile.gems += g; return {added:false, gems:g};
+}
+function acquireWeapon(id, rarity){
+  let e = profile.weapons.find(x=>x.id===id);
+  if (!e){ profile.weapons.push({id, lvl:1, exp:0}); profile.seenIds.add(id); return {added:true, gems:0}; }
+  const g = DUP_GEM[rarity]||10; profile.gems += g; return {added:false, gems:g};
+}
+function acquireSupport(id, rarity){
+  let e = profile.supports.find(x=>x.id===id);
+  if (!e){ profile.supports.push({id, lvl:1, exp:0, expNext:5}); profile.seenIds.add(id); return {added:true, gems:0}; }
+  const g = DUP_GEM[rarity]||10; profile.gems += g; return {added:false, gems:g};
+}
 
 /* ---------- Rendering ---------- */
 function cardHtml({title, subtitle, rarity, body='', badge=''}){
@@ -212,6 +211,7 @@ function pickRarity(){ const r=Math.random(); if(r<RATES.SSR) return RARITY.SSR;
 function poolCharacterByRarity(r){ return [...UNITS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
 function poolWeaponByRarity(r){ return [...WEAPONS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
 
+/* Roll with duplicate→gems behavior */
 function rollOne(fromPool){
   const rarity = pickRarity();
   const pool = fromPool(rarity);
@@ -220,26 +220,40 @@ function rollOne(fromPool){
   const isUnit = UNITS.some(u=>u.id===pick.id);
   const isWeapon = WEAPONS.some(w=>w.id===pick.id);
 
-  if (isSupport) giveSupport(pick.id);
-  if (isUnit) giveUnit(pick.id);
-  if (isWeapon) giveWeapon(pick.id);
+  let converted = false, gems = 0;
+
+  if (isSupport){
+    const res = acquireSupport(pick.id, rarity); converted = !res.added; gems = res.gems;
+  } else if (isUnit){
+    const res = acquireUnit(pick.id, rarity); converted = !res.added; gems = res.gems;
+  } else if (isWeapon){
+    const res = acquireWeapon(pick.id, rarity); converted = !res.added; gems = res.gems;
+  }
 
   renderInventory(); renderWallet(); rebuildChaosPickers(); rebuildPickers(); // refresh pickers immediately
-  return { id: pick.id, name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon') };
+  return { id: pick.id, name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon'), converted, gems };
 }
 
-/* Condensed results: collapse duplicates into xN */
+/* Condensed results: clear old, collapse duplicates, show gem refunds */
 function renderPullResults(containerSel, results){
   const box = q(containerSel);
-  const counts = new Map(); // key=id => { item, count }
+  box.innerHTML = '';   // clear old results per roll
+
+  // group by id and sum counts + gem refunds
+  const counts = new Map(); // id => { item, count, gems }
   for (const r of results){
-    if (!counts.has(r.id)) counts.set(r.id, { item:r, count:1 });
-    else counts.get(r.id).count++;
+    if (!counts.has(r.id)) counts.set(r.id, { item:r, count:1, gems:r.converted?r.gems:0 });
+    else {
+      const v = counts.get(r.id);
+      v.count++;
+      v.gems += r.converted ? r.gems : 0;
+    }
   }
   let html = '';
-  for (const {item,count} of counts.values()){
+  for (const {item,count,gems} of counts.values()){
     const badge = count>1 ? `×${count}` : '';
-    html += cardHtml({title:item.name, subtitle:item.type, rarity:item.rarity, badge});
+    const body = gems>0 ? `<span class="chip">+${gems} 💎 (dupes)</span>` : '';
+    html += cardHtml({title:item.name, subtitle:item.type, rarity:item.rarity, badge, body});
   }
   box.insertAdjacentHTML('afterbegin', html);
 }
@@ -520,10 +534,10 @@ function unitEffectiveStats(def, meta, w){
   let pow=def.base.pow, spd=def.base.spd, foc=def.base.foc, grt=def.base.grt;
   if (w){
     const ws=1 + w.growth*(w.meta.lvl-1);
-    pow += Math.round(w.add.pow*ws);
-    spd += Math.round(w.add.spd*ws);
-    foc += Math.round(w.add.foc*ws);
-    grt += Math.round(w.add.grt*ws);
+    pow += Math.round(w.def.add.pow*ws);
+    spd += Math.round(w.def.add.spd*ws);
+    foc += Math.round(w.def.add.foc*ws);
+    grt += Math.round(w.def.add.grt*ws);
   }
   const s=1 + 0.05*(ul-1);
   pow=Math.round(pow*s); spd=Math.round(spd*s); foc=Math.round(foc*s); grt=Math.round(grt*s);
@@ -543,10 +557,13 @@ function rebuildChaosPickers(){
     div.className = 'card pick '+rarityClass(def.rarity);
     div.innerHTML = `<div class="title">${def.name}</div><div class="tiny">Lv ${meta.lvl} • ${def.arche}</div>`;
     div.addEventListener('click', ()=>{
-      const idx = chaos.team.findIndex(t=>t.unitMeta.id===meta.id);
-      if (idx>=0){ chaos.team.splice(idx,1); div.classList.remove('selected'); }
-      else {
-        if (chaos.team.length>=3) return;
+      const already = chaos.team.find(t=>t.unitMeta.id===meta.id);
+      if (already) {
+        // Unselect if already picked
+        chaos.team = chaos.team.filter(t=>t.unitMeta.id!==meta.id);
+        div.classList.remove('selected');
+      } else {
+        if (chaos.team.length >= 3) return; // hard cap at 3
         div.classList.add('selected');
         const best = bestWeaponFor(def.arche);
         const s = unitEffectiveStats(def, meta, best);
