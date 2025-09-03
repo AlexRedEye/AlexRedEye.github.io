@@ -1,10 +1,9 @@
 /* =========================
    PocketFighters — MVP
-   v0.4.3 (full)
-   • Nerf: SPD dominance
-     - Career: SPD soft-cap + lower weights, tempo 0.30 (±6), stronger GRT guard
-     - MoC: SPD hit/evasion reduced (0.82 + 0.002*Δ, clamp 0.65–0.95)
-   • Keeps v0.4.2: NaN fix, Chaos picker cap/toggle, gacha dupes→gems, career balance
+   v0.4.4 (full)
+   • Career stat indicators (Weak / OK / Good / Excellent) vs. current stage targets
+   • Keeps v0.4.3: SPD nerf (career & MoC), Chaos NaN fix, Chaos picker cap/toggle,
+     gacha dupes→gems, deadline + detailed logs, confirm-on-defeat modal
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -289,7 +288,7 @@ function attachGacha(){
 }
 
 /* ==================================================
-   Career Mode (deadline + detailed fight + modal)
+   Career Mode (deadline + indicators + detailed fight + modal)
    ================================================== */
 const run = {
   mode: 'career',
@@ -299,6 +298,24 @@ const run = {
   lastReport:null,
   deadlineMax:5, deadline:5, costTrain:1, costRest:2
 };
+
+/* ======= Indicator helpers ======= */
+// Enemy preview for current stage (must mirror enemy scaling in battleStage)
+function enemyPreviewForStage(d){
+  return {
+    pow: 6 + d*2 + Math.floor(d*d*0.3),
+    spd: 5 + d*2,
+    foc: 5 + Math.floor(d*1.8),
+    grt: 7 + Math.floor(d*1.5 + d*d*0.2),
+  };
+}
+// Grade a ratio (your stat vs target)
+function statGrade(r){
+  if (r < 0.80) return {label:'Weak', cls:'weak', emoji:'🔴'};
+  if (r < 1.00) return {label:'OK',   cls:'ok',   emoji:'🟡'};
+  if (r < 1.30) return {label:'Good', cls:'good', emoji:'🟢'};
+  return {label:'Excellent', cls:'excel', emoji:'🔷'};
+}
 
 function rebuildPickers(){
   const uWrap = q('#pick-unit'); if(!uWrap) return; uWrap.innerHTML='';
@@ -368,14 +385,53 @@ function updateDeadlineUI(){
   if (bar) bar.style.width = `${pct*100}%`;
   const restBtn=q('#btn-rest'); if (restBtn) restBtn.disabled = (run.deadline < run.costRest) || !run.active;
 }
+
+/* === Updated with indicators === */
 function updateRunUI(){
   const s=run.stats;
   const sup = run.supports?.map(x=>`${x.def.name} (Lv ${x.meta.lvl})`).join(', ') || 'None';
   q('#run-summary').innerHTML = `<div><b>${run.unit.def.name}</b> • Lv ${run.unit.meta.lvl} • ${run.unit.def.arche}</div><div><b>${run.weapon.def.name}</b> • Lv ${run.weapon.meta.lvl}</div><div>Support: ${sup}</div>`;
-  q('#run-stats').innerHTML = `<div>POW ${s.pow} • SPD ${s.spd} • FOC ${s.foc} • GRT ${s.grt}</div>`;
   q('#run-stage').textContent = `Stage ${run.stage} / ${run.maxStage} • Stamina ${run.stamina}`;
+
+  // Indicators vs. current stage
+  const e = enemyPreviewForStage(run.stage);
+  const targets = {
+    powTarget: e.grt, // their toughness proxy
+    spdTarget: e.spd, // tempo
+    focTarget: e.foc, // scaling
+    grtTarget: e.pow, // guard vs enemy POW
+  };
+
+  const powG = statGrade(s.pow / Math.max(1, targets.powTarget));
+  const spdG = statGrade(s.spd / Math.max(1, targets.spdTarget));
+  const focG = statGrade(s.foc / Math.max(1, targets.focTarget));
+  const grtG = statGrade(s.grt / Math.max(1, targets.grtTarget));
+
+  const tip = (self, tgt) => `title="Your ${self} vs target ${tgt}"`;
+
+  q('#run-stats').innerHTML = `
+    <div class="statline">POW ${s.pow}
+      <span class="pill ${powG.cls}" ${tip(s.pow, targets.powTarget)}>${powG.emoji} ${powG.label}</span>
+      <span class="tiny dim">vs DEF≈${targets.powTarget}</span>
+    </div>
+    <div class="statline">SPD ${s.spd}
+      <span class="pill ${spdG.cls}" ${tip(s.spd, targets.spdTarget)}>${spdG.emoji} ${spdG.label}</span>
+      <span class="tiny dim">vs SPD ${targets.spdTarget}</span>
+    </div>
+    <div class="statline">FOC ${s.foc}
+      <span class="pill ${focG.cls}" ${tip(s.foc, targets.focTarget)}>${focG.emoji} ${focG.label}</span>
+      <span class="tiny dim">vs FOC ${targets.focTarget}</span>
+    </div>
+    <div class="statline">GRT ${s.grt}
+      <span class="pill ${grtG.cls}" ${tip(s.grt, targets.grtTarget)}>${grtG.emoji} ${grtG.label}</span>
+      <span class="tiny dim">vs POW ${targets.grtTarget}</span>
+    </div>
+    <div class="legend tiny dim">Legend: 🔴 Weak • 🟡 OK • 🟢 Good • 🔷 Excellent (compared to this stage’s expected enemy stats)</div>
+  `;
+
   updateDeadlineUI();
 }
+
 function spendTime(cost,label){ run.deadline -= cost; updateDeadlineUI(); log(`⏳ Time -${cost} (${label}). Left: ${Math.max(0, run.deadline)}.`); if(run.deadline<=0){ log('⏰ Deadline reached! Forced battle.'); battleStage(true); return false; } return true; }
 function trainOnce(which){
   if(!run.active) return; if(run.stamina<=0){ log('😓 Too tired to train. Rest or Battle.'); return; }
@@ -406,7 +462,7 @@ function restOnce(){
   spendTime(run.costRest, 'Rest');
 }
 
-/* Career battle: single-check fight per stage (v0.4.3 SPD nerf) */
+/* Career battle: single-check fight per stage (v0.4.3 SPD nerf retained) */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
   const d=run.stage;
@@ -439,7 +495,7 @@ function battleStage(forced=false){
   const pScore = pAtkBase * (1 + supDmg);
   const pDef2  = pDefBase;
 
-  // ---------- Enemy effective (unchanged weights) ----------
+  // ---------- Enemy effective ----------
   const ePOW = softCap(enemy.pow, 22, 0.6);
   const eFOC = softCap(enemy.foc, 22, 0.6);
   const eAtk  = ePOW*1.15 + eFOC*0.95 + enemy.spd*0.80;

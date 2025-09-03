@@ -150,3 +150,12 @@ footer.footer{padding:var(--sp-4);color:var(--muted);text-align:center;border-to
 .battle-card.target{ outline:2px solid var(--danger); outline-offset: 2px; }
 .stat-line{ font-size: var(--fs-xs); color: var(--muted); margin-top: 4px; }
 .card .badge { font-weight:600; }
+#run-stats .statline { margin: 4px 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#run-stats .statline .tiny.dim { opacity: 0.7; }
+#run-stats .legend { margin-top: 6px; }
+.pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; line-height:1.4; border:1px solid transparent; user-select:none; }
+.pill.weak  { background:#ffefef; color:#b00020; border-color:#ffc5c5; }
+.pill.ok    { background:#fff8e6; color:#9a6500; border-color:#ffe1a6; }
+.pill.good  { background:#ecf9ef; color:#0b7a29; border-color:#bde9c7; }
+.pill.excel { background:#eef3ff; color:#1a49a6; border-color:#c6d6ff; }
+@media (hover:hover){ .pill[title]{ cursor:help; } }
