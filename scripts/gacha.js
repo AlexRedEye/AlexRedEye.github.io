@@ -1190,7 +1190,7 @@ async function hmacSign(payloadObj){
 
 async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin, score, seed }) {
   try {
-    if (!LB_API_BASE || LB_API_BASE.includes('your-leaderboard-host')) return; // skip if not configured
+    if (!LB_API_BASE || LB_API_BASE.includes('https://gacha-server-fiuy.onrender.com')) return; // skip if not configured
     const payload = { playerName, clientVersion: CLIENT_VERSION, stagesCleared, maxStage, lastMargin, score, seed };
     const checksum = await hmacSign(payload);
     await fetch(`${LB_API_BASE}/api/submit/career`, {
