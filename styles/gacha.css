@@ -74,3 +74,78 @@ pre{white-space:pre-wrap;margin:0}
 
 .hidden{display:none}
 .pity{margin:4px 0}
+
+/* ======================
+   Mobile-friendly tweaks
+   ====================== */
+
+/* General: larger touch targets */
+button, .card, .chip {
+  min-height: 40px;
+  font-size: 15px;
+}
+
+/* Reduce padding on very small screens */
+@media(max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .wallet {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+  }
+  .tabs button {
+    flex: 1 1 calc(50% - 6px);
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  main {
+    padding: 8px;
+  }
+
+  /* Stack grid layouts vertically */
+  .grid-2, .grid-3, .split, .battle {
+    display: block;
+  }
+
+  .pane {
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* Log panel shorter to fit screen */
+  .log {
+    height: 200px;
+  }
+
+  /* Results grid goes full width */
+  .results {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal box: nearly full screen */
+  .modal-box {
+    width: 96vw;
+    max-width: none;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Statline pills wrap nicely */
+  .statline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
