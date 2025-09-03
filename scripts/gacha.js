@@ -612,17 +612,40 @@ function battleStage(forced=false){
   };
   run.lastReport=report;
 
-  if(report.victory){
-    const goldGain=80+run.stage*20, matGain=3+Math.floor(run.stage/2), gemGain=5+run.stage*2;
-    profile.gold+=goldGain; profile.mats=Math.min(MATS_CAP, profile.mats+matGain); profile.gems+=gemGain;
-    run.unit.meta.exp+=2; run.weapon.meta.exp+=2; const uu=tryLevelUnit(run.unit.meta), ww=tryLevelWeapon(run.weapon.meta);
-    renderWallet(); renderInventory(); rebuildChaosPickers();
-    log(`✅ Victory! Rewards → +${goldGain} gold, +${matGain} mats, +${gemGain} gems.`); if(uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`); if(ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
-    if(run.stage>=run.maxStage){ showSummary('Victory', buildCareerSummary(report,{gold:goldGain,mats:matGain,gems:gemGain,final:true}), 'career'); run.active=false; return; }
-    run.stage++; const old=run.stamina; run.stamina=Math.min(5, run.stamina+1); resetDeadline(); updateRunUI(); log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
-  } else {
-    showSummary('Defeat', buildCareerSummary(report,{gold:0,mats:0,gems:0,final:false}), 'career'); run.active=false;
+  if (report.victory) {
+  const goldGain = 80 + run.stage * 20;
+  const gemGain  = 5 + run.stage * 2;
+
+  profile.gold += goldGain;
+  profile.gems += gemGain;
+
+  run.unit.meta.exp += 2;
+  run.weapon.meta.exp += 2;
+  const uu = tryLevelUnit(run.unit.meta), ww = tryLevelWeapon(run.weapon.meta);
+
+  renderWallet(); renderInventory(); rebuildChaosPickers();
+
+  log(`✅ Victory! Rewards → +${goldGain} gold, +${gemGain} gems.`);
+  if (uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`);
+  if (ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
+
+  if (run.stage >= run.maxStage) {
+    showSummary('Victory', buildCareerSummary(report, { gold: goldGain, gems: gemGain, final: true }), 'career');
+    run.active = false;
+    return;
   }
+
+  run.stage++;
+  const old = run.stamina;
+  run.stamina = Math.min(5, run.stamina + 1);
+  resetDeadline();
+  updateRunUI();
+  log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
+} else {
+  showSummary('Defeat', buildCareerSummary(report, { gold: 0, gems: 0, final: false }), 'career');
+  run.active = false;
+}
+
 }
 
 /* === Smarter loss advisor (with icons) === */
