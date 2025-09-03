@@ -88,7 +88,7 @@ const SUPPORTS = [
 const profile = {
   gold: 0,
   gems: 0,
-  mats: 10,
+  mats: 120,
   units: [],
   weapons: [],
   supports: [],
