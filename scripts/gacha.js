@@ -675,7 +675,7 @@ Enemy
 • Stats: POW ${e.stats.pow} | SPD ${e.stats.spd} | FOC ${e.stats.foc} | GRT ${e.stats.grt}
 • ATK: ${e.atkScore}  | DEF: ${e.defScore}`;
 
-  const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0||reards?.gems>0))?
+  const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0||rewards?.gems>0))?
     `\n\nRewards\n• +${rewards.gold||0} gold, +${rewards.mats||0} mats, +${rewards.gems||0} gems`:'';
 
   let tail='';
