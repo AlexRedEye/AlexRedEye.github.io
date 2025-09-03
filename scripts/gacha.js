@@ -1,6 +1,6 @@
 /* =========================
    PocketFighters — MVP
-   v0.5.3 (+ leaderboard hooks, mats not rewarded on victory)
+   v0.6.0
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -18,7 +18,7 @@ const PITY = {
 };
 
 // ==== Leaderboard client config (safe to keep; no-ops if server absent) ====
-const LB_API_BASE = "https://gacha-server-fiuy.onrender.com"; // <-- set your API base
+const LB_API_BASE = "https://gacha-server-fiuy.onrender.com"; // <-- your Render API URL
 const CLIENT_VERSION = "0.6.0";
 
 /* ---------- Catalogs (expanded) ---------- */
@@ -631,12 +631,15 @@ function battleStage(forced=false){
     if (ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
 
     if (run.stage >= run.maxStage) {
-      // Leaderboard submit on FINAL victory
+      // Leaderboard submit on FINAL victory (includes unit/weapon/supports)
       if (typeof submitCareerRun === "function") {
         (async () => {
           const name = await promptPlayerName();
           if (!name) return;
           const score = Math.max(0, Math.round(report.stage * 100 + (report.margin || 0) * 10));
+          const unitName = run.unit?.def?.name || 'Unknown';
+          const weaponName = run.weapon?.def?.name || 'Unknown';
+          const supportNames = (run.supports||[]).map(s=>s.def.name);
           try {
             await submitCareerRun({
               playerName: name,
@@ -644,7 +647,10 @@ function battleStage(forced=false){
               maxStage: run.maxStage,
               lastMargin: report.margin || 0,
               score,
-              seed: ""
+              seed: '',
+              unit: unitName,
+              weapon: weaponName,
+              supports: supportNames
             });
           } catch {}
         })();
@@ -662,13 +668,16 @@ function battleStage(forced=false){
     updateRunUI();
     log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
   } else {
-    // Leaderboard submit on DEFEAT
+    // Leaderboard submit on DEFEAT (includes unit/weapon/supports)
     if (typeof submitCareerRun === "function") {
       (async () => {
         const name = await promptPlayerName();
         if (!name) return;
         const cleared = Math.max(0, report.stage - 1);
         const score = Math.max(0, Math.round(cleared * 100 + (report.margin || 0) * 10));
+        const unitName = run.unit?.def?.name || 'Unknown';
+        const weaponName = run.weapon?.def?.name || 'Unknown';
+        const supportNames = (run.supports||[]).map(s=>s.def.name);
         try {
           await submitCareerRun({
             playerName: name,
@@ -676,7 +685,10 @@ function battleStage(forced=false){
             maxStage: run.maxStage,
             lastMargin: report.margin || 0,
             score,
-            seed: ""
+            seed: '',
+            unit: unitName,
+            weapon: weaponName,
+            supports: supportNames
           });
         } catch {}
       })();
@@ -1175,7 +1187,7 @@ async function promptPlayerName(){
   return n;
 }
 
-// Minimal sha256 helper (WebCrypto)
+// Minimal sha256 helper (WebCrypto) for DEV signature
 async function sha256(str){
   if (!('crypto' in window) || !crypto.subtle) return '';
   const enc = new TextEncoder().encode(str);
@@ -1188,18 +1200,24 @@ async function hmacSign(payloadObj){
   return sha256(JSON.stringify(payloadObj));
 }
 
-async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin, score, seed }) {
+async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin, score, seed, unit, weapon, supports }) {
   try {
-    if (!LB_API_BASE || LB_API_BASE.includes('https://gacha-server-fiuy.onrender.com')) return; // skip if not configured
-    const payload = { playerName, clientVersion: CLIENT_VERSION, stagesCleared, maxStage, lastMargin, score, seed };
+    if (!LB_API_BASE || LB_API_BASE.includes('your-leaderboard-host')) return; // skip if not configured
+    const payload = { playerName, clientVersion: CLIENT_VERSION, stagesCleared, maxStage, lastMargin, score, seed, unit, weapon, supports };
     const checksum = await hmacSign(payload);
-    await fetch(`${LB_API_BASE}/api/submit/career`, {
+    const res = await fetch(`${LB_API_BASE}/api/submit/career`, {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ ...payload, checksum })
     });
+    if (!res.ok) {
+      const t = await res.text().catch(()=>res.statusText);
+      console.warn('submitCareerRun failed', res.status, t);
+      log(`⚠️ Leaderboard submit failed (${res.status}).`, true);
+    } else {
+      log('📡 Run submitted to leaderboard.', true);
+    }
   } catch (e) {
-    // swallow errors to avoid breaking gameplay
-    console.warn('submitCareerRun failed', e);
+    console.warn('submitCareerRun error', e);
   }
 }
