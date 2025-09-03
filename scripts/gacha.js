@@ -1,9 +1,11 @@
 /* =========================
    PocketFighters — MVP
-   v0.4.1 (full)
-   • Chaos picker fix: toggle select, cap at 3
-   • Gacha: clears per roll + duplicate → gems (R:10, SR:30, SSR:90)
-   • Keeps v0.4.0 systems: SPD acc/evasion + tempo, FOC crits, balance/content
+   v0.4.2 (full)
+   • Fix: MoC NaN (weapon wrapper), stat sanitization
+   • Chaos picker: toggle select + cap 3
+   • Gacha: clears per roll, dupes → gems (R:10, SR:30, SSR:90), condensed display
+   • Career: soft caps (POW/FOC), stronger SPD (tempo+ATK/DEF), GRT guard, imbalance penalty
+   • MoC: SPD = accuracy/evasion, FOC = crit chance
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -67,6 +69,11 @@ const q = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 const rarityClass = r => r===RARITY.SSR?'ssr':(r===RARITY.SR?'sr':'r');
 const clamp = (v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+
+// Soft-cap: beyond 'pivot', additional points are less effective (eff in 0..1)
+function softCap(x, pivot=22, eff=0.6){
+  return x <= pivot ? x : pivot + (x - pivot) * eff;
+}
 
 /* ---------- Save/Load ---------- */
 function save() {
@@ -400,7 +407,7 @@ function restOnce(){
   spendTime(run.costRest, 'Rest');
 }
 
-/* Career battle: single-check fight per stage (BALANCED + SPD tempo) */
+/* Career battle: single-check fight per stage (v0.4.2 balance) */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
   const d=run.stage;
@@ -413,10 +420,13 @@ function battleStage(forced=false){
     grt: 7 + Math.floor(d*1.5 + d*d*0.2),
   };
 
-  // Player effective scores (nerf GRT, buff POW/FOC)
-  const pAtk = run.stats.pow*1.2 + run.stats.spd*0.6 + run.stats.foc*1.0;
-  const pDef = run.stats.grt*0.9  + run.stats.spd*0.6;
+  // ---------- Player effective (soft caps + higher SPD/GRT impact) ----------
+  const pPOW = softCap(run.stats.pow, 22, 0.6);
+  const pFOC = softCap(run.stats.foc, 22, 0.6);
+  const pAtkBase = pPOW*1.15 + pFOC*0.95 + run.stats.spd*0.80; // SPD contributes to ATK
+  const pDefBase = run.stats.grt*1.00 + run.stats.spd*0.80;    // SPD contributes to DEF
 
+  // Supports
   let supDmg=0, dmgPieces=[];
   for(const s of run.supports||[]){
     const part=s.def.dmg*(1+0.02*(s.meta.lvl-1));
@@ -424,34 +434,38 @@ function battleStage(forced=false){
     supDmg+=part; s.meta.exp+=1;
     if(tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`);
   }
+  const pScore = pAtkBase * (1 + supDmg);
+  const pDef2  = pDefBase;
 
-  const pScore = pAtk * (1 + supDmg);
-  const eDef   = enemy.grt*0.9 + enemy.spd*0.6;
+  // ---------- Enemy effective (same rules) ----------
+  const ePOW = softCap(enemy.pow, 22, 0.6);
+  const eFOC = softCap(enemy.foc, 22, 0.6);
+  const eAtk  = ePOW*1.15 + eFOC*0.95 + enemy.spd*0.80;
+  const eDef  = enemy.grt*1.00 + enemy.spd*0.80;
 
-  const eAtk   = enemy.pow*1.2 + enemy.spd*0.6 + enemy.foc*1.0;
-  const pDef2  = pDef;
-
-  // NEW: SPD Tempo (small capped swing based on SPD difference)
+  // ---------- New balance levers ----------
   const spdDiff = (run.stats.spd - enemy.spd);
-  const tempo = clamp(spdDiff * 0.3, -6, 6);
+  const tempo = clamp(spdDiff * 0.45, -8, 8);                     // stronger SPD tempo
+  const guard = clamp((run.stats.grt - enemy.pow) * 0.20, -4, 4); // GRT vs POW swing
+  const offVsDef = (run.stats.pow + run.stats.foc) - (run.stats.grt + run.stats.spd);
+  const imbalancePenalty = clamp(offVsDef * 0.10, 0, 6);          // punish pure glass cannons a bit
 
   const pEff = pScore - eDef;
   const eEff = eAtk   - pDef2;
 
   const rng=(Math.random()*10-5);
-  const margin=pEff - eEff + rng + tempo;
+  const margin=pEff - eEff + rng + tempo + guard - imbalancePenalty;
 
   log(`⚔️ ${forced?'Forced ':''}Battle — Stage ${run.stage}`);
   if(forced) log('• Reason: Time Left reached 0.');
-  log(`• Enemy Stats → POW ${enemy.pow} | SPD ${enemy.spd} | FOC ${enemy.foc} | GRT ${enemy.grt}`);
-  log(`• Player Scores → ATK ${pScore.toFixed(1)} (base ${(pAtk).toFixed(1)} • DMG +${Math.round(supDmg*100)}%${dmgPieces.length?`; ${dmgPieces.join(', ')}`:''}) vs Enemy DEF ${eDef.toFixed(1)}`);
-  log(`• Enemy Score → ATK ${eAtk.toFixed(1)} vs Player DEF ${pDef2.toFixed(1)}`);
-  log(`• Tempo (SPD diff ${spdDiff>=0?'+':''}${spdDiff}) contributes ${tempo.toFixed(1)} to margin.`);
-  log(`• Effective → You ${(pEff+tempo).toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
+  log(`• Player ATKbase ${pAtkBase.toFixed(1)} (POW ${pPOW}, FOC ${pFOC}, SPD ${run.stats.spd}) • DEFbase ${pDefBase.toFixed(1)} (GRT ${run.stats.grt}, SPD ${run.stats.spd})`);
+  log(`• Enemy  ATKbase ${eAtk.toFixed(1)} • DEFbase ${eDef.toFixed(1)}`);
+  log(`• Tempo (SPD Δ ${spdDiff>=0?'+':''}${spdDiff}): ${tempo.toFixed(1)}  • Guard (GRT vs POW): ${guard.toFixed(1)}  • Off-imbalance: -${imbalancePenalty.toFixed(1)}`);
+  log(`• Effective → You ${(pEff+tempo+guard-imbalancePenalty).toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
 
   const report={
     stage:run.stage, victory:margin>=0, margin:+margin.toFixed(1), rng:+rng.toFixed(1), forced,
-    player:{stats:{...run.stats}, atkScore:+(pAtk.toFixed(1)), defScore:+(pDef2.toFixed(1)), supDmgPct:Math.round(supDmg*100), supBreakdown:dmgPieces},
+    player:{stats:{...run.stats}, atkScore:+(pAtkBase.toFixed(1)), defScore:+(pDef2.toFixed(1)), supDmgPct:Math.round(supDmg*100), supBreakdown:dmgPieces},
     enemy:{stats:enemy, atkScore:+(eAtk.toFixed(1)), defScore:+(eDef.toFixed(1))}
   };
   run.lastReport=report;
@@ -530,18 +544,25 @@ function bestWeaponFor(arche){
   return best;
 }
 function unitEffectiveStats(def, meta, w){
-  const ul=meta.lvl;
-  let pow=def.base.pow, spd=def.base.spd, foc=def.base.foc, grt=def.base.grt;
-  if (w){
-    const ws=1 + w.growth*(w.meta.lvl-1);
-    pow += Math.round(w.def.add.pow*ws);
-    spd += Math.round(w.def.add.spd*ws);
-    foc += Math.round(w.def.add.foc*ws);
-    grt += Math.round(w.def.add.grt*ws);
+  const ul = meta.lvl;
+  let pow = def.base.pow, spd = def.base.spd, foc = def.base.foc, grt = def.base.grt;
+
+  // w is expected to be { meta, def } or null
+  if (w && w.meta && w.def){
+    const ws = 1 + (w.def.growth || 0) * ((w.meta.lvl || 1) - 1);
+    pow += Math.round((w.def.add?.pow || 0) * ws);
+    spd += Math.round((w.def.add?.spd || 0) * ws);
+    foc += Math.round((w.def.add?.foc || 0) * ws);
+    grt += Math.round((w.def.add?.grt || 0) * ws);
   }
-  const s=1 + 0.05*(ul-1);
-  pow=Math.round(pow*s); spd=Math.round(spd*s); foc=Math.round(foc*s); grt=Math.round(grt*s);
-  return {pow,spd,foc,grt};
+
+  const s = 1 + 0.05 * (ul - 1);
+  pow = Math.round(pow * s);
+  spd = Math.round(spd * s);
+  foc = Math.round(foc * s);
+  grt = Math.round(grt * s);
+
+  return { pow, spd, foc, grt };
 }
 
 /* --- Chaos pickers --- */
@@ -638,12 +659,18 @@ function renderBattlefield(){
   });
 }
 
-/* --- Stat sheet conversion (HP/ATK/DEF/SPD) — balanced --- */
+/* --- Stat sheet conversion (HP/ATK/DEF/SPD) — balanced + sanitize --- */
 function toSheet(s, label='Unit', lvl=1){
-  const hp   = Math.round(s.grt*4 + s.foc*3 + 30 + lvl*4); // GRT nerfed, FOC buffed
-  const atk  = Math.round(s.pow*1.4 + s.foc*1.0);          // FOC adds damage
-  const def  = Math.round(s.grt*0.9 + s.spd*0.6);          // SPD contributes to DEF
-  const spd  = Math.max(1, Math.round(s.spd));
+  // sanitize inputs
+  const POW = Number.isFinite(s.pow) ? s.pow : 0;
+  const SPD = Number.isFinite(s.spd) ? s.spd : 0;
+  const FOC = Number.isFinite(s.foc) ? s.foc : 0;
+  const GRT = Number.isFinite(s.grt) ? s.grt : 0;
+
+  const hp   = Math.round(GRT*4 + FOC*3 + 30 + lvl*4); // GRT nerfed, FOC buffed
+  const atk  = Math.round(POW*1.4 + FOC*1.0);          // FOC adds damage
+  const def  = Math.round(GRT*0.9 + SPD*0.6);          // SPD contributes to DEF
+  const spd  = Math.max(1, Math.round(SPD));
   return { maxHp:hp, hp, atk, def, spd, label };
 }
 
