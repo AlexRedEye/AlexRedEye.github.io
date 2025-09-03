@@ -1,206 +1,199 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>PocketFighters — MVP</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="styles/gacha.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PocketFighters v0.5.2</title>
+  <link rel="stylesheet" href="styles/gacha.css"/>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">🧧 PocketFighters — MVP</div>
-    <nav class="tabs">
-      <button data-tab="home" class="active">Home</button>
-      <button data-tab="gacha">Gacha</button>
-      <button data-tab="inventory">Inventory</button>
-      <button data-tab="career">Career Mode</button>
-      <button data-tab="chaos">Memories of Chaos</button>
-      <button data-tab="settings">Settings</button>
-    </nav>
+  <header>
+    <h1>PocketFighters <span class="ver">v0.5.2</span></h1>
     <div class="wallet">
       <span id="gold">🪙 0</span>
       <span id="gems">💎 0</span>
       <span id="mats">📦 0</span>
+      <span id="mats-regen" class="dim tiny"></span>
     </div>
   </header>
 
+  <nav class="tabs">
+    <button class="active" data-tab="career">Career</button>
+    <button data-tab="chaos">Memories of Chaos</button>
+    <button data-tab="gacha">Gacha</button>
+    <button data-tab="inventory">Inventory</button>
+    <button data-tab="system">System</button>
+  </nav>
+
   <main>
-    <!-- HOME -->
-    <section id="home" class="tab active">
-      <h2>Welcome</h2>
-      <p>This is a lean HTML/JS/CSS MVP for a gacha + career-mode fighter plus a Chaos endgame.</p>
-      <ul>
-        <li>Pull <b>Units</b>, <b>Weapons</b>, and <b>Support Cards</b>.</li>
-        <li>Run <b>Career Mode</b> (training with time pressure).</li>
-        <li>Use trained units in a <b>hands-on</b> Memories of Chaos mode.</li>
-      </ul>
-      <button id="btn-grant-starter">Grant Starter Resources</button>
-    </section>
-
-    <!-- GACHA -->
-    <section id="gacha" class="tab">
-      <h2>Gacha</h2>
-      <div class="banners">
-        <div class="banner">
-          <h3>Character Banner</h3>
-          <p>Units + Support Cards</p>
-          <div class="rates">SSR 3% • SR 17% • R 80%</div>
-          <div class="actions">
-            <button data-pull="char-1">Single Pull (💎 30)</button>
-            <button data-pull="char-10">x10 Pull (💎 300)</button>
-          </div>
-          <div class="results" id="char-results"></div>
-        </div>
-
-        <div class="banner">
-          <h3>Weapon Banner</h3>
-          <p>Weapons + Support Cards</p>
-          <div class="rates">SSR 3% • SR 17% • R 80%</div>
-          <div class="actions">
-            <button data-pull="weap-1">Single Pull (💎 30)</button>
-            <button data-pull="weap-10">x10 Pull (💎 300)</button>
-          </div>
-          <div class="results" id="weap-results"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- INVENTORY -->
-    <section id="inventory" class="tab">
-      <h2>Inventory</h2>
-      <div class="inv-grid">
-        <div>
-          <h3>Units</h3>
-          <div id="inv-units" class="card-grid"></div>
-        </div>
-        <div>
-          <h3>Weapons</h3>
-          <div id="inv-weapons" class="card-grid"></div>
-        </div>
-        <div>
-          <h3>Support Cards</h3>
-          <div id="inv-supports" class="card-grid"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CAREER -->
-    <section id="career" class="tab">
-      <h2>Career Mode</h2>
-      <div id="career-setup">
-        <div class="picker">
-          <h3>Choose Unit</h3>
-          <div id="pick-unit" class="pick-grid"></div>
-        </div>
-        <div class="picker">
-          <h3>Choose Weapon</h3>
-          <div id="pick-weapon" class="pick-grid"></div>
-        </div>
-        <div class="picker">
-          <h3>Slot Support (0–2)</h3>
-          <div id="pick-supports" class="pick-grid"></div>
-        </div>
-        <button id="start-run" disabled>Start Run</button>
-      </div>
-
-      <div id="career-run" class="hidden">
-        <div class="run-top">
-          <div id="run-summary"></div>
-          <div id="run-stats"></div>
+    <!-- Career -->
+    <section id="career" class="tab active">
+      <div id="career-setup" class="pane">
+        <h2>Career — Setup <span class="tiny dim">(Cost: <b id="career-cost">10</b> 📦)</span></h2>
+        <div class="grid-3">
           <div>
-            <div id="run-stage">Stage 1 / 10 • Stamina 5</div>
-            <div class="deadline-row">
+            <h3>Unit</h3>
+            <div id="pick-unit" class="picker"></div>
+          </div>
+          <div>
+            <h3>Weapon</h3>
+            <div id="pick-weapon" class="picker"></div>
+          </div>
+          <div>
+            <h3>Supports (pick up to 2)</h3>
+            <div id="pick-supports" class="picker"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="start-run" disabled>Start Career (spend mats)</button>
+        </div>
+      </div>
+
+      <div id="career-run" class="pane hidden">
+        <div class="split">
+          <div>
+            <h2>Career — Run</h2>
+            <div id="run-summary" class="summary"></div>
+            <div id="run-stage" class="dim"></div>
+            <div id="run-stats" class="stats"></div>
+            <div class="deadline">
               <span id="deadline-label">Time Left: 5</span>
-              <div class="meter" aria-label="Time Left">
-                <span id="deadline-bar" style="width:100%"></span>
-              </div>
+              <div class="progress"><div id="deadline-bar"></div></div>
+            </div>
+            <div class="actions">
+              <button data-train="pow">Train POW</button>
+              <button data-train="spd">Train SPD</button>
+              <button data-train="foc">Train FOC</button>
+              <button data-train="grt">Train GRT</button>
+              <button id="btn-rest">Rest (-2 Time)</button>
+              <button id="btn-battle">Battle</button>
+              <button id="btn-abandon" class="danger">Abandon</button>
             </div>
           </div>
+          <div>
+            <h3>Log</h3>
+            <div id="run-log" class="log"></div>
+          </div>
         </div>
-
-        <div class="run-actions">
-          <span class="tiny" style="display:block;margin-bottom:6px;">Choose Training:</span>
-          <button data-train="pow">Train POW</button>
-          <button data-train="spd">Train SPD</button>
-          <button data-train="foc">Train FOC</button>
-          <button data-train="grt">Train GRT</button>
-          <button id="btn-rest" title="Costs 2 time">Rest (-2 time)</button>
-          <button id="btn-battle" class="primary">Battle</button>
-          <button id="btn-abandon" class="danger">End Run</button>
-        </div>
-
-        <div class="run-log" id="run-log"></div>
       </div>
     </section>
 
-    <!-- CHAOS -->
+    <!-- Memories of Chaos -->
     <section id="chaos" class="tab">
-      <h2>Memories of Chaos</h2>
-      <p class="tiny">Turn-based. Pick a hero, then a target, and attack. Clear waves to progress and earn 💎.</p>
-
-      <div id="chaos-setup" class="picker">
-        <h3>Team (up to 3)</h3>
-        <div id="chaos-team" class="card-grid"></div>
-        <h3>Choose Units</h3>
-        <div id="chaos-unit-pool" class="pick-grid"></div>
-        <button id="chaos-start" disabled>Start Chaos</button>
+      <div id="chaos-setup" class="pane">
+        <h2>Memories of Chaos — Team Select (pick up to 3)</h2>
+        <div id="chaos-team" class="chips"></div>
+        <h3>Unit Pool</h3>
+        <div id="chaos-unit-pool" class="picker"></div>
+        <div class="actions">
+          <button id="chaos-start" disabled>Start Chaos</button>
+        </div>
       </div>
 
-      <div id="chaos-run" class="hidden">
-        <div class="run-top">
+      <div id="chaos-run" class="pane hidden">
+        <div class="split">
           <div>
-            <div id="chaos-team-summary"></div>
-            <div class="tiny" id="chaos-mods"></div>
+            <h2 id="chaos-floor"></h2>
+            <div id="chaos-team-summary" class="dim"></div>
+            <div id="chaos-mods" class="dim tiny"></div>
+            <div id="chaos-stats"></div>
+            <div class="battle">
+              <div>
+                <h3>Your Team</h3>
+                <div id="chaos-ally-grid" class="grid-3"></div>
+              </div>
+              <div>
+                <h3>Enemies</h3>
+                <div id="chaos-enemy-grid" class="grid-3"></div>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="chaos-attack" disabled>Attack</button>
+              <button id="chaos-endturn">End Turn</button>
+              <button id="chaos-abandon" class="danger">Abandon</button>
+            </div>
           </div>
-          <div id="chaos-stats"></div>
           <div>
-            <div id="chaos-floor">Floor 1 / 8 • Wave 1 / 2 • Player Phase</div>
+            <h3>Log</h3>
+            <div id="chaos-log" class="log"></div>
           </div>
         </div>
-
-        <div class="chaos-battlefield">
-          <div>
-            <h3>Your Team</h3>
-            <div id="chaos-ally-grid" class="battle-grid"></div>
-          </div>
-          <div>
-            <h3>Enemies</h3>
-            <div id="chaos-enemy-grid" class="battle-grid"></div>
-          </div>
-        </div>
-
-        <div class="run-actions">
-          <button id="chaos-attack" class="primary" disabled>Attack</button>
-          <button id="chaos-endturn">End Turn</button>
-          <button id="chaos-abandon" class="danger">End Chaos</button>
-        </div>
-
-        <div class="run-log" id="chaos-log"></div>
       </div>
     </section>
 
-    <!-- SETTINGS -->
-    <section id="settings" class="tab">
-      <h2>Settings & Save</h2>
-      <button id="btn-save">Save</button>
-      <button id="btn-load">Load</button>
-      <button id="btn-wipe" class="danger">Wipe Save</button>
-      <p class="small">Saves to your browser’s localStorage.</p>
+    <!-- Gacha -->
+    <section id="gacha" class="tab">
+      <h2>Gacha</h2>
+      <div class="grid-2">
+        <div class="pane">
+          <h3>Character Banner</h3>
+          <div class="pity tiny">
+            <span>SSR pity: <b id="pity-char-ssr">0</b>/90 (soft at 70)</span> •
+            <span>SR pity: <b id="pity-char-sr">0</b>/10 (soft at 8)</span>
+          </div>
+          <div class="actions">
+            <button data-pull="char-1">Pull ×1 (30 💎)</button>
+            <button data-pull="char-10">Pull ×10 (300 💎)</button>
+          </div>
+          <div id="char-results" class="results"></div>
+        </div>
+        <div class="pane">
+          <h3>Weapon Banner</h3>
+          <div class="pity tiny">
+            <span>SSR pity: <b id="pity-weap-ssr">0</b>/90 (soft at 70)</span> •
+            <span>SR pity: <b id="pity-weap-sr">0</b>/10 (soft at 8)</span>
+          </div>
+          <div class="actions">
+            <button data-pull="weap-1">Pull ×1 (30 💎)</button>
+            <button data-pull="weap-10">Pull ×10 (300 💎)</button>
+          </div>
+          <div id="weap-results" class="results"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inventory -->
+    <section id="inventory" class="tab">
+      <div class="grid-3">
+        <div class="pane">
+          <h2>Units</h2>
+          <div id="inv-units"></div>
+        </div>
+        <div class="pane">
+          <h2>Weapons</h2>
+          <div id="inv-weapons"></div>
+        </div>
+        <div class="pane">
+          <h2>Supports</h2>
+          <div id="inv-supports"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- System -->
+    <section id="system" class="tab">
+      <div class="pane">
+        <h2>System</h2>
+        <div class="actions">
+          <button id="btn-save">Save</button>
+          <button id="btn-load">Load</button>
+          <button id="btn-wipe" class="danger">Wipe Save</button>
+        </div>
+      </div>
     </section>
   </main>
 
-  <!-- SUMMARY MODAL -->
-  <div id="summary-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="summary-title">
-    <div class="modal-card">
+  <!-- Summary Modal -->
+  <div id="summary-modal" class="modal hidden">
+    <div class="modal-box">
       <h3 id="summary-title">Summary</h3>
-      <div id="summary-body" class="summary-body"></div>
-      <div class="modal-actions">
-        <button id="btn-summary-confirm" class="primary">Confirm & Return</button>
+      <pre id="summary-body"></pre>
+      <div class="actions right">
+        <button id="btn-summary-confirm">Confirm</button>
       </div>
     </div>
   </div>
 
-  <footer class="footer">v0.4.4-MVP • All placeholder data/art</footer>
   <script src="scripts/gacha.js"></script>
 </body>
 </html>

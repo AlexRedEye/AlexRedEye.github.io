@@ -1,63 +1,100 @@
 /* =========================
    PocketFighters — MVP
-   v0.4.4 (full)
-   • Career stat indicators (Weak / OK / Good / Excellent) vs. current stage targets
-   • Keeps v0.4.3: SPD nerf (career & MoC), Chaos NaN fix, Chaos picker cap/toggle,
-     gacha dupes→gems, deadline + detailed logs, confirm-on-defeat modal
+   v0.5.2
+   • Starter roster auto-grant on new/empty saves (Rai, Brick, Kira + basic weapons & supports)
+   • Expanded catalogs: more Units, Weapons, Supports (all in gacha pools)
+   • Keeps v0.5.1: smarter loss advisor, pity banners, mats regen, condensed results, MoC hands-on
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
 const ARCH = { BRAWLER:'Brawler', BLADE:'Blade', GUNNER:'Gunner', MAGE:'Mage' };
 
-/* ---------- Catalogs ---------- */
+/* ---------- Tunables ---------- */
+const RUN_COST_MATS = 10;
+const MATS_CAP = 120;
+const MATS_REGEN_EVERY_MS = 5*60*1000;
+const GACHA_COST_1 = 30;
+const GACHA_COST_10 = 300;
+const PITY = {
+  char: { SSR: { soft:70, hard:90 }, SR: { soft:8, hard:10 } },
+  weap: { SSR: { soft:70, hard:90 }, SR: { soft:8, hard:10 } },
+};
+
+/* ---------- Catalogs (expanded) ---------- */
 const UNITS = [
-  // Existing
-  { id:'u_rai',   name:'Rai',     arche:ARCH.BLADE,   rarity:RARITY.SR,  base:{pow:9,  spd:8,  foc:5,  grt:7} },
-  { id:'u_nox',   name:'Nox',     arche:ARCH.MAGE,    rarity:RARITY.SSR, base:{pow:7,  spd:7,  foc:12, grt:6} },
-  { id:'u_brick', name:'Brick',   arche:ARCH.BRAWLER, rarity:RARITY.R,   base:{pow:10, spd:5,  foc:3,  grt:10} },
+  { id:'u_rai',     name:'Rai',       arche:ARCH.BLADE,   rarity:RARITY.SR,  base:{pow:9,  spd:8,  foc:5,  grt:7} },
+  { id:'u_nox',     name:'Nox',       arche:ARCH.MAGE,    rarity:RARITY.SSR, base:{pow:7,  spd:7,  foc:12, grt:6} },
+  { id:'u_brick',   name:'Brick',     arche:ARCH.BRAWLER, rarity:RARITY.R,   base:{pow:10, spd:5,  foc:3,  grt:10} },
+  { id:'u_kira',    name:'Kira',      arche:ARCH.GUNNER,  rarity:RARITY.SR,  base:{pow:8,  spd:11, foc:6,  grt:5} },
+  { id:'u_zen',     name:'Zen',       arche:ARCH.BLADE,   rarity:RARITY.SSR, base:{pow:11, spd:10, foc:7,  grt:6} },
+  { id:'u_sable',   name:'Sable',     arche:ARCH.MAGE,    rarity:RARITY.SR,  base:{pow:6,  spd:8,  foc:11, grt:6} },
+  { id:'u_vex',     name:'Vex',       arche:ARCH.GUNNER,  rarity:RARITY.R,   base:{pow:7,  spd:9,  foc:4,  grt:6} },
+  { id:'u_ursa',    name:'Ursa',      arche:ARCH.BRAWLER, rarity:RARITY.SSR, base:{pow:12, spd:6,  foc:5,  grt:11} },
   // New
-  { id:'u_kira',  name:'Kira',    arche:ARCH.GUNNER,  rarity:RARITY.SR,  base:{pow:8,  spd:11, foc:6,  grt:5} },
-  { id:'u_zen',   name:'Zen',     arche:ARCH.BLADE,   rarity:RARITY.SSR, base:{pow:11, spd:10, foc:7,  grt:6} },
-  { id:'u_sable', name:'Sable',   arche:ARCH.MAGE,    rarity:RARITY.SR,  base:{pow:6,  spd:8,  foc:11, grt:6} },
-  { id:'u_vex',   name:'Vex',     arche:ARCH.GUNNER,  rarity:RARITY.R,   base:{pow:7,  spd:9,  foc:4,  grt:6} },
-  { id:'u_ursa',  name:'Ursa',    arche:ARCH.BRAWLER, rarity:RARITY.SSR, base:{pow:12, spd:6,  foc:5,  grt:11} },
+  { id:'u_ember',   name:'Ember',     arche:ARCH.MAGE,    rarity:RARITY.SR,  base:{pow:6,  spd:9,  foc:10, grt:5} },
+  { id:'u_rune',    name:'Rune',      arche:ARCH.BLADE,   rarity:RARITY.R,   base:{pow:8,  spd:8,  foc:4,  grt:6} },
+  { id:'u_ivy',     name:'Ivy',       arche:ARCH.GUNNER,  rarity:RARITY.SR,  base:{pow:7,  spd:12, foc:5,  grt:5} },
+  { id:'u_goliath', name:'Goliath',   arche:ARCH.BRAWLER, rarity:RARITY.SSR, base:{pow:13, spd:5,  foc:4,  grt:12} },
+  { id:'u_aqua',    name:'Aqua',      arche:ARCH.MAGE,    rarity:RARITY.R,   base:{pow:5,  spd:7,  foc:9,  grt:6} },
+  { id:'u_nero',    name:'Nero',      arche:ARCH.BLADE,   rarity:RARITY.SR,  base:{pow:10, spd:9,  foc:6,  grt:6} },
+  { id:'u_mira',    name:'Mira',      arche:ARCH.GUNNER,  rarity:RARITY.SSR, base:{pow:9,  spd:13, foc:7,  grt:5} },
+  { id:'u_bolt',    name:'Bolt',      arche:ARCH.BRAWLER, rarity:RARITY.SR,  base:{pow:11, spd:8,  foc:4,  grt:9} },
 ];
 
 const WEAPONS = [
-  // Existing
-  { id:'w_katana',  name:'Storm Katana',      rarity:RARITY.SR,  pref:ARCH.BLADE,  add:{pow:4, spd:2, foc:0, grt:0}, growth:0.07, max:5 },
-  { id:'w_staff',   name:'Orbweaver Staff',   rarity:RARITY.SSR, pref:ARCH.MAGE,   add:{pow:1, spd:1, foc:5, grt:1}, growth:0.08, max:5 },
-  { id:'w_gaunt',   name:'Titan Gauntlets',   rarity:RARITY.R,   pref:ARCH.BRAWLER,add:{pow:3, spd:0, foc:0, grt:2}, growth:0.05, max:5 },
-  { id:'w_pistol',  name:'Silent Pistol',     rarity:RARITY.R,   pref:ARCH.GUNNER, add:{pow:2, spd:2, foc:0, grt:0}, growth:0.05, max:5 },
+  { id:'w_katana',   name:'Storm Katana',      rarity:RARITY.SR,  pref:ARCH.BLADE,  add:{pow:4, spd:2, foc:0, grt:0}, growth:0.07, max:5 },
+  { id:'w_staff',    name:'Orbweaver Staff',   rarity:RARITY.SSR, pref:ARCH.MAGE,   add:{pow:1, spd:1, foc:5, grt:1}, growth:0.08, max:5 },
+  { id:'w_gaunt',    name:'Titan Gauntlets',   rarity:RARITY.R,   pref:ARCH.BRAWLER,add:{pow:3, spd:0, foc:0, grt:2}, growth:0.05, max:5 },
+  { id:'w_pistol',   name:'Silent Pistol',     rarity:RARITY.R,   pref:ARCH.GUNNER, add:{pow:2, spd:2, foc:0, grt:0}, growth:0.05, max:5 },
+  { id:'w_odachi',   name:'Mooncut Odachi',    rarity:RARITY.SSR, pref:ARCH.BLADE,  add:{pow:6, spd:1, foc:1, grt:0}, growth:0.08, max:5 },
+  { id:'w_tome',     name:'Aether Tome',       rarity:RARITY.SR,  pref:ARCH.MAGE,   add:{pow:0, spd:1, foc:4, grt:0}, growth:0.07, max:5 },
+  { id:'w_revolver', name:'Twin Revolvers',    rarity:RARITY.SR,  pref:ARCH.GUNNER, add:{pow:3, spd:3, foc:1, grt:0}, growth:0.07, max:5 },
+  { id:'w_maul',     name:'Earthsplit Maul',   rarity:RARITY.SR,  pref:ARCH.BRAWLER,add:{pow:5, spd:0, foc:0, grt:2}, growth:0.06, max:5 },
   // New
-  { id:'w_odachi',  name:'Mooncut Odachi',    rarity:RARITY.SSR, pref:ARCH.BLADE,  add:{pow:6, spd:1, foc:1, grt:0}, growth:0.08, max:5 },
-  { id:'w_tome',    name:'Aether Tome',       rarity:RARITY.SR,  pref:ARCH.MAGE,   add:{pow:0, spd:1, foc:4, grt:0}, growth:0.07, max:5 },
-  { id:'w_revolver',name:'Twin Revolvers',    rarity:RARITY.SR,  pref:ARCH.GUNNER, add:{pow:3, spd:3, foc:1, grt:0}, growth:0.07, max:5 },
-  { id:'w_maul',    name:'Earthsplit Maul',   rarity:RARITY.SR,  pref:ARCH.BRAWLER,add:{pow:5, spd:0, foc:0, grt:2}, growth:0.06, max:5 },
+  { id:'w_scythe',   name:'Night Scythe',      rarity:RARITY.SSR, pref:ARCH.BLADE,  add:{pow:5, spd:2, foc:2, grt:1}, growth:0.08, max:5 },
+  { id:'w_wand',     name:'Glint Wand',        rarity:RARITY.R,   pref:ARCH.MAGE,   add:{pow:0, spd:1, foc:3, grt:0}, growth:0.05, max:5 },
+  { id:'w_shotgun',  name:'Boomstick',         rarity:RARITY.SR,  pref:ARCH.GUNNER, add:{pow:5, spd:1, foc:0, grt:0}, growth:0.06, max:5 },
+  { id:'w_knuckles', name:'Temple Knuckles',   rarity:RARITY.SR,  pref:ARCH.BRAWLER,add:{pow:4, spd:1, foc:0, grt:3}, growth:0.06, max:5 },
+  { id:'w_railgun',  name:'Valkyrie Railgun',  rarity:RARITY.SSR, pref:ARCH.GUNNER, add:{pow:6, spd:2, foc:1, grt:0}, growth:0.08, max:5 },
+  { id:'w_staves',   name:'Seer Staves',       rarity:RARITY.SR,  pref:ARCH.MAGE,   add:{pow:1, spd:0, foc:5, grt:1}, growth:0.07, max:5 },
+  { id:'w_bladefans',name:'Blade Fans',        rarity:RARITY.R,   pref:ARCH.BLADE,  add:{pow:2, spd:2, foc:0, grt:0}, growth:0.05, max:5 },
+  { id:'w_tonfa',    name:'Stone Tonfa',       rarity:RARITY.R,   pref:ARCH.BRAWLER,add:{pow:2, spd:1, foc:0, grt:2}, growth:0.05, max:5 },
 ];
 
 const SUPPORTS = [
-  // Existing
-  { id:'s_cardio', name:'Cardio Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.12,foc:0.00,grt:0.00}, dmg:0.00 },
-  { id:'s_brutal', name:'Brutal Sparring',  rarity:RARITY.SR,  train:{pow:0.15,spd:0.00,foc:0.00,grt:0.05}, dmg:0.05 },
-  { id:'s_mind',   name:'Mind Palace',      rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.18,grt:0.00}, dmg:0.06 },
-  { id:'s_guard',  name:'Guard Drills',     rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.00,grt:0.15}, dmg:0.02 },
-  { id:'s_aegis',  name:'Aegis Mentor',     rarity:RARITY.SSR, train:{pow:0.05,spd:0.05,foc:0.05,grt:0.10}, dmg:0.10 },
-  { id:'s_split',  name:'Split Focus',      rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00 },
+  { id:'s_cardio',  name:'Cardio Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.12,foc:0.00,grt:0.00}, dmg:0.00 },
+  { id:'s_brutal',  name:'Brutal Sparring',  rarity:RARITY.SR,  train:{pow:0.15,spd:0.00,foc:0.00,grt:0.05}, dmg:0.05 },
+  { id:'s_mind',    name:'Mind Palace',      rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.18,grt:0.00}, dmg:0.06 },
+  { id:'s_guard',   name:'Guard Drills',     rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.00,grt:0.15}, dmg:0.02 },
+  { id:'s_aegis',   name:'Aegis Mentor',     rarity:RARITY.SSR, train:{pow:0.05,spd:0.05,foc:0.05,grt:0.10}, dmg:0.10 },
+  { id:'s_split',   name:'Split Focus',      rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00 },
+  { id:'s_blitz',   name:'Blitz Tactics',    rarity:RARITY.SR,  train:{pow:0.05,spd:0.18,foc:0.00,grt:0.00}, dmg:0.03 },
+  { id:'s_zenith',  name:'Zenith Study',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.05,foc:0.20,grt:0.00}, dmg:0.08 },
+  { id:'s_iron',    name:'Iron Will',        rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.02 },
+  { id:'s_duelist', name:'Duelist Footwork', rarity:RARITY.SR,  train:{pow:0.08,spd:0.15,foc:0.00,grt:0.00}, dmg:0.04 },
   // New
-  { id:'s_blitz',  name:'Blitz Tactics',    rarity:RARITY.SR,  train:{pow:0.05,spd:0.18,foc:0.00,grt:0.00}, dmg:0.03 },
-  { id:'s_zenith', name:'Zenith Study',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.05,foc:0.20,grt:0.00}, dmg:0.08 },
-  { id:'s_iron',   name:'Iron Will',        rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.02 },
-  { id:'s_duelist',name:'Duelist Footwork', rarity:RARITY.SR,  train:{pow:0.08,spd:0.15,foc:0.00,grt:0.00}, dmg:0.04 },
+  { id:'s_focus2',  name:'Sharp Mind',       rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.16,grt:0.04}, dmg:0.05 },
+  { id:'s_speed2',  name:'Sprint Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.15,foc:0.00,grt:0.00}, dmg:0.01 },
+  { id:'s_power2',  name:'Powerlifting',     rarity:RARITY.SR,  train:{pow:0.16,spd:0.00,foc:0.00,grt:0.04}, dmg:0.05 },
+  { id:'s_guard2',  name:'Bulwark',          rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.00,grt:0.18}, dmg:0.04 },
+  { id:'s_overdrv', name:'Overdrive',        rarity:RARITY.SSR, train:{pow:0.10,spd:0.00,foc:0.10,grt:0.00}, dmg:0.12 },
+  { id:'s_fleet',   name:'Fleet Footed',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.22,foc:0.00,grt:0.00}, dmg:0.06 },
+  { id:'s_stoic',   name:'Stoic Focus',      rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.01 },
+  { id:'s_balance', name:'Balanced Regimen', rarity:RARITY.SR,  train:{pow:0.08,spd:0.08,foc:0.08,grt:0.08}, dmg:0.03 },
 ];
 
-/* ---------- Player Profile ---------- */
+/* ---------- Profile ---------- */
 const profile = {
-  gold: 0, gems: 0, mats: 0,
-  units: [],        // {id, lvl, exp}
-  weapons: [],      // {id, lvl, exp}
-  supports: [],     // {id, lvl, exp, expNext}
+  gold: 0,
+  gems: 0,
+  mats: 120,
+  units: [],
+  weapons: [],
+  supports: [],
+  pity: { char: { ssr: 0, sr: 0 }, weap: { ssr: 0, sr: 0 } },
+  matsLastTs: Date.now(),
   seenIds: new Set(),
+  starterGranted: false,   // NEW
 };
 
 /* ---------- Helpers ---------- */
@@ -67,11 +104,7 @@ const q = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 const rarityClass = r => r===RARITY.SSR?'ssr':(r===RARITY.SR?'sr':'r');
 const clamp = (v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-
-// Soft-cap: beyond 'pivot', additional points are less effective (eff in 0..1)
-function softCap(x, pivot=22, eff=0.6){
-  return x <= pivot ? x : pivot + (x - pivot) * eff;
-}
+function softCap(x, pivot=22, eff=0.6){ return x <= pivot ? x : pivot + (x - pivot) * eff; }
 
 /* ---------- Save/Load ---------- */
 function save() {
@@ -85,18 +118,17 @@ function load() {
   const data = JSON.parse(raw);
   Object.assign(profile, data);
   rebuildSeen();
-  renderWallet();
-  renderInventory();
-  rebuildPickers();
-  rebuildChaosPickers();
+  regenMatsNow();
+  renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
   clog('📂 Loaded save.');
   return true;
 }
 function wipe() {
   localStorage.removeItem('pf_save');
-  Object.assign(profile, {gold:0,gems:0,mats:0,units:[],weapons:[],supports:[],seenIds:new Set()});
-  renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers();
-  clog('🧹 Save wiped.');
+  Object.assign(profile, {gold:0,gems:0,mats:10,units:[],weapons:[],supports:[],pity:{char:{ssr:0,sr:0},weap:{ssr:0,sr:0}},matsLastTs:Date.now(),seenIds:new Set(),starterGranted:false});
+  ensureStarterRoster();                // give starters on fresh wipe
+  renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
+  clog('🧹 Save wiped. Starter roster granted.');
 }
 function rebuildSeen(){
   profile.seenIds = new Set();
@@ -105,27 +137,65 @@ function rebuildSeen(){
   for (const s of profile.supports) profile.seenIds.add(s.id);
 }
 
-/* ---------- Starter ---------- */
-function grantStarter(){
-  profile.gold += 1000;
-  profile.gems += 600;
-  profile.mats += 50;
-  acquireUnit('u_brick', RARITY.R);
-  acquireWeapon('w_pistol', RARITY.R);
-  acquireSupport('s_cardio', RARITY.R);
-  renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers();
-  clog('🎁 Starter granted.');
+/* ---------- Starter roster (auto, one-time) ---------- */
+function ensureStarterRoster(){
+  const needGrant = !profile.starterGranted || profile.units.length===0;
+  if (!needGrant) return;
+
+  const addUnit   = id => { if(!profile.units.find(x=>x.id===id)) profile.units.push({id, lvl:1, exp:0}); profile.seenIds.add(id); };
+  const addWeapon = id => { if(!profile.weapons.find(x=>x.id===id)) profile.weapons.push({id, lvl:1, exp:0}); profile.seenIds.add(id); };
+  const addSupport= id => { if(!profile.supports.find(x=>x.id===id)) profile.supports.push({id, lvl:1, exp:0, expNext:5}); profile.seenIds.add(id); };
+
+  const STARTER_UNITS   = ['u_rai','u_brick','u_kira'];          // 2×SR, 1×R
+  const STARTER_WEAPONS = ['w_katana','w_gaunt','w_pistol'];     // basic matching
+  const STARTER_SUPPORTS= ['s_split','s_guard','s_brutal'];      // balanced
+
+  STARTER_UNITS.forEach(addUnit);
+  STARTER_WEAPONS.forEach(addWeapon);
+  STARTER_SUPPORTS.forEach(addSupport);
+
+  profile.starterGranted = true;
+
+  renderInventory(); rebuildPickers(); rebuildChaosPickers(); renderWallet();
+  log('🎁 Starter roster granted: Rai, Brick, Kira • Storm Katana, Titan Gauntlets, Silent Pistol • Split Focus, Guard Drills, Brutal Sparring.');
 }
 
-/* ---------- Inventory helpers ---------- */
+/* ---------- Regen (Mats) ---------- */
+function regenMatsNow(){
+  const now = Date.now();
+  let mats = profile.mats;
+  if (mats >= MATS_CAP){ profile.matsLastTs = now; return; }
+  const elapsed = now - (profile.matsLastTs || now);
+  if (elapsed < MATS_REGEN_EVERY_MS) return;
+  const gained = Math.floor(elapsed / MATS_REGEN_EVERY_MS);
+  if (gained > 0){
+    profile.mats = Math.min(MATS_CAP, mats + gained);
+    profile.matsLastTs = now - (elapsed % MATS_REGEN_EVERY_MS);
+  }
+}
+function matsNextTickMs(){
+  const now = Date.now();
+  const base = profile.matsLastTs || now;
+  const next = base + MATS_REGEN_EVERY_MS;
+  return Math.max(0, next - now);
+}
+function matsCountdownText(){
+  regenMatsNow();
+  if (profile.mats >= MATS_CAP) return `Mats full (${MATS_CAP})`;
+  const ms = matsNextTickMs();
+  const s = Math.ceil(ms/1000);
+  const mm = Math.floor(s/60), ss = s%60;
+  return `+1 in ${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')} (cap ${MATS_CAP})`;
+}
+
+/* ---------- Inventory Level helpers ---------- */
 function tryLevelUnit(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=true;} return up; }
 function tryLevelWeapon(e){ let up=false; while(e.exp>=5){e.exp-=5;e.lvl++;up=true;} return up; }
 function tryLevelSupport(e){ let up=false; while(e.exp>=e.expNext){e.exp-=e.expNext;e.lvl++;e.expNext=Math.ceil(e.expNext*1.35);up=true;} return up; }
 
-/* Duplicate compensation table (gems) */
+/* ---------- Duplicate compensation (gems) ---------- */
 const DUP_GEM = { [RARITY.R]:10, [RARITY.SR]:30, [RARITY.SSR]:90 };
 
-/* Acquisition that respects duplicate→gems (no level-ups from gacha) */
 function acquireUnit(id, rarity){
   let e = profile.units.find(x=>x.id===id);
   if (!e){ profile.units.push({id, lvl:1, exp:0}); profile.seenIds.add(id); return {added:true, gems:0}; }
@@ -151,9 +221,12 @@ function cardHtml({title, subtitle, rarity, body='', badge=''}){
   </div>`;
 }
 function renderWallet(){
+  regenMatsNow();
   q('#gold').textContent = `🪙 ${fmt(profile.gold)}`;
   q('#gems').textContent = `💎 ${fmt(profile.gems)}`;
   q('#mats').textContent = `📦 ${fmt(profile.mats)}`;
+  const reg = q('#mats-regen'); if (reg) reg.textContent = matsCountdownText();
+  const cost = q('#career-cost'); if (cost) cost.textContent = RUN_COST_MATS;
 }
 function renderInventory(){
   const uCont = q('#inv-units'); if (uCont){ uCont.innerHTML='';
@@ -210,23 +283,59 @@ function clog(msg){
   while (el.children.length>160) el.removeChild(el.lastChild);
 }
 
-/* ---------- Gacha ---------- */
-const RATES = { SSR:0.03, SR:0.17, R:0.80 };
-function pickRarity(){ const r=Math.random(); if(r<RATES.SSR) return RARITY.SSR; if(r<RATES.SSR+RATES.SR) return RARITY.SR; return RARITY.R; }
+/* ==================================================
+   Gacha — pity banners
+   ================================================== */
+function updatePityUI(){
+  const P = profile.pity;
+  q('#pity-char-ssr')?.replaceChildren(document.createTextNode(P.char.ssr));
+  q('#pity-char-sr')?.replaceChildren(document.createTextNode(P.char.sr));
+  q('#pity-weap-ssr')?.replaceChildren(document.createTextNode(P.weap.ssr));
+  q('#pity-weap-sr')?.replaceChildren(document.createTextNode(P.weap.sr));
+}
 function poolCharacterByRarity(r){ return [...UNITS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
 function poolWeaponByRarity(r){ return [...WEAPONS.filter(x=>x.rarity===r), ...SUPPORTS.filter(x=>x.rarity===r)]; }
+function spendGems(cost){ if(profile.gems<cost){alert('Not enough gems!');return false;} profile.gems-=cost; renderWallet(); return true; }
 
-/* Roll with duplicate→gems behavior */
-function rollOne(fromPool){
-  const rarity = pickRarity();
-  const pool = fromPool(rarity);
+function pickWithPity(whichBanner){
+  const pity = profile.pity[whichBanner];
+  const cfg = PITY[whichBanner];
+  const prob = (counter, base, soft, hard)=>{
+    if (counter < soft) return base;
+    if (counter >= hard-1) return 1.0;
+    const t = (counter - soft + 1) / (hard - soft);
+    return base + t * (1.0 - base);
+  };
+  const roll = Math.random();
+  const ssrChance = prob(pity.ssr, 0.03, cfg.SSR.soft, cfg.SSR.hard);
+  const srBase = 0.17;
+  const srChance = Math.max(srBase, prob(pity.sr, srBase, cfg.SR.soft, cfg.SR.hard));
+
+  let rarity;
+  if (roll < ssrChance){
+    rarity = RARITY.SSR;
+    pity.ssr = 0; pity.sr = 0;
+  } else if (Math.random() < srChance){
+    rarity = RARITY.SR;
+    pity.sr = 0; pity.ssr++;
+  } else {
+    rarity = RARITY.R;
+    pity.sr++; pity.ssr++;
+  }
+  updatePityUI();
+  return rarity;
+}
+
+function rollOne(whichBanner){
+  const rarity = pickWithPity(whichBanner);
+  const pool = whichBanner==='char' ? poolCharacterByRarity(rarity) : poolWeaponByRarity(rarity);
   const pick = pool[Math.floor(Math.random()*pool.length)];
+
   const isSupport = SUPPORTS.some(s=>s.id===pick.id);
   const isUnit = UNITS.some(u=>u.id===pick.id);
   const isWeapon = WEAPONS.some(w=>w.id===pick.id);
 
   let converted = false, gems = 0;
-
   if (isSupport){
     const res = acquireSupport(pick.id, rarity); converted = !res.added; gems = res.gems;
   } else if (isUnit){
@@ -235,24 +344,17 @@ function rollOne(fromPool){
     const res = acquireWeapon(pick.id, rarity); converted = !res.added; gems = res.gems;
   }
 
-  renderInventory(); renderWallet(); rebuildChaosPickers(); rebuildPickers(); // refresh pickers immediately
+  renderInventory(); renderWallet(); rebuildChaosPickers(); rebuildPickers();
   return { id: pick.id, name: pick.name, rarity, type: isSupport?'Support':(isUnit?'Unit':'Weapon'), converted, gems };
 }
 
-/* Condensed results: clear old, collapse duplicates, show gem refunds */
 function renderPullResults(containerSel, results){
   const box = q(containerSel);
-  box.innerHTML = '';   // clear old results per roll
-
-  // group by id and sum counts + gem refunds
-  const counts = new Map(); // id => { item, count, gems }
+  box.innerHTML = '';
+  const counts = new Map();
   for (const r of results){
     if (!counts.has(r.id)) counts.set(r.id, { item:r, count:1, gems:r.converted?r.gems:0 });
-    else {
-      const v = counts.get(r.id);
-      v.count++;
-      v.gems += r.converted ? r.gems : 0;
-    }
+    else { const v = counts.get(r.id); v.count++; v.gems += r.converted ? r.gems : 0; }
   }
   let html = '';
   for (const {item,count,gems} of counts.values()){
@@ -263,32 +365,31 @@ function renderPullResults(containerSel, results){
   box.insertAdjacentHTML('afterbegin', html);
 }
 
-function spendGems(cost){ if(profile.gems<cost){alert('Not enough gems!');return false;} profile.gems-=cost; renderWallet(); return true; }
 function attachGacha(){
   q('[data-pull="char-1"]')?.addEventListener('click', ()=>{
-    if(!spendGems(30))return;
-    const r=rollOne(poolCharacterByRarity);
+    if(!spendGems(GACHA_COST_1))return;
+    const r=rollOne('char');
     renderPullResults('#char-results',[r]);
   });
   q('[data-pull="char-10"]')?.addEventListener('click', ()=>{
-    if(!spendGems(300))return;
-    const results=[]; for(let i=0;i<10;i++) results.push(rollOne(poolCharacterByRarity));
+    if(!spendGems(GACHA_COST_10))return;
+    const results=[]; for(let i=0;i<10;i++) results.push(rollOne('char'));
     renderPullResults('#char-results',results);
   });
   q('[data-pull="weap-1"]')?.addEventListener('click', ()=>{
-    if(!spendGems(30))return;
-    const r=rollOne(poolWeaponByRarity);
+    if(!spendGems(GACHA_COST_1))return;
+    const r=rollOne('weap');
     renderPullResults('#weap-results',[r]);
   });
   q('[data-pull="weap-10"]')?.addEventListener('click', ()=>{
-    if(!spendGems(300))return;
-    const results=[]; for(let i=0;i<10;i++) results.push(rollOne(poolWeaponByRarity));
+    if(!spendGems(GACHA_COST_10))return;
+    const results=[]; for(let i=0;i<10;i++) results.push(rollOne('weap'));
     renderPullResults('#weap-results',results);
   });
 }
 
 /* ==================================================
-   Career Mode (deadline + indicators + detailed fight + modal)
+   Career Mode (with indicators, timer)
    ================================================== */
 const run = {
   mode: 'career',
@@ -299,8 +400,6 @@ const run = {
   deadlineMax:5, deadline:5, costTrain:1, costRest:2
 };
 
-/* ======= Indicator helpers ======= */
-// Enemy preview for current stage (must mirror enemy scaling in battleStage)
 function enemyPreviewForStage(d){
   return {
     pow: 6 + d*2 + Math.floor(d*d*0.3),
@@ -309,7 +408,6 @@ function enemyPreviewForStage(d){
     grt: 7 + Math.floor(d*1.5 + d*d*0.2),
   };
 }
-// Grade a ratio (your stat vs target)
 function statGrade(r){
   if (r < 0.80) return {label:'Weak', cls:'weak', emoji:'🔴'};
   if (r < 1.00) return {label:'OK',   cls:'ok',   emoji:'🟡'};
@@ -360,8 +458,13 @@ function rebuildPickers(){
 }
 function enableStartIfReady(){ q('#start-run').disabled = !(run.unit && run.weapon); }
 function resetDeadline(){ run.deadline = run.deadlineMax; updateDeadlineUI(); }
+
 function startRun(){
+  regenMatsNow(); renderWallet();
+  if (profile.mats < RUN_COST_MATS){ alert(`Not enough mats (${profile.mats}/${RUN_COST_MATS}). They regenerate over time.`); return; }
   if (!run.unit || !run.weapon){ alert('Pick a unit and weapon.'); return; }
+  profile.mats -= RUN_COST_MATS; profile.matsLastTs = Date.now(); renderWallet();
+
   run.mode = 'career'; run.active=true; run.stage=1; run.stamina=5; q('#run-log').innerHTML='';
   const u=run.unit.def, ulvl=run.unit.meta.lvl; const w=run.weapon.def, wlvl=run.weapon.meta.lvl;
   const ws = 1 + w.growth*(wlvl-1);
@@ -375,7 +478,7 @@ function startRun(){
   q('#career-setup').classList.add('hidden');
   q('#career-run').classList.remove('hidden');
   resetDeadline(); updateRunUI();
-  log(`▶️ Career started with ${u.name} (Lv ${ulvl}) + ${w.name} (Lv ${wlvl}).`);
+  log(`▶️ Career started with ${u.name} (Lv ${ulvl}) + ${w.name} (Lv ${wlvl}). Spent ${RUN_COST_MATS} mats.`);
   log(`Stats → POW ${run.stats.pow} | SPD ${run.stats.spd} | FOC ${run.stats.foc} | GRT ${run.stats.grt}`);
 }
 function updateDeadlineUI(){
@@ -386,27 +489,18 @@ function updateDeadlineUI(){
   const restBtn=q('#btn-rest'); if (restBtn) restBtn.disabled = (run.deadline < run.costRest) || !run.active;
 }
 
-/* === Updated with indicators === */
 function updateRunUI(){
   const s=run.stats;
   const sup = run.supports?.map(x=>`${x.def.name} (Lv ${x.meta.lvl})`).join(', ') || 'None';
   q('#run-summary').innerHTML = `<div><b>${run.unit.def.name}</b> • Lv ${run.unit.meta.lvl} • ${run.unit.def.arche}</div><div><b>${run.weapon.def.name}</b> • Lv ${run.weapon.meta.lvl}</div><div>Support: ${sup}</div>`;
   q('#run-stage').textContent = `Stage ${run.stage} / ${run.maxStage} • Stamina ${run.stamina}`;
 
-  // Indicators vs. current stage
   const e = enemyPreviewForStage(run.stage);
-  const targets = {
-    powTarget: e.grt, // their toughness proxy
-    spdTarget: e.spd, // tempo
-    focTarget: e.foc, // scaling
-    grtTarget: e.pow, // guard vs enemy POW
-  };
-
+  const targets = { powTarget:e.grt, spdTarget:e.spd, focTarget:e.foc, grtTarget:e.pow };
   const powG = statGrade(s.pow / Math.max(1, targets.powTarget));
   const spdG = statGrade(s.spd / Math.max(1, targets.spdTarget));
   const focG = statGrade(s.foc / Math.max(1, targets.focTarget));
   const grtG = statGrade(s.grt / Math.max(1, targets.grtTarget));
-
   const tip = (self, tgt) => `title="Your ${self} vs target ${tgt}"`;
 
   q('#run-stats').innerHTML = `
@@ -426,7 +520,7 @@ function updateRunUI(){
       <span class="pill ${grtG.cls}" ${tip(s.grt, targets.grtTarget)}>${grtG.emoji} ${grtG.label}</span>
       <span class="tiny dim">vs POW ${targets.grtTarget}</span>
     </div>
-    <div class="legend tiny dim">Legend: 🔴 Weak • 🟡 OK • 🟢 Good • 🔷 Excellent (compared to this stage’s expected enemy stats)</div>
+    <div class="legend tiny dim">Legend: 🔴 Weak • 🟡 OK • 🟢 Good • 🔷 Excellent</div>
   `;
 
   updateDeadlineUI();
@@ -444,13 +538,9 @@ function trainOnce(which){
   log(`Stats: POW ${before.pow}→${run.stats.pow} | SPD ${before.spd}→${run.stats.spd} | FOC ${before.foc}→${run.stats.foc} | GRT ${before.grt}→${run.stats.grt}`);
   spendTime(run.costTrain, `Training ${which.toUpperCase()}`);
 }
-// Rest: +2 Stamina (to max 5), costs 2 time; supports gain use-EXP
 function restOnce(){
   if (!run.active) return;
-  if (run.deadline < run.costRest){
-    log('⛔ Not enough time left to Rest.');
-    return;
-  }
+  if (run.deadline < run.costRest){ log('⛔ Not enough time left to Rest.'); return; }
   const before = run.stamina;
   run.stamina = Math.min(5, run.stamina + 2);
   for (const s of run.supports || []){
@@ -462,12 +552,11 @@ function restOnce(){
   spendTime(run.costRest, 'Rest');
 }
 
-/* Career battle: single-check fight per stage (v0.4.3 SPD nerf retained) */
+/* Battle & smarter summary (from v0.5.1) */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
   const d=run.stage;
 
-  // Enemy scaling
   const enemy = {
     pow: 6 + d*2 + Math.floor(d*d*0.3),
     spd: 5 + d*2,
@@ -475,16 +564,13 @@ function battleStage(forced=false){
     grt: 7 + Math.floor(d*1.5 + d*d*0.2),
   };
 
-  // ---------- Player effective (soft caps; nerfed SPD weights) ----------
   const pPOW = softCap(run.stats.pow, 22, 0.6);
   const pFOC = softCap(run.stats.foc, 22, 0.6);
   const pSPD = softCap(run.stats.spd, 22, 0.7);
 
-  // Reduce SPD weight a bit; give a tiny GRT bump to defense
   const pAtkBase = pPOW*1.15 + pFOC*0.95 + pSPD*0.55;
   const pDefBase = run.stats.grt*1.05 + pSPD*0.55;
 
-  // Supports
   let supDmg=0, dmgPieces=[];
   for(const s of run.supports||[]){
     const part=s.def.dmg*(1+0.02*(s.meta.lvl-1));
@@ -495,16 +581,14 @@ function battleStage(forced=false){
   const pScore = pAtkBase * (1 + supDmg);
   const pDef2  = pDefBase;
 
-  // ---------- Enemy effective ----------
   const ePOW = softCap(enemy.pow, 22, 0.6);
   const eFOC = softCap(enemy.foc, 22, 0.6);
   const eAtk  = ePOW*1.15 + eFOC*0.95 + enemy.spd*0.80;
   const eDef  = enemy.grt*1.00 + enemy.spd*0.80;
 
-  // ---------- Balance levers (nerfed tempo, stronger guard) ----------
   const spdDiff = (run.stats.spd - enemy.spd);
-  const tempo = clamp(spdDiff * 0.30, -6, 6);                     // nerfed SPD tempo
-  const guard = clamp((run.stats.grt - enemy.pow) * 0.25, -4, 4); // stronger GRT guard
+  const tempo = clamp(spdDiff * 0.30, -6, 6);
+  const guard = clamp((run.stats.grt - enemy.pow) * 0.25, -4, 4);
   const offVsDef = (run.stats.pow + run.stats.foc) - (run.stats.grt + run.stats.spd);
   const imbalancePenalty = clamp(offVsDef * 0.10, 0, 6);
 
@@ -529,18 +613,52 @@ function battleStage(forced=false){
   run.lastReport=report;
 
   if(report.victory){
-    const goldGain=80+run.stage*20, matGain=3+Math.floor(run.stage/2);
-    profile.gold+=goldGain; profile.mats+=matGain;
+    const goldGain=80+run.stage*20, matGain=3+Math.floor(run.stage/2), gemGain=5+run.stage*2;
+    profile.gold+=goldGain; profile.mats=Math.min(MATS_CAP, profile.mats+matGain); profile.gems+=gemGain;
     run.unit.meta.exp+=2; run.weapon.meta.exp+=2; const uu=tryLevelUnit(run.unit.meta), ww=tryLevelWeapon(run.weapon.meta);
     renderWallet(); renderInventory(); rebuildChaosPickers();
-    log(`✅ Victory! Rewards → +${goldGain} gold, +${matGain} mats.`); if(uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`); if(ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
-    if(run.stage>=run.maxStage){ showSummary('Victory', buildCareerSummary(report,{gold:goldGain,mats:matGain,final:true}), 'career'); run.active=false; return; }
+    log(`✅ Victory! Rewards → +${goldGain} gold, +${matGain} mats, +${gemGain} gems.`); if(uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`); if(ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
+    if(run.stage>=run.maxStage){ showSummary('Victory', buildCareerSummary(report,{gold:goldGain,mats:matGain,gems:gemGain,final:true}), 'career'); run.active=false; return; }
     run.stage++; const old=run.stamina; run.stamina=Math.min(5, run.stamina+1); resetDeadline(); updateRunUI(); log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
   } else {
-    showSummary('Defeat', buildCareerSummary(report,{gold:0,mats:0,final:false}), 'career'); run.active=false;
+    showSummary('Defeat', buildCareerSummary(report,{gold:0,mats:0,gems:0,final:false}), 'career'); run.active=false;
   }
 }
 
+/* === Smarter loss advisor (with icons) === */
+function lossAdvice(report){
+  const p = report.player, e = report.enemy;
+  const ps = p.stats, es = e.stats;
+  const bullets = [];
+
+  const atkGap = p.atkScore - e.defScore;
+  const defGap = e.atkScore - p.defScore;
+  const tempoDiff = (ps.spd - es.spd);
+  const guardDiff = (ps.grt - es.pow);
+  const scaleDiff = (ps.foc - es.foc);
+  const powerDiff = (ps.pow - es.grt);
+  const offSum = ps.pow + ps.foc;
+  const defSum = ps.grt + ps.spd;
+
+  if (atkGap < -2) bullets.push(`🗡 Offense check failed (ATK ${p.atkScore} vs enemy DEF ${e.defScore}). Train **POW** / **🧠 FOC** or use dmg supports (Brutal/Zenith/Aegis).`);
+  else if (atkGap < 1) bullets.push(`🗡 Offense barely broke through (ATK ${p.atkScore} vs DEF ${e.defScore}). A few **POW/🧠 FOC** trainings or a dmg support will tip it.`);
+
+  if (defGap > 2) bullets.push(`🛡 Too squishy (enemy ATK ${e.atkScore} vs your DEF ${p.defScore}). Add **GRT**, some **🌀 SPD**, or guard supports (Guard/Iron/Aegis).`);
+  else if (defGap > 0.5) bullets.push(`🛡 Slightly fragile. Sprinkle **GRT/🌀 SPD**.`);
+
+  if (tempoDiff < -3) bullets.push(`🌀 Tempo disadvantage (SPD ${ps.spd} vs ${es.spd}). Add **SPD** or footwork supports (Blitz/Duelist).`);
+  if (guardDiff < -2) bullets.push(`🛡 Guard low vs POW (GRT ${ps.grt} vs enemy POW ${es.pow}). Train **GRT** or use **Guard/Iron/Aegis**.`);
+
+  if (scaleDiff < -3 && atkGap <= 0) bullets.push(`🧠 Scaling behind (FOC ${ps.foc} vs ${es.foc}). Boost **FOC** or use **Mind/Zenith** supports.`);
+  if (offSum - defSum >= 10) bullets.push(`🎯 Over-offense (Off ${offSum} vs Def ${defSum}). Add **🛡 GRT** and **🌀 SPD**.`);
+  else if (defSum - offSum >= 10 && atkGap <= 0) bullets.push(`🎯 Over-tanky (Def ${defSum} vs Off ${offSum}). Add **🗡 POW** / **🧠 FOC**.`);
+  if (powerDiff < 0 && atkGap <= 0) bullets.push(`🗡 POW didn’t beat their toughness (enemy GRT ${es.grt}). Add **POW** or POW-lean weapon/support.`);
+
+  if (report.forced) bullets.push(`⏳ Forced battle by deadline. Battle earlier, rest less, or target **🌀 SPD / 🗡 POW** this stage.`);
+
+  if (!bullets.length) bullets.push(`🎯 Margins were close. Nudge **🌀 SPD**, **🛡 GRT**, and whichever of **🗡 POW / 🧠 FOC** fits your build.`);
+  return [...new Set(bullets)].join('\n');
+}
 function buildCareerSummary(report, rewards){
   const p=report.player, e=report.enemy;
   const sup=(p.supBreakdown&&p.supBreakdown.length)?`\n• Support DMG: +${p.supDmgPct}% (${p.supBreakdown.join(', ')})`:`\n• Support DMG: +${p.supDmgPct}%`;
@@ -556,36 +674,37 @@ Player
 Enemy
 • Stats: POW ${e.stats.pow} | SPD ${e.stats.spd} | FOC ${e.stats.foc} | GRT ${e.stats.grt}
 • ATK: ${e.atkScore}  | DEF: ${e.defScore}`;
-  const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0))?`\n\nRewards\n• +${rewards.gold} gold, +${rewards.mats} mats`:''; 
-  const atkGap = (p.atkScore - e.defScore);
-  const defGap = (e.atkScore - p.defScore);
-  const hint=report.victory?(rewards.final?`\n\nRun complete! Press Confirm to return.`:'')
-    :`\n\nWhy you lost
-• ${atkGap < defGap ? 'Your offense lagged behind enemy defense.' : 'Enemy offense outpaced your defense.'}
-• Try training ${atkGap<defGap?'POW/FOC (damage & crits)':'GRT/SPD (toughness & tempo)'} and consider supports that amplify those.
-${report.forced ? '• You ran out of Time. Battle earlier or rest less often.' : ''}`;
-  return base+rewardLine+hint;
+
+  const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0||reards?.gems>0))?
+    `\n\nRewards\n• +${rewards.gold||0} gold, +${rewards.mats||0} mats, +${rewards.gems||0} gems`:'';
+
+  let tail='';
+  if (!report.victory){
+    const advice = lossAdvice(report);
+    tail = `\n\nWhy you lost\n${advice}`;
+  } else if (rewards?.final){
+    tail = `\n\nRun complete! Press Confirm to return.`;
+  }
+  return base + rewardLine + tail;
 }
 
-/* ---------- Career abandon button ---------- */
+/* ---------- Career abandon ---------- */
 const abandonCareerBtn = q('#btn-abandon');
 if (abandonCareerBtn) abandonCareerBtn.addEventListener('click', ()=>{
   if(!run.active){ q('#career-run').classList.add('hidden'); q('#career-setup').classList.remove('hidden'); rebuildPickers(); renderInventory(); updateRunUI(); return; }
   const report={stage:run.stage,victory:false,margin:0,rng:0,forced:false,player:{stats:{...run.stats},atkScore:0,defScore:0,supDmgPct:0,supBreakdown:[]},enemy:{stats:{pow:0,spd:0,foc:0,grt:0},atkScore:0,defScore:0}};
-  showSummary('Abandoned', buildCareerSummary(report,{gold:0,mats:0}), 'career'); run.active=false;
+  showSummary('Abandoned', buildCareerSummary(report,{gold:0,mats:0,gems:0}), 'career'); run.active=false;
 });
 
 /* ==================================================
-   Memories of Chaos — Turn-based hands-on mode
-   (acted flags; SPD=acc/evasion, FOC=crit)
+   Memories of Chaos (hands-on)
    ================================================== */
 const CHAOS_FLOORS = 8;
 const chaos = {
   active:false, floor:1, maxFloor:CHAOS_FLOORS, wave:1, wavesPerFloor:2,
   stars:0, score:0,
-  team:[],     // [{unitMeta, unitDef, weaponMeta, weaponDef, stats, hp, maxHp, atk, def, spd, alive, acted}]
-  enemies:[],  // { name, hp, maxHp, atk, def, spd, alive, raw:{pow,spd,foc,grt} }
-  phase:'player', // 'player' | 'enemy'
+  team:[], enemies:[],
+  phase:'player',
   selection:{allyIdx:null, enemyIdx:null},
   modifiers:[],
   lastReport:null
@@ -596,7 +715,7 @@ function bestWeaponFor(arche){
   let best=null;
   for(const meta of sorted){
     const def=byId(WEAPONS,meta.id);
-    if (!best || (def.pref===arche && meta.lvl >= best.meta.lvl)) best={meta,def};
+    if (!best || (def.pref===arche && meta.lvl >= (best.meta?.lvl||0))) best={meta,def};
     if (def.pref===arche) return best;
   }
   return best;
@@ -604,8 +723,6 @@ function bestWeaponFor(arche){
 function unitEffectiveStats(def, meta, w){
   const ul = meta.lvl;
   let pow = def.base.pow, spd = def.base.spd, foc = def.base.foc, grt = def.base.grt;
-
-  // w is expected to be { meta, def } or null
   if (w && w.meta && w.def){
     const ws = 1 + (w.def.growth || 0) * ((w.meta.lvl || 1) - 1);
     pow += Math.round((w.def.add?.pow || 0) * ws);
@@ -613,17 +730,15 @@ function unitEffectiveStats(def, meta, w){
     foc += Math.round((w.def.add?.foc || 0) * ws);
     grt += Math.round((w.def.add?.grt || 0) * ws);
   }
-
   const s = 1 + 0.05 * (ul - 1);
   pow = Math.round(pow * s);
   spd = Math.round(spd * s);
   foc = Math.round(foc * s);
   grt = Math.round(grt * s);
-
   return { pow, spd, foc, grt };
 }
 
-/* --- Chaos pickers --- */
+/* Chaos pickers */
 function rebuildChaosPickers(){
   const teamWrap = q('#chaos-team'); if (teamWrap) teamWrap.innerHTML = '';
   chaos.team = [];
@@ -638,11 +753,10 @@ function rebuildChaosPickers(){
     div.addEventListener('click', ()=>{
       const already = chaos.team.find(t=>t.unitMeta.id===meta.id);
       if (already) {
-        // Unselect if already picked
         chaos.team = chaos.team.filter(t=>t.unitMeta.id!==meta.id);
         div.classList.remove('selected');
       } else {
-        if (chaos.team.length >= 3) return; // hard cap at 3
+        if (chaos.team.length >= 3) return;
         div.classList.add('selected');
         const best = bestWeaponFor(def.arche);
         const s = unitEffectiveStats(def, meta, best);
@@ -670,9 +784,8 @@ function updateChaosTeamDisplay(){
   q('#chaos-start').disabled = chaos.team.length===0;
 }
 
-/* --- Battlefield UI --- */
+/* Battlefield UI */
 function renderBattlefield(){
-  // Allies
   const ag = q('#chaos-ally-grid'); ag.innerHTML='';
   chaos.team.forEach((a,idx)=>{
     const card = document.createElement('div');
@@ -694,7 +807,6 @@ function renderBattlefield(){
     ag.appendChild(card);
   });
 
-  // Enemies
   const eg = q('#chaos-enemy-grid'); eg.innerHTML='';
   chaos.enemies.forEach((e,idx)=>{
     const card = document.createElement('div');
@@ -717,22 +829,21 @@ function renderBattlefield(){
   });
 }
 
-/* --- Stat sheet conversion (HP/ATK/DEF/SPD) — balanced + sanitize --- */
+/* Stat sheet → MoC */
 function toSheet(s, label='Unit', lvl=1){
-  // sanitize inputs
   const POW = Number.isFinite(s.pow) ? s.pow : 0;
   const SPD = Number.isFinite(s.spd) ? s.spd : 0;
   const FOC = Number.isFinite(s.foc) ? s.foc : 0;
   const GRT = Number.isFinite(s.grt) ? s.grt : 0;
 
-  const hp   = Math.round(GRT*4 + FOC*3 + 30 + lvl*4); // GRT nerfed, FOC buffed
-  const atk  = Math.round(POW*1.4 + FOC*1.0);          // FOC adds damage
-  const def  = Math.round(GRT*0.9 + SPD*0.6);          // SPD contributes to DEF
+  const hp   = Math.round(GRT*4 + FOC*3 + 30 + lvl*4);
+  const atk  = Math.round(POW*1.4 + FOC*1.0);
+  const def  = Math.round(GRT*0.9 + SPD*0.6);
   const spd  = Math.max(1, Math.round(SPD));
   return { maxHp:hp, hp, atk, def, spd, label };
 }
 
-/* --- Enemy generation (harder scaling) + raw stats snapshot --- */
+/* Enemies */
 function makeEnemy(floor, idx){
   const f = floor, i = idx;
   const pow = Math.round(18 + f*5 + f*f*0.6 + i*2);
@@ -743,7 +854,7 @@ function makeEnemy(floor, idx){
   return { name:`E${floor}-${idx+1}`, ...sheet, alive:true, raw:{pow,spd,foc,grt} };
 }
 
-/* --- Modifiers & helpers --- */
+/* Modifiers */
 function chaosFloorModifiers(floor){
   const list = ['Enemy +10% ATK','Enemy +15% DEF','Your SPD +10%','Your POW +10%'];
   return [list[floor%list.length], list[(floor+2)%list.length]];
@@ -757,20 +868,20 @@ function withModifiers(type, value){
   for (const m of chaos.modifiers){
     if (m==='Enemy +10% ATK' && type==='enemyAtk') v*=1.10;
     if (m==='Enemy +15% DEF' && type==='enemyDef') v*=1.15;
-    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06; // small indirect bump
+    if (m==='Your SPD +10%'  && type==='allyDef') v*=1.06;
     if (m==='Your POW +10%'  && type==='allyAtk') v*=1.08;
   }
   return Math.round(v);
 }
 
-/* --- Chaos Flow --- */
+/* Flow */
 function startChaos(){
   if (chaos.team.length===0){ alert('Pick at least one unit.'); return; }
   chaos.active = true; run.mode='chaos';
   chaos.floor = 1; chaos.wave = 1; chaos.stars = 0; chaos.score = 0; chaos.phase='player';
   chaos.modifiers = chaosFloorModifiers(chaos.floor);
   setupEnemies();
-  resetActs(); // ensure fresh player phase
+  resetActs();
   q('#chaos-setup').classList.add('hidden');
   q('#chaos-run').classList.remove('hidden');
   q('#chaos-log').innerHTML='';
@@ -797,41 +908,32 @@ function updateChaosHud(){
   const ai = chaos.selection.allyIdx, ei = chaos.selection.enemyIdx;
   const ally = ai!=null ? chaos.team[ai] : null;
   const enemy = ei!=null ? chaos.enemies[ei] : null;
-
-  const can = chaos.phase==='player'
-    && ally && enemy
-    && ally.alive && !ally.acted
-    && enemy.hp>0;
-
+  const can = chaos.phase==='player' && ally && enemy && ally.alive && !ally.acted && enemy.hp>0;
   q('#chaos-attack').disabled = !can;
 }
 
-/* --- Combat math: SPD = acc/evasion, FOC = crit (NERFED) --- */
+/* Combat */
+const clampf = clamp;
 function calcDamage(attacker, defender, isEnemy=false){
-  // Accuracy / Evasion from SPD differential (nerfed)
   const spdDiff = (attacker.spd || 0) - (defender.spd || 0);
-  const baseHit = 0.82 + spdDiff * 0.002;      // nerfed from 0.85 + 0.003*Δ
-  const hit = clamp(baseHit, 0.65, 0.95);       // tighter caps
-  if (Math.random() > hit){
-    return { dmg:0, miss:true, crit:false };
-  }
+  const baseHit = 0.82 + spdDiff * 0.002;
+  const hit = clampf(baseHit, 0.65, 0.95);
+  if (Math.random() > hit){ return { dmg:0, miss:true, crit:false }; }
 
   const atk = withModifiers(isEnemy?'enemyAtk':'allyAtk', attacker.atk);
   const def = withModifiers(isEnemy?'enemyDef':'allyDef', defender.def);
   const base = Math.max(1, Math.round((atk - def*0.55)));
-  const rng  = (Math.random()*6 - 3); // -3..+3
+  const rng  = (Math.random()*6 - 3);
   let dmg = Math.max(1, Math.round(base + rng));
 
-  // Crit chance from FOC (fallback to SPD if FOC unknown)
   const focLike = (attacker.stats?.foc) ?? (attacker.raw?.foc) ?? (attacker.spd || 0);
-  const critChance = clamp(0.08 + (focLike * 0.004), 0.08, 0.30);  // 8–30%
+  const critChance = clampf(0.08 + (focLike * 0.004), 0.08, 0.30);
   const crit = Math.random() < critChance;
   if (crit) dmg = Math.round(dmg * 1.5);
 
   return { dmg, miss:false, crit };
 }
 
-/* --- Player actions --- */
 function playerAttack(){
   const ai = chaos.selection.allyIdx, ei = chaos.selection.enemyIdx;
   if (ai==null || ei==null) return;
@@ -865,7 +967,6 @@ function playerAttack(){
   updateChaosHud();
 }
 
-/* --- Enemy turn --- */
 function enemyTurn(){
   chaos.phase='enemy';
   updateChaosUI();
@@ -896,7 +997,6 @@ function enemyTurn(){
   updateChaosUI();
 }
 
-/* --- Progression --- */
 function nextWaveOrFloor(){
   chaos.score += 2;
 
@@ -930,7 +1030,6 @@ function nextWaveOrFloor(){
   updateChaosUI(); renderBattlefield();
 }
 
-/* --- Fail/summary text --- */
 function defeatChaos(reason){
   clog(`❌ Defeat — ${reason}.`);
   const text = buildChaosSummary(false, 0, reason);
@@ -946,7 +1045,7 @@ Alive Heroes: ${alive}/${chaos.team.length}${reason?`\nReason: ${reason}`:''}${f
 ${!final && reason?`\nTip\n• Train more in Career, equip matching weapons, and balance offense (POW/FOC) with defense/tempo (GRT/SPD).` : ''}`;
 }
 
-/* ---------- Summary Modal (routing) ---------- */
+/* ---------- Summary Modal ---------- */
 const modal = q('#summary-modal');
 const modalTitle = q('#summary-title');
 const modalBody = q('#summary-body');
@@ -973,19 +1072,14 @@ modalConfirm.addEventListener('click', ()=>{
 });
 
 /* ---------- Wires ---------- */
-q('#btn-grant-starter')?.addEventListener('click', grantStarter);
-
-/* Career */
 q('#start-run')?.addEventListener('click', startRun);
 qa('[data-train]')?.forEach(b=>b.addEventListener('click', ()=>trainOnce(b.getAttribute('data-train'))));
 q('#btn-rest')?.addEventListener('click', restOnce);
 q('#btn-battle')?.addEventListener('click', ()=>battleStage(false));
-
 q('#btn-save')?.addEventListener('click', save);
 q('#btn-load')?.addEventListener('click', load);
 q('#btn-wipe')?.addEventListener('click', wipe);
 
-/* Chaos */
 q('#chaos-start')?.addEventListener('click', startChaos);
 q('#chaos-attack')?.addEventListener('click', playerAttack);
 q('#chaos-endturn')?.addEventListener('click', enemyTurn);
@@ -994,17 +1088,10 @@ q('#chaos-abandon')?.addEventListener('click', ()=>{
   defeatChaos('Abandoned');
 });
 
-/* Optional: expose functions if your HTML uses inline onclick="..." */
-Object.assign(window, {
-  restOnce, trainOnce, battleStage, startRun,
-  grantStarter, save, load, wipe,
-  startChaos, playerAttack, enemyTurn
-});
-
-/* ---------- Boot ---------- */
 attachGacha();
-renderWallet();
-renderInventory();
-rebuildPickers();
-rebuildChaosPickers();
-load(); // try autoload
+
+/* Regen tick & boot */
+setInterval(()=>{ renderWallet(); }, 1000);
+renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
+const hadSave = load();        // try to load
+ensureStarterRoster();         // then grant starters if needed (new/empty)
