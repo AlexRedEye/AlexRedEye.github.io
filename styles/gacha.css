@@ -149,3 +149,7 @@ button, .card, .chip {
     align-items: flex-start;
   }
 }
+
+#lb-table table{ width:100%; border-collapse:collapse; }
+#lb-table th,#lb-table td{ border-bottom:1px solid #233055; padding:8px; text-align:left; }
+#lb-table th{ color:#a6b3d5; font-weight:600; }

@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>PocketFighters v0.5.3</title>
+  <title>PocketFighters v0.6.0</title>
   <link rel="stylesheet" href="styles/gacha.css"/>
 </head>
 <body>
   <header>
-    <h1>PocketFighters <span class="ver">v0.5.3</span></h1>
+    <h1>PocketFighters <span class="ver">v0.6.0</span></h1>
     <div class="wallet">
       <span id="gold">🪙 0</span>
       <span id="gems">💎 0</span>
@@ -22,6 +22,7 @@
     <button data-tab="chaos">Memories of Chaos</button>
     <button data-tab="gacha">Gacha</button>
     <button data-tab="inventory">Inventory</button>
+    <button data-tab="leaderboard">Leaderboard</button>
     <button data-tab="system">System</button>
   </nav>
 
@@ -169,6 +170,21 @@
         </div>
       </div>
     </section>
+
+    <section id="leaderboard" class="tab">
+  <div class="pane">
+    <h2>Leaderboard</h2>
+    <div class="actions">
+      <select id="lb-mode">
+        <option value="career">Career</option>
+        <option value="chaos">Memories of Chaos</option>
+      </select>
+      <button id="lb-refresh">Refresh</button>
+    </div>
+    <div id="lb-table" class="pane"></div>
+  </div>
+</section>
+
 
     <!-- System -->
     <section id="system" class="tab">

@@ -1,9 +1,6 @@
 /* =========================
    PocketFighters — MVP
-   v0.5.2
-   • Starter roster auto-grant on new/empty saves (Rai, Brick, Kira + basic weapons & supports)
-   • Expanded catalogs: more Units, Weapons, Supports (all in gacha pools)
-   • Keeps v0.5.1: smarter loss advisor, pity banners, mats regen, condensed results, MoC hands-on
+   v0.5.3 (+ leaderboard hooks, mats not rewarded on victory)
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -19,6 +16,10 @@ const PITY = {
   char: { SSR: { soft:70, hard:90 }, SR: { soft:8, hard:10 } },
   weap: { SSR: { soft:70, hard:90 }, SR: { soft:8, hard:10 } },
 };
+
+// ==== Leaderboard client config (safe to keep; no-ops if server absent) ====
+const LB_API_BASE = "https://gacha-server-fiuy.onrender.com"; // <-- set your API base
+const CLIENT_VERSION = "0.6.0";
 
 /* ---------- Catalogs (expanded) ---------- */
 const UNITS = [
@@ -87,14 +88,14 @@ const SUPPORTS = [
 const profile = {
   gold: 0,
   gems: 0,
-  mats: 120,
+  mats: 10,
   units: [],
   weapons: [],
   supports: [],
   pity: { char: { ssr: 0, sr: 0 }, weap: { ssr: 0, sr: 0 } },
   matsLastTs: Date.now(),
   seenIds: new Set(),
-  starterGranted: false,   // NEW
+  starterGranted: false,
 };
 
 /* ---------- Helpers ---------- */
@@ -126,7 +127,7 @@ function load() {
 function wipe() {
   localStorage.removeItem('pf_save');
   Object.assign(profile, {gold:0,gems:0,mats:10,units:[],weapons:[],supports:[],pity:{char:{ssr:0,sr:0},weap:{ssr:0,sr:0}},matsLastTs:Date.now(),seenIds:new Set(),starterGranted:false});
-  ensureStarterRoster();                // give starters on fresh wipe
+  ensureStarterRoster();
   renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
   clog('🧹 Save wiped. Starter roster granted.');
 }
@@ -146,9 +147,9 @@ function ensureStarterRoster(){
   const addWeapon = id => { if(!profile.weapons.find(x=>x.id===id)) profile.weapons.push({id, lvl:1, exp:0}); profile.seenIds.add(id); };
   const addSupport= id => { if(!profile.supports.find(x=>x.id===id)) profile.supports.push({id, lvl:1, exp:0, expNext:5}); profile.seenIds.add(id); };
 
-  const STARTER_UNITS   = ['u_rai','u_brick','u_kira'];          // 2×SR, 1×R
-  const STARTER_WEAPONS = ['w_katana','w_gaunt','w_pistol'];     // basic matching
-  const STARTER_SUPPORTS= ['s_split','s_guard','s_brutal'];      // balanced
+  const STARTER_UNITS   = ['u_rai','u_brick','u_kira'];
+  const STARTER_WEAPONS = ['w_katana','w_gaunt','w_pistol'];
+  const STARTER_SUPPORTS= ['s_split','s_guard','s_brutal'];
 
   STARTER_UNITS.forEach(addUnit);
   STARTER_WEAPONS.forEach(addWeapon);
@@ -552,7 +553,7 @@ function restOnce(){
   spendTime(run.costRest, 'Rest');
 }
 
-/* Battle & smarter summary (from v0.5.1) */
+/* Battle & smarter summary */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
   const d=run.stage;
@@ -613,39 +614,77 @@ function battleStage(forced=false){
   run.lastReport=report;
 
   if (report.victory) {
-  const goldGain = 80 + run.stage * 20;
-  const gemGain  = 5 + run.stage * 2;
+    const goldGain = 80 + run.stage * 20;
+    const gemGain  = 5 + run.stage * 2;
 
-  profile.gold += goldGain;
-  profile.gems += gemGain;
+    profile.gold += goldGain;
+    profile.gems += gemGain;
 
-  run.unit.meta.exp += 2;
-  run.weapon.meta.exp += 2;
-  const uu = tryLevelUnit(run.unit.meta), ww = tryLevelWeapon(run.weapon.meta);
+    run.unit.meta.exp += 2;
+    run.weapon.meta.exp += 2;
+    const uu = tryLevelUnit(run.unit.meta), ww = tryLevelWeapon(run.weapon.meta);
 
-  renderWallet(); renderInventory(); rebuildChaosPickers();
+    renderWallet(); renderInventory(); rebuildChaosPickers();
 
-  log(`✅ Victory! Rewards → +${goldGain} gold, +${gemGain} gems.`);
-  if (uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`);
-  if (ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
+    log(`✅ Victory! Rewards → +${goldGain} gold, +${gemGain} gems.`);
+    if (uu) log(`⬆️ ${run.unit.def.name} Lv ${run.unit.meta.lvl}.`);
+    if (ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
 
-  if (run.stage >= run.maxStage) {
-    showSummary('Victory', buildCareerSummary(report, { gold: goldGain, gems: gemGain, final: true }), 'career');
+    if (run.stage >= run.maxStage) {
+      // Leaderboard submit on FINAL victory
+      if (typeof submitCareerRun === "function") {
+        (async () => {
+          const name = await promptPlayerName();
+          if (!name) return;
+          const score = Math.max(0, Math.round(report.stage * 100 + (report.margin || 0) * 10));
+          try {
+            await submitCareerRun({
+              playerName: name,
+              stagesCleared: report.stage,
+              maxStage: run.maxStage,
+              lastMargin: report.margin || 0,
+              score,
+              seed: ""
+            });
+          } catch {}
+        })();
+      }
+
+      showSummary('Victory', buildCareerSummary(report, { gold: goldGain, gems: gemGain, final: true }), 'career');
+      run.active = false;
+      return;
+    }
+
+    run.stage++;
+    const old = run.stamina;
+    run.stamina = Math.min(5, run.stamina + 1);
+    resetDeadline();
+    updateRunUI();
+    log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
+  } else {
+    // Leaderboard submit on DEFEAT
+    if (typeof submitCareerRun === "function") {
+      (async () => {
+        const name = await promptPlayerName();
+        if (!name) return;
+        const cleared = Math.max(0, report.stage - 1);
+        const score = Math.max(0, Math.round(cleared * 100 + (report.margin || 0) * 10));
+        try {
+          await submitCareerRun({
+            playerName: name,
+            stagesCleared: cleared,
+            maxStage: run.maxStage,
+            lastMargin: report.margin || 0,
+            score,
+            seed: ""
+          });
+        } catch {}
+      })();
+    }
+
+    showSummary('Defeat', buildCareerSummary(report, { gold: 0, gems: 0, final: false }), 'career');
     run.active = false;
-    return;
   }
-
-  run.stage++;
-  const old = run.stamina;
-  run.stamina = Math.min(5, run.stamina + 1);
-  resetDeadline();
-  updateRunUI();
-  log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
-} else {
-  showSummary('Defeat', buildCareerSummary(report, { gold: 0, gems: 0, final: false }), 'career');
-  run.active = false;
-}
-
 }
 
 /* === Smarter loss advisor (with icons) === */
@@ -698,8 +737,9 @@ Enemy
 • Stats: POW ${e.stats.pow} | SPD ${e.stats.spd} | FOC ${e.stats.foc} | GRT ${e.stats.grt}
 • ATK: ${e.atkScore}  | DEF: ${e.defScore}`;
 
-  const rewardLine=(rewards&&(rewards.gold>0||rewards.mats>0||rewards?.gems>0))?
-    `\n\nRewards\n• +${rewards.gold||0} gold, +${rewards.mats||0} mats, +${rewards.gems||0} gems`:'';
+  const rewardLine = (rewards && ((rewards.gold||0) > 0 || (rewards.mats||0) > 0 || (rewards.gems||0) > 0))
+    ? `\n\nRewards\n• +${rewards.gold||0} gold, +${rewards.mats||0} mats, +${rewards.gems||0} gems`
+    : '';
 
   let tail='';
   if (!report.victory){
@@ -1118,3 +1158,48 @@ setInterval(()=>{ renderWallet(); }, 1000);
 renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
 const hadSave = load();        // try to load
 ensureStarterRoster();         // then grant starters if needed (new/empty)
+
+/* ============================
+   Leaderboard helpers (Career)
+   ============================ */
+
+// Store player name once
+async function promptPlayerName(){
+  let n = localStorage.getItem('pf_name') || '';
+  if (!n) {
+    n = prompt('Enter a name for the leaderboard (1-18 chars):', '') || '';
+    n = n.trim().slice(0,18);
+    if (!n) return null;
+    localStorage.setItem('pf_name', n);
+  }
+  return n;
+}
+
+// Minimal sha256 helper (WebCrypto)
+async function sha256(str){
+  if (!('crypto' in window) || !crypto.subtle) return '';
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+// Demo signer (not secure for production; see server notes)
+async function hmacSign(payloadObj){
+  // Don’t ship real secrets; this is a placeholder so dev can test round-trips
+  return sha256(JSON.stringify(payloadObj));
+}
+
+async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin, score, seed }) {
+  try {
+    if (!LB_API_BASE || LB_API_BASE.includes('your-leaderboard-host')) return; // skip if not configured
+    const payload = { playerName, clientVersion: CLIENT_VERSION, stagesCleared, maxStage, lastMargin, score, seed };
+    const checksum = await hmacSign(payload);
+    await fetch(`${LB_API_BASE}/api/submit/career`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ ...payload, checksum })
+    });
+  } catch (e) {
+    // swallow errors to avoid breaking gameplay
+    console.warn('submitCareerRun failed', e);
+  }
+}
