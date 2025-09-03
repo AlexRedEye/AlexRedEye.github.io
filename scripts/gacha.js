@@ -1245,3 +1245,118 @@ async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin
     console.warn('submitCareerRun error', e);
   }
 }
+
+/* ============================
+   Leaderboard (UI + fetch)
+   ============================ */
+
+const LB_PAGE_SIZE = 20;
+
+function timeAgo(d){
+  try {
+    const t = typeof d === 'string' ? new Date(d) : d;
+    const s = Math.floor((Date.now() - t.getTime())/1000);
+    if (s < 60) return `${s}s ago`;
+    const m = Math.floor(s/60); if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m/60); if (h < 24) return `${h}h ago`;
+    const dd = Math.floor(h/24); return `${dd}d ago`;
+  } catch { return ''; }
+}
+
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderLeaderboard(mode, rows){
+  const host = document.getElementById('lb-table');
+  if (!host) return;
+  if (!rows || rows.length===0){
+    host.innerHTML = `<div class="dim">No entries yet.</div>`;
+    return;
+  }
+
+  if (mode === 'career'){
+    const head = `
+      <div class="table">
+        <div class="trow thead">
+          <div>#</div><div>Player</div><div>Score</div><div>Depth</div>
+          <div>Margin</div><div>Unit</div><div>Weapon</div><div>Supports</div><div>When</div>
+        </div>
+        ${rows.map((r,i)=>`
+          <div class="trow">
+            <div>${i+1}</div>
+            <div>${esc(r.playerName)}</div>
+            <div><b>${esc(r.score)}</b></div>
+            <div>${esc(r.stagesCleared)}/${esc(r.maxStage)}</div>
+            <div>${('lastMargin' in r && r.lastMargin!=null) ? (r.lastMargin>0?'+':'')+r.lastMargin.toFixed?.(1) ?? r.lastMargin : ''}</div>
+            <div>${esc(r.unit)}</div>
+            <div>${esc(r.weapon)}</div>
+            <div class="tiny">${(r.supports||[]).map(esc).join(', ')}</div>
+            <div class="dim tiny" title="${esc(r.createdAt)}">${timeAgo(r.createdAt)}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    host.innerHTML = head;
+  } else {
+    const head = `
+      <div class="table">
+        <div class="trow thead">
+          <div>#</div><div>Player</div><div>Score</div><div>Floors</div>
+          <div>Stars</div><div>Team</div><div>When</div>
+        </div>
+        ${rows.map((r,i)=>`
+          <div class="trow">
+            <div>${i+1}</div>
+            <div>${esc(r.playerName)}</div>
+            <div><b>${esc(r.score)}</b></div>
+            <div>${esc(r.floorsCleared)}/${esc(r.maxFloor)}</div>
+            <div>${esc(r.stars)}</div>
+            <div class="tiny">${(r.team||[]).map(esc).join(', ')}</div>
+            <div class="dim tiny" title="${esc(r.createdAt)}">${timeAgo(r.createdAt)}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    host.innerHTML = head;
+  }
+}
+
+async function fetchLeaderboard(mode){
+  if (!LB_API_BASE) return { rows: [] };
+  const url = `${LB_API_BASE}/api/leaderboard?mode=${encodeURIComponent(mode)}&limit=${LB_PAGE_SIZE}`;
+  try {
+    const res = await fetch(url, { method:'GET' });
+    if (!res.ok) {
+      const t = await res.text().catch(()=>res.statusText);
+      console.warn('leaderboard fetch failed', res.status, t);
+      return { rows: [] };
+    }
+    const data = await res.json();
+    return { rows: data.rows || [] };
+  } catch (e) {
+    console.warn('leaderboard fetch error', e);
+    return { rows: [] };
+  }
+}
+
+async function loadLeaderboard(){
+  const sel = document.getElementById('lb-mode');
+  const mode = sel ? sel.value : 'career';
+  const { rows } = await fetchLeaderboard(mode);
+  renderLeaderboard(mode, rows);
+}
+
+/* Hooks */
+document.getElementById('lb-refresh')?.addEventListener('click', loadLeaderboard);
+document.getElementById('lb-mode')?.addEventListener('change', loadLeaderboard);
+
+// Auto-load when the Leaderboard tab is opened (patches your existing tab code)
+qa('.tabs button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const tab = b.getAttribute('data-tab');
+    if (tab === 'leaderboard') loadLeaderboard();
+  });
+});
+
+// Also refresh after a successful submit (optional)
+async function tryRefreshLeaderboardIfVisible(){
+  const sec = document.getElementById('leaderboard');
+  if (sec && sec.classList.contains('active')) loadLeaderboard();
+}

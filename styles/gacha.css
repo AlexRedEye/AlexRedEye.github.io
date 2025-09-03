@@ -153,3 +153,13 @@ button, .card, .chip {
 #lb-table table{ width:100%; border-collapse:collapse; }
 #lb-table th,#lb-table td{ border-bottom:1px solid #233055; padding:8px; text-align:left; }
 #lb-table th{ color:#a6b3d5; font-weight:600; }
+
+/* simple grid-table for leaderboard */
+.table { display: grid; grid-auto-rows: minmax(32px, auto); border: 1px solid var(--border, #333); border-radius: 12px; overflow: hidden; }
+.trow { display:grid; grid-template-columns: 48px 1fr 90px 100px 90px 1fr 1fr 1.4fr 120px; gap: 8px; align-items:center; padding: 6px 10px; }
+.trow:nth-child(odd):not(.thead){ background: rgba(255,255,255,0.03); }
+.thead { background: rgba(255,255,255,0.08); font-weight: 600; }
+#leaderboard .pane .table .trow > div { overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 900px){
+  .trow { grid-template-columns: 36px 1fr 80px 90px 70px 1fr 1fr 1fr 84px; font-size: 12px; }
+}
