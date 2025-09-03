@@ -1,11 +1,10 @@
 /* =========================
    PocketFighters — MVP
-   v0.4.2 (full)
-   • Fix: MoC NaN (weapon wrapper), stat sanitization
-   • Chaos picker: toggle select + cap 3
-   • Gacha: clears per roll, dupes → gems (R:10, SR:30, SSR:90), condensed display
-   • Career: soft caps (POW/FOC), stronger SPD (tempo+ATK/DEF), GRT guard, imbalance penalty
-   • MoC: SPD = accuracy/evasion, FOC = crit chance
+   v0.4.3 (full)
+   • Nerf: SPD dominance
+     - Career: SPD soft-cap + lower weights, tempo 0.30 (±6), stronger GRT guard
+     - MoC: SPD hit/evasion reduced (0.82 + 0.002*Δ, clamp 0.65–0.95)
+   • Keeps v0.4.2: NaN fix, Chaos picker cap/toggle, gacha dupes→gems, career balance
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -407,12 +406,12 @@ function restOnce(){
   spendTime(run.costRest, 'Rest');
 }
 
-/* Career battle: single-check fight per stage (v0.4.2 balance) */
+/* Career battle: single-check fight per stage (v0.4.3 SPD nerf) */
 function battleStage(forced=false){
   if(!run.unit || !run.weapon) return;
   const d=run.stage;
 
-  // Enemy scaling: offense outpaces defense
+  // Enemy scaling
   const enemy = {
     pow: 6 + d*2 + Math.floor(d*d*0.3),
     spd: 5 + d*2,
@@ -420,11 +419,14 @@ function battleStage(forced=false){
     grt: 7 + Math.floor(d*1.5 + d*d*0.2),
   };
 
-  // ---------- Player effective (soft caps + higher SPD/GRT impact) ----------
+  // ---------- Player effective (soft caps; nerfed SPD weights) ----------
   const pPOW = softCap(run.stats.pow, 22, 0.6);
   const pFOC = softCap(run.stats.foc, 22, 0.6);
-  const pAtkBase = pPOW*1.15 + pFOC*0.95 + run.stats.spd*0.80; // SPD contributes to ATK
-  const pDefBase = run.stats.grt*1.00 + run.stats.spd*0.80;    // SPD contributes to DEF
+  const pSPD = softCap(run.stats.spd, 22, 0.7);
+
+  // Reduce SPD weight a bit; give a tiny GRT bump to defense
+  const pAtkBase = pPOW*1.15 + pFOC*0.95 + pSPD*0.55;
+  const pDefBase = run.stats.grt*1.05 + pSPD*0.55;
 
   // Supports
   let supDmg=0, dmgPieces=[];
@@ -437,18 +439,18 @@ function battleStage(forced=false){
   const pScore = pAtkBase * (1 + supDmg);
   const pDef2  = pDefBase;
 
-  // ---------- Enemy effective (same rules) ----------
+  // ---------- Enemy effective (unchanged weights) ----------
   const ePOW = softCap(enemy.pow, 22, 0.6);
   const eFOC = softCap(enemy.foc, 22, 0.6);
   const eAtk  = ePOW*1.15 + eFOC*0.95 + enemy.spd*0.80;
   const eDef  = enemy.grt*1.00 + enemy.spd*0.80;
 
-  // ---------- New balance levers ----------
+  // ---------- Balance levers (nerfed tempo, stronger guard) ----------
   const spdDiff = (run.stats.spd - enemy.spd);
-  const tempo = clamp(spdDiff * 0.45, -8, 8);                     // stronger SPD tempo
-  const guard = clamp((run.stats.grt - enemy.pow) * 0.20, -4, 4); // GRT vs POW swing
+  const tempo = clamp(spdDiff * 0.30, -6, 6);                     // nerfed SPD tempo
+  const guard = clamp((run.stats.grt - enemy.pow) * 0.25, -4, 4); // stronger GRT guard
   const offVsDef = (run.stats.pow + run.stats.foc) - (run.stats.grt + run.stats.spd);
-  const imbalancePenalty = clamp(offVsDef * 0.10, 0, 6);          // punish pure glass cannons a bit
+  const imbalancePenalty = clamp(offVsDef * 0.10, 0, 6);
 
   const pEff = pScore - eDef;
   const eEff = eAtk   - pDef2;
@@ -458,7 +460,7 @@ function battleStage(forced=false){
 
   log(`⚔️ ${forced?'Forced ':''}Battle — Stage ${run.stage}`);
   if(forced) log('• Reason: Time Left reached 0.');
-  log(`• Player ATKbase ${pAtkBase.toFixed(1)} (POW ${pPOW}, FOC ${pFOC}, SPD ${run.stats.spd}) • DEFbase ${pDefBase.toFixed(1)} (GRT ${run.stats.grt}, SPD ${run.stats.spd})`);
+  log(`• Player ATKbase ${pAtkBase.toFixed(1)} (POW ${pPOW}, FOC ${pFOC}, SPD ${pSPD}) • DEFbase ${pDefBase.toFixed(1)} (GRT ${run.stats.grt}, SPD ${pSPD})`);
   log(`• Enemy  ATKbase ${eAtk.toFixed(1)} • DEFbase ${eDef.toFixed(1)}`);
   log(`• Tempo (SPD Δ ${spdDiff>=0?'+':''}${spdDiff}): ${tempo.toFixed(1)}  • Guard (GRT vs POW): ${guard.toFixed(1)}  • Off-imbalance: -${imbalancePenalty.toFixed(1)}`);
   log(`• Effective → You ${(pEff+tempo+guard-imbalancePenalty).toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
@@ -748,12 +750,12 @@ function updateChaosHud(){
   q('#chaos-attack').disabled = !can;
 }
 
-/* --- Combat math: SPD = acc/evasion, FOC = crit --- */
+/* --- Combat math: SPD = acc/evasion, FOC = crit (NERFED) --- */
 function calcDamage(attacker, defender, isEnemy=false){
-  // Accuracy / Evasion from SPD differential
+  // Accuracy / Evasion from SPD differential (nerfed)
   const spdDiff = (attacker.spd || 0) - (defender.spd || 0);
-  const baseHit = 0.85 + spdDiff * 0.003;          // ~±30 SPD swings ≈ ±9% hit
-  const hit = clamp(baseHit, 0.60, 0.98);          // always some chance to miss/hit
+  const baseHit = 0.82 + spdDiff * 0.002;      // nerfed from 0.85 + 0.003*Δ
+  const hit = clamp(baseHit, 0.65, 0.95);       // tighter caps
   if (Math.random() > hit){
     return { dmg:0, miss:true, crit:false };
   }
