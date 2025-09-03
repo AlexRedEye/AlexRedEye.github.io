@@ -1187,29 +1187,53 @@ async function promptPlayerName(){
   return n;
 }
 
-// Minimal sha256 helper (WebCrypto) for DEV signature
+// --- Canonical key order MUST match server ---
+const CAREER_SIG_KEYS = [
+  "playerName","clientVersion","seed","score",
+  "stagesCleared","maxStage","lastMargin","durationSec",
+  "unit","weapon","supports"
+];
+
+function canonicalCareer(obj){
+  const o = {};
+  for (const k of CAREER_SIG_KEYS) if (obj[k] !== undefined) o[k] = obj[k];
+  return JSON.stringify(o);
+}
+
+// Dev SHA-256 signer (server must have ALLOW_DEV_SHA256=1)
 async function sha256(str){
   if (!('crypto' in window) || !crypto.subtle) return '';
-  const enc = new TextEncoder().encode(str);
-  const buf = await crypto.subtle.digest("SHA-256", enc);
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-// Demo signer (not secure for production; see server notes)
-async function hmacSign(payloadObj){
-  // Don’t ship real secrets; this is a placeholder so dev can test round-trips
-  return sha256(JSON.stringify(payloadObj));
 }
 
 async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin, score, seed, unit, weapon, supports }) {
   try {
-    if (!LB_API_BASE || LB_API_BASE.includes('your-leaderboard-host')) return; // skip if not configured
-    const payload = { playerName, clientVersion: CLIENT_VERSION, stagesCleared, maxStage, lastMargin, score, seed, unit, weapon, supports };
-    const checksum = await hmacSign(payload);
+    if (!LB_API_BASE || LB_API_BASE.includes('your-leaderboard-host')) return;
+
+    const payload = {
+      playerName,
+      clientVersion: CLIENT_VERSION,
+      seed: (seed || ""),
+      score,
+      stagesCleared,
+      maxStage,
+      lastMargin,
+      durationSec: 0,          // set a real timer if you track it
+      unit,
+      weapon,
+      supports: supports || []
+    };
+
+    const canonical = canonicalCareer(payload);
+    const checksum = await sha256(canonical); // matches server dev mode
+
     const res = await fetch(`${LB_API_BASE}/api/submit/career`, {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ ...payload, checksum })
     });
+
     if (!res.ok) {
       const t = await res.text().catch(()=>res.statusText);
       console.warn('submitCareerRun failed', res.status, t);
