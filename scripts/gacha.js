@@ -1,6 +1,6 @@
 /* =========================
    PocketFighters — MVP
-   v0.6.0 + Support Effects
+   v0.6.1 + Support Effects
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -19,7 +19,7 @@ const PITY = {
 
 // ==== Leaderboard client config (safe to keep; no-ops if server absent) ====
 const LB_API_BASE = "https://gacha-server-fiuy.onrender.com"; // <-- your Render API URL
-const CLIENT_VERSION = "0.6.0";
+const CLIENT_VERSION = "0.6.1";
 
 /* ---------- Catalogs (expanded) ---------- */
 const UNITS = [
