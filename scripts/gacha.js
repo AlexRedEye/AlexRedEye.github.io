@@ -1,6 +1,6 @@
 /* =========================
    PocketFighters — MVP
-   v0.6.0
+   v0.6.0 + Support Effects
    ========================= */
 
 const RARITY = { R:'R', SR:'SR', SSR:'SSR' };
@@ -62,26 +62,30 @@ const WEAPONS = [
   { id:'w_tonfa',    name:'Stone Tonfa',       rarity:RARITY.R,   pref:ARCH.BRAWLER,add:{pow:2, spd:1, foc:0, grt:2}, growth:0.05, max:5 },
 ];
 
+/* ---------- VARIED SUPPORTS WITH EFFECTS ---------- */
 const SUPPORTS = [
-  { id:'s_cardio',  name:'Cardio Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.12,foc:0.00,grt:0.00}, dmg:0.00 },
-  { id:'s_brutal',  name:'Brutal Sparring',  rarity:RARITY.SR,  train:{pow:0.15,spd:0.00,foc:0.00,grt:0.05}, dmg:0.05 },
-  { id:'s_mind',    name:'Mind Palace',      rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.18,grt:0.00}, dmg:0.06 },
-  { id:'s_guard',   name:'Guard Drills',     rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.00,grt:0.15}, dmg:0.02 },
-  { id:'s_aegis',   name:'Aegis Mentor',     rarity:RARITY.SSR, train:{pow:0.05,spd:0.05,foc:0.05,grt:0.10}, dmg:0.10 },
-  { id:'s_split',   name:'Split Focus',      rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00 },
-  { id:'s_blitz',   name:'Blitz Tactics',    rarity:RARITY.SR,  train:{pow:0.05,spd:0.18,foc:0.00,grt:0.00}, dmg:0.03 },
-  { id:'s_zenith',  name:'Zenith Study',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.05,foc:0.20,grt:0.00}, dmg:0.08 },
-  { id:'s_iron',    name:'Iron Will',        rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.02 },
-  { id:'s_duelist', name:'Duelist Footwork', rarity:RARITY.SR,  train:{pow:0.08,spd:0.15,foc:0.00,grt:0.00}, dmg:0.04 },
-  // New
-  { id:'s_focus2',  name:'Sharp Mind',       rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.16,grt:0.04}, dmg:0.05 },
-  { id:'s_speed2',  name:'Sprint Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.15,foc:0.00,grt:0.00}, dmg:0.01 },
-  { id:'s_power2',  name:'Powerlifting',     rarity:RARITY.SR,  train:{pow:0.16,spd:0.00,foc:0.00,grt:0.04}, dmg:0.05 },
-  { id:'s_guard2',  name:'Bulwark',          rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.00,grt:0.18}, dmg:0.04 },
-  { id:'s_overdrv', name:'Overdrive',        rarity:RARITY.SSR, train:{pow:0.10,spd:0.00,foc:0.10,grt:0.00}, dmg:0.12 },
-  { id:'s_fleet',   name:'Fleet Footed',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.22,foc:0.00,grt:0.00}, dmg:0.06 },
-  { id:'s_stoic',   name:'Stoic Focus',      rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.01 },
-  { id:'s_balance', name:'Balanced Regimen', rarity:RARITY.SR,  train:{pow:0.08,spd:0.08,foc:0.08,grt:0.08}, dmg:0.03 },
+  // Train = % bonuses to training gains (unchanged)
+  // dmg   = % additive battle damage amp (unchanged)
+  // NEW: effects[] adding strategic variety
+  { id:'s_cardio',  name:'Cardio Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.12,foc:0.00,grt:0.00}, dmg:0.00, effects:[{kind:'tempo_flat', flat:1}] },
+  { id:'s_brutal',  name:'Brutal Sparring',  rarity:RARITY.SR,  train:{pow:0.15,spd:0.00,foc:0.00,grt:0.05}, dmg:0.05, effects:[{kind:'imbalance_mitigate', pct:0.25}] },
+  { id:'s_mind',    name:'Mind Palace',      rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.18,grt:0.00}, dmg:0.06, effects:[{kind:'tempo_flat', flat:0.5}] },
+  { id:'s_guard',   name:'Guard Drills',     rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.00,grt:0.15}, dmg:0.02, effects:[{kind:'guard_flat', flat:1}] },
+  { id:'s_aegis',   name:'Aegis Mentor',     rarity:RARITY.SSR, train:{pow:0.05,spd:0.05,foc:0.05,grt:0.10}, dmg:0.10, effects:[{kind:'guard_flat', flat:2},{kind:'tempo_flat', flat:1},{kind:'deadline_bonus', add:1}] },
+  { id:'s_split',   name:'Split Focus',      rarity:RARITY.R,   train:{pow:0.05,spd:0.05,foc:0.05,grt:0.05}, dmg:0.00, effects:[{kind:'rest_bonus', add:1}] },
+  { id:'s_blitz',   name:'Blitz Tactics',    rarity:RARITY.SR,  train:{pow:0.05,spd:0.18,foc:0.00,grt:0.00}, dmg:0.03, effects:[{kind:'tempo_flat', flat:2}] },
+  { id:'s_zenith',  name:'Zenith Study',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.05,foc:0.20,grt:0.00}, dmg:0.08, effects:[{kind:'train_cost_reduction', reduce:1}] },
+  { id:'s_iron',    name:'Iron Will',        rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.02, effects:[{kind:'guard_flat', flat:1}] },
+  { id:'s_duelist', name:'Duelist Footwork', rarity:RARITY.SR,  train:{pow:0.08,spd:0.15,foc:0.00,grt:0.00}, dmg:0.04, effects:[{kind:'tempo_flat', flat:1.5}] },
+  // Extra variety
+  { id:'s_focus2',  name:'Sharp Mind',       rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.16,grt:0.04}, dmg:0.05, effects:[{kind:'imbalance_mitigate', pct:0.2}] },
+  { id:'s_speed2',  name:'Sprint Coach',     rarity:RARITY.R,   train:{pow:0.00,spd:0.15,foc:0.00,grt:0.00}, dmg:0.01, effects:[{kind:'deadline_bonus', add:1}] },
+  { id:'s_power2',  name:'Powerlifting',     rarity:RARITY.SR,  train:{pow:0.16,spd:0.00,foc:0.00,grt:0.04}, dmg:0.05, effects:[{kind:'momentum', carryPct:0.10}] },
+  { id:'s_guard2',  name:'Bulwark',          rarity:RARITY.SR,  train:{pow:0.00,spd:0.00,foc:0.00,grt:0.18}, dmg:0.04, effects:[{kind:'guard_flat', flat:2}] },
+  { id:'s_overdrv', name:'Overdrive',        rarity:RARITY.SSR, train:{pow:0.10,spd:0.00,foc:0.10,grt:0.00}, dmg:0.12, effects:[{kind:'tempo_flat', flat:1},{kind:'imbalance_mitigate', pct:0.3}] },
+  { id:'s_fleet',   name:'Fleet Footed',     rarity:RARITY.SSR, train:{pow:0.00,spd:0.22,foc:0.00,grt:0.00}, dmg:0.06, effects:[{kind:'train_cost_reduction', reduce:1},{kind:'deadline_bonus', add:1}] },
+  { id:'s_stoic',   name:'Stoic Focus',      rarity:RARITY.R,   train:{pow:0.00,spd:0.00,foc:0.05,grt:0.12}, dmg:0.01, effects:[{kind:'rest_bonus', add:1}] },
+  { id:'s_balance', name:'Balanced Regimen', rarity:RARITY.SR,  train:{pow:0.08,spd:0.08,foc:0.08,grt:0.08}, dmg:0.03, effects:[{kind:'imbalance_mitigate', pct:0.35}] },
 ];
 
 /* ---------- Profile ---------- */
@@ -106,6 +110,50 @@ const qa = s => Array.from(document.querySelectorAll(s));
 const rarityClass = r => r===RARITY.SSR?'ssr':(r===RARITY.SR?'sr':'r');
 const clamp = (v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 function softCap(x, pivot=22, eff=0.6){ return x <= pivot ? x : pivot + (x - pivot) * eff; }
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- Support Effects helpers ---------- */
+function effectLabel(e){
+  switch(e.kind){
+    case 'tempo_flat': return `Tempo +${e.flat}`;
+    case 'guard_flat': return `Guard +${e.flat}`;
+    case 'deadline_bonus': return `+${e.add} Time`;
+    case 'rest_bonus': return `Rest +${e.add}`;
+    case 'train_cost_reduction': return `Train Time -${e.reduce}`;
+    case 'imbalance_mitigate': return `Imbalance -${Math.round(e.pct*100)}%`;
+    case 'momentum': return `Momentum +${Math.round(e.carryPct*100)}%`;
+    default: return '';
+  }
+}
+function collectSupportEffects(supports){
+  const eff = {
+    tempoFlat: 0,
+    guardFlat: 0,
+    deadlineBonus: 0,
+    restBonus: 0,
+    trainCostReduction: 0,
+    imbalanceMitigatePct: 0,
+    momentumCarryPct: 0
+  };
+  for (const s of (supports||[])){
+    const lvlMul = 1 + 0.02*((s.meta?.lvl||1)-1);
+    for (const e of (s.def.effects||[])){
+      if (e.kind==='tempo_flat') eff.tempoFlat += (e.flat||0)*lvlMul;
+      if (e.kind==='guard_flat') eff.guardFlat += (e.flat||0)*lvlMul;
+      if (e.kind==='deadline_bonus') eff.deadlineBonus += (e.add||0);
+      if (e.kind==='rest_bonus') eff.restBonus += (e.add||0);
+      if (e.kind==='train_cost_reduction') eff.trainCostReduction += (e.reduce||0);
+      if (e.kind==='imbalance_mitigate') eff.imbalanceMitigatePct = Math.max(eff.imbalanceMitigatePct, e.pct||0);
+      if (e.kind==='momentum') eff.momentumCarryPct = Math.max(eff.momentumCarryPct, e.carryPct||0);
+    }
+  }
+  eff.trainCostReduction = Math.min(1, eff.trainCostReduction);
+  eff.deadlineBonus = Math.min(3, eff.deadlineBonus);
+  eff.restBonus = Math.min(3, eff.restBonus);
+  eff.tempoFlat = Math.round(eff.tempoFlat*10)/10;
+  eff.guardFlat = Math.round(eff.guardFlat*10)/10;
+  return eff;
+}
 
 /* ---------- Save/Load ---------- */
 function save() {
@@ -216,8 +264,8 @@ function acquireSupport(id, rarity){
 /* ---------- Rendering ---------- */
 function cardHtml({title, subtitle, rarity, body='', badge=''}){
   return `<div class="card ${rarityClass(rarity)}">
-    <div class="title">${title}${badge?` <span class="chip badge">${badge}</span>`:''}</div>
-    <div class="tiny">${subtitle||''}</div>
+    <div class="title">${esc(title)}${badge?` <span class="chip badge">${badge}</span>`:''}</div>
+    <div class="tiny">${esc(subtitle||'')}</div>
     ${body?`<div class="chips">${body}</div>`:''}
   </div>`;
 }
@@ -261,6 +309,7 @@ qa('.tabs button').forEach(b=>{
     const tab = b.getAttribute('data-tab');
     qa('main .tab').forEach(s=>s.classList.remove('active'));
     q('#'+tab).classList.add('active');
+    if (tab === 'leaderboard') loadLeaderboard();
   });
 });
 
@@ -390,13 +439,14 @@ function attachGacha(){
 }
 
 /* ==================================================
-   Career Mode (with indicators, timer)
+   Career Mode (with indicators, timer, support effects)
    ================================================== */
 const run = {
   mode: 'career',
   active:false, stage:1, maxStage:10, stamina:5,
   unit:null, weapon:null, supports:[],
   stats:{pow:0,spd:0,foc:0,grt:0},
+  eff:null, // aggregated support effects
   lastReport:null,
   deadlineMax:5, deadline:5, costTrain:1, costRest:2
 };
@@ -422,7 +472,7 @@ function rebuildPickers(){
     const u = byId(UNITS,e.id);
     const div = document.createElement('div');
     div.className = 'card pick '+rarityClass(u.rarity);
-    div.innerHTML = `<div class="title">${u.name}</div><div class="tiny">Lv ${e.lvl} • ${u.arche}</div>`;
+    div.innerHTML = `<div class="title">${esc(u.name)}</div><div class="tiny">Lv ${e.lvl} • ${u.arche}</div>`;
     div.addEventListener('click', ()=>{
       qa('#pick-unit .pick').forEach(x=>x.classList.remove('selected'));
       div.classList.add('selected'); run.unit={def:u, meta:e}; enableStartIfReady();
@@ -434,7 +484,7 @@ function rebuildPickers(){
     const w = byId(WEAPONS,e.id);
     const div = document.createElement('div');
     div.className = 'card pick '+rarityClass(w.rarity);
-    div.innerHTML = `<div class="title">${w.name}</div><div class="tiny">Lv ${e.lvl} • Pref ${w.pref}</div>`;
+    div.innerHTML = `<div class="title">${esc(w.name)}</div><div class="tiny">Lv ${e.lvl} • Pref ${w.pref}</div>`;
     div.addEventListener('click', ()=>{
       qa('#pick-weapon .pick').forEach(x=>x.classList.remove('selected'));
       div.classList.add('selected'); run.weapon={def:w, meta:e}; enableStartIfReady();
@@ -445,9 +495,10 @@ function rebuildPickers(){
   const picks = new Set();
   for(const e of profile.supports){
     const s = byId(SUPPORTS,e.id);
+    const effectsTiny = (s.effects||[]).map(effectLabel).filter(Boolean).map(t=>`<span class="chip tiny">${esc(t)}</span>`).join(' ');
     const div = document.createElement('div');
     div.className='card pick '+rarityClass(s.rarity);
-    div.innerHTML = `<div class="title">${s.name}</div><div class="tiny">Lv ${e.lvl} • DMG +${Math.round(s.dmg*100)}%</div>`;
+    div.innerHTML = `<div class="title">${esc(s.name)}</div><div class="tiny">Lv ${e.lvl} • DMG +${Math.round(s.dmg*100)}%</div>${effectsTiny?`<div class="tiny dim">Effects: ${effectsTiny}</div>`:''}`;
     div.addEventListener('click', ()=>{
       if (div.classList.contains('selected')){ div.classList.remove('selected'); picks.delete(e.id); }
       else { if (picks.size>=2) return; div.classList.add('selected'); picks.add(e.id); }
@@ -475,6 +526,11 @@ function startRun(){
     foc: Math.round((u.base.foc + w.add.foc*ws) * (1 + 0.05*(ulvl-1))),
     grt: Math.round((u.base.grt + w.add.grt*ws) * (1 + 0.05*(ulvl-1))),
   };
+  run.eff = collectSupportEffects(run.supports);
+  run.costTrain = Math.max(1, 1 - (run.eff.trainCostReduction||0));
+  run.costRest  = 2;
+  run.deadlineMax = 5 + (run.eff.deadlineBonus||0);
+
   run.lastReport=null;
   q('#career-setup').classList.add('hidden');
   q('#career-run').classList.remove('hidden');
@@ -493,7 +549,18 @@ function updateDeadlineUI(){
 function updateRunUI(){
   const s=run.stats;
   const sup = run.supports?.map(x=>`${x.def.name} (Lv ${x.meta.lvl})`).join(', ') || 'None';
-  q('#run-summary').innerHTML = `<div><b>${run.unit.def.name}</b> • Lv ${run.unit.meta.lvl} • ${run.unit.def.arche}</div><div><b>${run.weapon.def.name}</b> • Lv ${run.weapon.meta.lvl}</div><div>Support: ${sup}</div>`;
+  q('#run-summary').innerHTML = `<div><b>${esc(run.unit.def.name)}</b> • Lv ${run.unit.meta.lvl} • ${run.unit.def.arche}</div><div><b>${esc(run.weapon.def.name)}</b> • Lv ${run.weapon.meta.lvl}</div><div>Support: ${esc(sup)}</div>`;
+  // effect chips
+  const effChips = [];
+  for (const sp of (run.supports||[])){
+    for (const e of (sp.def.effects||[])){
+      const lbl = effectLabel(e); if (lbl) effChips.push(`<span class="chip tiny">${esc(lbl)}</span>`);
+    }
+  }
+  if (effChips.length){
+    q('#run-summary').insertAdjacentHTML('beforeend', `<div class="tiny dim">Effects: ${effChips.join(' ')}</div>`);
+  }
+
   q('#run-stage').textContent = `Stage ${run.stage} / ${run.maxStage} • Stamina ${run.stamina}`;
 
   const e = enemyPreviewForStage(run.stage);
@@ -543,7 +610,8 @@ function restOnce(){
   if (!run.active) return;
   if (run.deadline < run.costRest){ log('⛔ Not enough time left to Rest.'); return; }
   const before = run.stamina;
-  run.stamina = Math.min(5, run.stamina + 2);
+  const gain = 2 + (run.eff?.restBonus||0);
+  run.stamina = Math.min(5, run.stamina + gain);
   for (const s of run.supports || []){
     s.meta.exp += 1;
     if (tryLevelSupport(s.meta)) log(`⬆️ Support ${s.def.name} leveled to Lv ${s.meta.lvl}.`);
@@ -593,18 +661,24 @@ function battleStage(forced=false){
   const offVsDef = (run.stats.pow + run.stats.foc) - (run.stats.grt + run.stats.spd);
   const imbalancePenalty = clamp(offVsDef * 0.10, 0, 6);
 
+  // ----- Apply support effects to battle terms -----
+  const tempoBonus = +(run.eff?.tempoFlat||0);
+  const guardBonus = +(run.eff?.guardFlat||0);
+  const imbMit = +(run.eff?.imbalanceMitigatePct||0);
+  const imbalanceAfter = imbalancePenalty * (1 - imbMit);
+
   const pEff = pScore - eDef;
   const eEff = eAtk   - pDef2;
 
   const rng=(Math.random()*10-5);
-  const margin=pEff - eEff + rng + tempo + guard - imbalancePenalty;
+  const margin=pEff - eEff + rng + (tempo + tempoBonus) + (guard + guardBonus) - imbalanceAfter;
 
   log(`⚔️ ${forced?'Forced ':''}Battle — Stage ${run.stage}`);
   if(forced) log('• Reason: Time Left reached 0.');
   log(`• Player ATKbase ${pAtkBase.toFixed(1)} (POW ${pPOW}, FOC ${pFOC}, SPD ${pSPD}) • DEFbase ${pDefBase.toFixed(1)} (GRT ${run.stats.grt}, SPD ${pSPD})`);
   log(`• Enemy  ATKbase ${eAtk.toFixed(1)} • DEFbase ${eDef.toFixed(1)}`);
-  log(`• Tempo (SPD Δ ${spdDiff>=0?'+':''}${spdDiff}): ${tempo.toFixed(1)}  • Guard (GRT vs POW): ${guard.toFixed(1)}  • Off-imbalance: -${imbalancePenalty.toFixed(1)}`);
-  log(`• Effective → You ${(pEff+tempo+guard-imbalancePenalty).toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
+  log(`• Tempo (SPD Δ ${spdDiff>=0?'+':''}${spdDiff}): ${(tempo+tempoBonus).toFixed(1)}  • Guard: ${(guard+guardBonus).toFixed(1)}  • Off-imbalance: -${imbalanceAfter.toFixed(1)}`);
+  log(`• Effective → You ${(pEff+(tempo+tempoBonus)+(guard+guardBonus)-imbalanceAfter).toFixed(1)} | Enemy ${eEff.toFixed(1)} | RNG ${rng.toFixed(1)} | Margin ${margin.toFixed(1)}`);
 
   const report={
     stage:run.stage, victory:margin>=0, margin:+margin.toFixed(1), rng:+rng.toFixed(1), forced,
@@ -631,7 +705,7 @@ function battleStage(forced=false){
     if (ww) log(`⬆️ ${run.weapon.def.name} Lv ${run.weapon.meta.lvl}.`);
 
     if (run.stage >= run.maxStage) {
-      // Leaderboard submit on FINAL victory (includes unit/weapon/supports)
+      // Leaderboard submit on FINAL victory
       if (typeof submitCareerRun === "function") {
         (async () => {
           const name = await promptPlayerName();
@@ -652,6 +726,7 @@ function battleStage(forced=false){
               weapon: weaponName,
               supports: supportNames
             });
+            tryRefreshLeaderboardIfVisible?.();
           } catch {}
         })();
       }
@@ -661,6 +736,17 @@ function battleStage(forced=false){
       return;
     }
 
+    // ----- Momentum carryover (tiny) -----
+    if (run.eff?.momentumCarryPct){
+      const carry = (v)=>Math.max(0, Math.round(v * run.eff.momentumCarryPct));
+      const before = {...run.stats};
+      run.stats.pow += carry(2);
+      run.stats.spd += carry(2);
+      run.stats.foc += carry(2);
+      run.stats.grt += carry(2);
+      log(`🏃 Momentum: POW ${before.pow}→${run.stats.pow}, SPD ${before.spd}→${run.stats.spd}, FOC ${before.foc}→${run.stats.foc}, GRT ${before.grt}→${run.stats.grt}`);
+    }
+
     run.stage++;
     const old = run.stamina;
     run.stamina = Math.min(5, run.stamina + 1);
@@ -668,7 +754,7 @@ function battleStage(forced=false){
     updateRunUI();
     log(`➡️ Stage ${run.stage}. Stamina ${old}→${run.stamina}. Time reset.`);
   } else {
-    // Leaderboard submit on DEFEAT (includes unit/weapon/supports)
+    // Leaderboard submit on DEFEAT
     if (typeof submitCareerRun === "function") {
       (async () => {
         const name = await promptPlayerName();
@@ -690,6 +776,7 @@ function battleStage(forced=false){
             weapon: weaponName,
             supports: supportNames
           });
+          tryRefreshLeaderboardIfVisible?.();
         } catch {}
       })();
     }
@@ -707,30 +794,30 @@ function lossAdvice(report){
 
   const atkGap = p.atkScore - e.defScore;
   const defGap = e.atkScore - p.defScore;
-  const tempoDiff = (ps.spd - es.spd);
-  const guardDiff = (ps.grt - es.pow);
+  const tempoDiff = (ps.spd - es.spd) + (run.eff?.tempoFlat||0);
+  const guardDiff = (ps.grt - es.pow) + (run.eff?.guardFlat||0);
   const scaleDiff = (ps.foc - es.foc);
   const powerDiff = (ps.pow - es.grt);
   const offSum = ps.pow + ps.foc;
   const defSum = ps.grt + ps.spd;
 
-  if (atkGap < -2) bullets.push(`🗡 Offense check failed (ATK ${p.atkScore} vs enemy DEF ${e.defScore}). Train **POW** / **🧠 FOC** or use dmg supports (Brutal/Zenith/Aegis).`);
-  else if (atkGap < 1) bullets.push(`🗡 Offense barely broke through (ATK ${p.atkScore} vs DEF ${e.defScore}). A few **POW/🧠 FOC** trainings or a dmg support will tip it.`);
+  if (atkGap < -2) bullets.push(`🗡 Offense check failed (ATK ${p.atkScore} vs enemy DEF ${e.defScore}). Train **POW/FOC** or use dmg supports.`);
+  else if (atkGap < 1) bullets.push(`🗡 Offense barely broke through. A few **POW/FOC** trainings or a dmg support will tip it.`);
 
-  if (defGap > 2) bullets.push(`🛡 Too squishy (enemy ATK ${e.atkScore} vs your DEF ${p.defScore}). Add **GRT**, some **🌀 SPD**, or guard supports (Guard/Iron/Aegis).`);
-  else if (defGap > 0.5) bullets.push(`🛡 Slightly fragile. Sprinkle **GRT/🌀 SPD**.`);
+  if (defGap > 2) bullets.push(`🛡 Too squishy (enemy ATK ${e.atkScore} vs your DEF ${p.defScore}). Add **GRT**, some **SPD**, or guard supports.`);
+  else if (defGap > 0.5) bullets.push(`🛡 Slightly fragile. Sprinkle **GRT/ SPD**.`);
 
-  if (tempoDiff < -3) bullets.push(`🌀 Tempo disadvantage (SPD ${ps.spd} vs ${es.spd}). Add **SPD** or footwork supports (Blitz/Duelist).`);
-  if (guardDiff < -2) bullets.push(`🛡 Guard low vs POW (GRT ${ps.grt} vs enemy POW ${es.pow}). Train **GRT** or use **Guard/Iron/Aegis**.`);
+  if (tempoDiff < -3) bullets.push(`🌀 Tempo disadvantage (SPD gap). Add **SPD** or tempo supports.`);
+  if (guardDiff < -2) bullets.push(`🛡 Guard low vs POW. Train **GRT** or add guard supports.`);
 
-  if (scaleDiff < -3 && atkGap <= 0) bullets.push(`🧠 Scaling behind (FOC ${ps.foc} vs ${es.foc}). Boost **FOC** or use **Mind/Zenith** supports.`);
-  if (offSum - defSum >= 10) bullets.push(`🎯 Over-offense (Off ${offSum} vs Def ${defSum}). Add **🛡 GRT** and **🌀 SPD**.`);
-  else if (defSum - offSum >= 10 && atkGap <= 0) bullets.push(`🎯 Over-tanky (Def ${defSum} vs Off ${offSum}). Add **🗡 POW** / **🧠 FOC**.`);
-  if (powerDiff < 0 && atkGap <= 0) bullets.push(`🗡 POW didn’t beat their toughness (enemy GRT ${es.grt}). Add **POW** or POW-lean weapon/support.`);
+  if (scaleDiff < -3 && atkGap <= 0) bullets.push(`🧠 Scaling behind (FOC). Train **FOC** or use focus supports.`);
+  if (offSum - defSum >= 10) bullets.push(`🎯 Over-offense. Add **GRT** and **SPD**.`);
+  else if (defSum - offSum >= 10 && atkGap <= 0) bullets.push(`🎯 Over-tanky. Add **POW / FOC**.`);
+  if (powerDiff < 0 && atkGap <= 0) bullets.push(`🗡 POW didn’t beat enemy toughness. Add **POW** or better weapon/support.`);
 
-  if (report.forced) bullets.push(`⏳ Forced battle by deadline. Battle earlier, rest less, or target **🌀 SPD / 🗡 POW** this stage.`);
+  if (report.forced) bullets.push(`⏳ Forced battle by deadline. Train faster or bring **deadline/train-cost** supports.`);
 
-  if (!bullets.length) bullets.push(`🎯 Margins were close. Nudge **🌀 SPD**, **🛡 GRT**, and whichever of **🗡 POW / 🧠 FOC** fits your build.`);
+  if (!bullets.length) bullets.push(`🎯 Margins were close. Nudge **SPD**, **GRT**, and whichever of **POW / FOC** fits your build.`);
   return [...new Set(bullets)].join('\n');
 }
 function buildCareerSummary(report, rewards){
@@ -772,7 +859,7 @@ if (abandonCareerBtn) abandonCareerBtn.addEventListener('click', ()=>{
 });
 
 /* ==================================================
-   Memories of Chaos (hands-on)
+   Memories of Chaos (hands-on) — unchanged from 0.6.0
    ================================================== */
 const CHAOS_FLOORS = 8;
 const chaos = {
@@ -824,7 +911,7 @@ function rebuildChaosPickers(){
     const def = byId(UNITS, meta.id);
     const div = document.createElement('div');
     div.className = 'card pick '+rarityClass(def.rarity);
-    div.innerHTML = `<div class="title">${def.name}</div><div class="tiny">Lv ${meta.lvl} • ${def.arche}</div>`;
+    div.innerHTML = `<div class="title">${esc(def.name)}</div><div class="tiny">Lv ${meta.lvl} • ${def.arche}</div>`;
     div.addEventListener('click', ()=>{
       const already = chaos.team.find(t=>t.unitMeta.id===meta.id);
       if (already) {
@@ -866,7 +953,7 @@ function renderBattlefield(){
     const card = document.createElement('div');
     card.className = 'battle-card' + (a.alive?'':' dead') + (chaos.selection.allyIdx===idx?' selected':'');
     card.innerHTML = `
-      <div class="title">${a.unitDef.name}${a.acted?' <span class="tiny">(Acted)</span>':''}</div>
+      <div class="title">${esc(a.unitDef.name)}${a.acted?' <span class="tiny">(Acted)</span>':''}</div>
       <div class="stat-line">ATK ${a.atk} • DEF ${a.def} • SPD ${a.spd} <span class="tiny">(acc/eva)</span></div>
       <div class="bar"><span style="width:${(a.hp/a.maxHp)*100}%"></span></div>
       <div class="stat-line">HP ${Math.max(0,Math.ceil(a.hp))}/${a.maxHp}</div>
@@ -888,7 +975,7 @@ function renderBattlefield(){
     const dead = e.hp<=0;
     card.className = 'battle-card' + (dead?' dead':'') + (chaos.selection.enemyIdx===idx?' target':'');
     card.innerHTML = `
-      <div class="title">${e.name}</div>
+      <div class="title">${esc(e.name)}</div>
       <div class="stat-line">ATK ${e.atk} • DEF ${e.def} • SPD ${e.spd}</div>
       <div class="bar"><span style="width:${(Math.max(0,e.hp)/e.maxHp)*100}%"></span></div>
       <div class="stat-line">HP ${Math.max(0,Math.ceil(e.hp))}/${e.maxHp}</div>
@@ -970,7 +1057,7 @@ function setupEnemies(){
 }
 function updateChaosUI(){
   const teamStr = chaos.team.map(t=>`${t.unitDef.name} (Lv ${t.unitMeta.lvl})`).join(', ');
-  q('#chaos-team-summary').innerHTML = `<b>Team:</b> ${teamStr}`;
+  q('#chaos-team-summary').innerHTML = `<b>Team:</b> ${esc(teamStr)}`;
   q('#chaos-mods').textContent = `Modifiers: ${chaos.modifiers.join(' • ')}`;
   q('#chaos-floor').textContent = `Floor ${chaos.floor} / ${chaos.maxFloor} • Wave ${chaos.wave} / ${chaos.wavesPerFloor} • ${chaos.phase==='player'?'Player':'Enemy'} Phase`;
 
@@ -1146,30 +1233,104 @@ modalConfirm.addEventListener('click', ()=>{
   }
 });
 
-/* ---------- Wires ---------- */
-q('#start-run')?.addEventListener('click', startRun);
-qa('[data-train]')?.forEach(b=>b.addEventListener('click', ()=>trainOnce(b.getAttribute('data-train'))));
-q('#btn-rest')?.addEventListener('click', restOnce);
-q('#btn-battle')?.addEventListener('click', ()=>battleStage(false));
-q('#btn-save')?.addEventListener('click', save);
-q('#btn-load')?.addEventListener('click', load);
-q('#btn-wipe')?.addEventListener('click', wipe);
+/* ============================
+   Leaderboard (UI + fetch)
+   ============================ */
 
-q('#chaos-start')?.addEventListener('click', startChaos);
-q('#chaos-attack')?.addEventListener('click', playerAttack);
-q('#chaos-endturn')?.addEventListener('click', enemyTurn);
-q('#chaos-abandon')?.addEventListener('click', ()=>{
-  if(!chaos.active){ modal.classList.add('hidden'); q('#chaos-run').classList.add('hidden'); q('#chaos-setup').classList.remove('hidden'); rebuildChaosPickers(); return; }
-  defeatChaos('Abandoned');
-});
+const LB_PAGE_SIZE = 20;
 
-attachGacha();
+function timeAgo(d){
+  try {
+    const t = typeof d === 'string' ? new Date(d) : d;
+    const s = Math.floor((Date.now() - t.getTime())/1000);
+    if (s < 60) return `${s}s ago`;
+    const m = Math.floor(s/60); if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m/60); if (h < 24) return `${h}h ago`;
+    const dd = Math.floor(h/24); return `${dd}d ago`;
+  } catch { return ''; }
+}
 
-/* Regen tick & boot */
-setInterval(()=>{ renderWallet(); }, 1000);
-renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
-const hadSave = load();        // try to load
-ensureStarterRoster();         // then grant starters if needed (new/empty)
+function renderLeaderboard(mode, rows){
+  const host = document.getElementById('lb-table');
+  if (!host) return;
+  if (!rows || rows.length===0){
+    host.innerHTML = `<div class="dim">No entries yet.</div>`;
+    return;
+  }
+
+  if (mode === 'career'){
+    const head = `
+      <div class="table">
+        <div class="trow thead">
+          <div>#</div><div>Player</div><div>Score</div><div>Depth</div>
+          <div>Margin</div><div>Unit</div><div>Weapon</div><div>Supports</div><div>When</div>
+        </div>
+        ${rows.map((r,i)=>`
+          <div class="trow">
+            <div>${i+1}</div>
+            <div>${esc(r.playerName)}</div>
+            <div><b>${esc(r.score)}</b></div>
+            <div>${esc(r.stagesCleared)}/${esc(r.maxStage)}</div>
+            <div>${('lastMargin' in r && r.lastMargin!=null) ? esc(((r.lastMargin>0?'+':'')+Number(r.lastMargin).toFixed?.(1)) || r.lastMargin) : ''}</div>
+            <div>${esc(r.unit)}</div>
+            <div>${esc(r.weapon)}</div>
+            <div class="tiny">${(r.supports||[]).map(esc).join(', ')}</div>
+            <div class="dim tiny" title="${esc(r.createdAt)}">${timeAgo(r.createdAt)}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    host.innerHTML = head;
+  } else {
+    const head = `
+      <div class="table">
+        <div class="trow thead">
+          <div>#</div><div>Player</div><div>Score</div><div>Floors</div>
+          <div>Stars</div><div>Team</div><div>When</div>
+        </div>
+        ${rows.map((r,i)=>`
+          <div class="trow">
+            <div>${i+1}</div>
+            <div>${esc(r.playerName)}</div>
+            <div><b>${esc(r.score)}</b></div>
+            <div>${esc(r.floorsCleared)}/${esc(r.maxFloor)}</div>
+            <div>${esc(r.stars)}</div>
+            <div class="tiny">${(r.team||[]).map(esc).join(', ')}</div>
+            <div class="dim tiny" title="${esc(r.createdAt)}">${timeAgo(r.createdAt)}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    host.innerHTML = head;
+  }
+}
+
+async function fetchLeaderboard(mode){
+  if (!LB_API_BASE) return { rows: [] };
+  const url = `${LB_API_BASE}/api/leaderboard?mode=${encodeURIComponent(mode)}&limit=${LB_PAGE_SIZE}`;
+  try {
+    const res = await fetch(url, { method:'GET' });
+    if (!res.ok) {
+      const t = await res.text().catch(()=>res.statusText);
+      console.warn('leaderboard fetch failed', res.status, t);
+      return { rows: [] };
+    }
+    const data = await res.json();
+    return { rows: data.rows || [] };
+  } catch (e) {
+    console.warn('leaderboard fetch error', e);
+    return { rows: [] };
+  }
+}
+
+async function loadLeaderboard(){
+  const sel = document.getElementById('lb-mode');
+  const mode = sel ? sel.value : 'career';
+  const { rows } = await fetchLeaderboard(mode);
+  renderLeaderboard(mode, rows);
+}
+async function tryRefreshLeaderboardIfVisible(){
+  const sec = document.getElementById('leaderboard');
+  if (sec && sec.classList.contains('active')) loadLeaderboard();
+}
 
 /* ============================
    Leaderboard helpers (Career)
@@ -1240,123 +1401,37 @@ async function submitCareerRun({ playerName, stagesCleared, maxStage, lastMargin
       log(`⚠️ Leaderboard submit failed (${res.status}).`, true);
     } else {
       log('📡 Run submitted to leaderboard.', true);
+      tryRefreshLeaderboardIfVisible();
     }
   } catch (e) {
     console.warn('submitCareerRun error', e);
   }
 }
 
-/* ============================
-   Leaderboard (UI + fetch)
-   ============================ */
+/* ---------- Wires ---------- */
+q('#start-run')?.addEventListener('click', startRun);
+qa('[data-train]')?.forEach(b=>b.addEventListener('click', ()=>trainOnce(b.getAttribute('data-train'))));
+q('#btn-rest')?.addEventListener('click', restOnce);
+q('#btn-battle')?.addEventListener('click', ()=>battleStage(false));
+q('#btn-save')?.addEventListener('click', save);
+q('#btn-load')?.addEventListener('click', load);
+q('#btn-wipe')?.addEventListener('click', wipe);
 
-const LB_PAGE_SIZE = 20;
+q('#chaos-start')?.addEventListener('click', startChaos);
+q('#chaos-attack')?.addEventListener('click', playerAttack);
+q('#chaos-endturn')?.addEventListener('click', enemyTurn);
+q('#chaos-abandon')?.addEventListener('click', ()=>{
+  if(!chaos.active){ modal.classList.add('hidden'); q('#chaos-run').classList.add('hidden'); q('#chaos-setup').classList.remove('hidden'); rebuildChaosPickers(); return; }
+  defeatChaos('Abandoned');
+});
 
-function timeAgo(d){
-  try {
-    const t = typeof d === 'string' ? new Date(d) : d;
-    const s = Math.floor((Date.now() - t.getTime())/1000);
-    if (s < 60) return `${s}s ago`;
-    const m = Math.floor(s/60); if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m/60); if (h < 24) return `${h}h ago`;
-    const dd = Math.floor(h/24); return `${dd}d ago`;
-  } catch { return ''; }
-}
-
-function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function renderLeaderboard(mode, rows){
-  const host = document.getElementById('lb-table');
-  if (!host) return;
-  if (!rows || rows.length===0){
-    host.innerHTML = `<div class="dim">No entries yet.</div>`;
-    return;
-  }
-
-  if (mode === 'career'){
-    const head = `
-      <div class="table">
-        <div class="trow thead">
-          <div>#</div><div>Player</div><div>Score</div><div>Depth</div>
-          <div>Margin</div><div>Unit</div><div>Weapon</div><div>Supports</div><div>When</div>
-        </div>
-        ${rows.map((r,i)=>`
-          <div class="trow">
-            <div>${i+1}</div>
-            <div>${esc(r.playerName)}</div>
-            <div><b>${esc(r.score)}</b></div>
-            <div>${esc(r.stagesCleared)}/${esc(r.maxStage)}</div>
-            <div>${('lastMargin' in r && r.lastMargin!=null) ? (r.lastMargin>0?'+':'')+r.lastMargin.toFixed?.(1) ?? r.lastMargin : ''}</div>
-            <div>${esc(r.unit)}</div>
-            <div>${esc(r.weapon)}</div>
-            <div class="tiny">${(r.supports||[]).map(esc).join(', ')}</div>
-            <div class="dim tiny" title="${esc(r.createdAt)}">${timeAgo(r.createdAt)}</div>
-          </div>
-        `).join('')}
-      </div>`;
-    host.innerHTML = head;
-  } else {
-    const head = `
-      <div class="table">
-        <div class="trow thead">
-          <div>#</div><div>Player</div><div>Score</div><div>Floors</div>
-          <div>Stars</div><div>Team</div><div>When</div>
-        </div>
-        ${rows.map((r,i)=>`
-          <div class="trow">
-            <div>${i+1}</div>
-            <div>${esc(r.playerName)}</div>
-            <div><b>${esc(r.score)}</b></div>
-            <div>${esc(r.floorsCleared)}/${esc(r.maxFloor)}</div>
-            <div>${esc(r.stars)}</div>
-            <div class="tiny">${(r.team||[]).map(esc).join(', ')}</div>
-            <div class="dim tiny" title="${esc(r.createdAt)}">${timeAgo(r.createdAt)}</div>
-          </div>
-        `).join('')}
-      </div>`;
-    host.innerHTML = head;
-  }
-}
-
-async function fetchLeaderboard(mode){
-  if (!LB_API_BASE) return { rows: [] };
-  const url = `${LB_API_BASE}/api/leaderboard?mode=${encodeURIComponent(mode)}&limit=${LB_PAGE_SIZE}`;
-  try {
-    const res = await fetch(url, { method:'GET' });
-    if (!res.ok) {
-      const t = await res.text().catch(()=>res.statusText);
-      console.warn('leaderboard fetch failed', res.status, t);
-      return { rows: [] };
-    }
-    const data = await res.json();
-    return { rows: data.rows || [] };
-  } catch (e) {
-    console.warn('leaderboard fetch error', e);
-    return { rows: [] };
-  }
-}
-
-async function loadLeaderboard(){
-  const sel = document.getElementById('lb-mode');
-  const mode = sel ? sel.value : 'career';
-  const { rows } = await fetchLeaderboard(mode);
-  renderLeaderboard(mode, rows);
-}
-
-/* Hooks */
 document.getElementById('lb-refresh')?.addEventListener('click', loadLeaderboard);
 document.getElementById('lb-mode')?.addEventListener('change', loadLeaderboard);
 
-// Auto-load when the Leaderboard tab is opened (patches your existing tab code)
-qa('.tabs button').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    const tab = b.getAttribute('data-tab');
-    if (tab === 'leaderboard') loadLeaderboard();
-  });
-});
+attachGacha();
 
-// Also refresh after a successful submit (optional)
-async function tryRefreshLeaderboardIfVisible(){
-  const sec = document.getElementById('leaderboard');
-  if (sec && sec.classList.contains('active')) loadLeaderboard();
-}
+/* Regen tick & boot */
+setInterval(()=>{ renderWallet(); }, 1000);
+renderWallet(); renderInventory(); rebuildPickers(); rebuildChaosPickers(); updatePityUI();
+const hadSave = load();        // try to load
+ensureStarterRoster();         // then grant starters if needed (new/empty)
