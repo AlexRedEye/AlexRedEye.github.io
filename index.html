@@ -3,8 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alex Marquez</title>
+  <title>Alex Marquez - Web Developer & Game Designer</title>
+  <meta name="description" content="Alex Marquez - Full-stack web developer specializing in interactive web applications and game development. View my portfolio of projects including web games and applications.">
+  <meta name="keywords" content="Alex Marquez, web developer, game developer, JavaScript, HTML, CSS, portfolio">
+  <meta name="author" content="Alex Marquez">
+  
+  <!-- Open Graph tags for social sharing -->
+  <meta property="og:title" content="Alex Marquez - Web Developer & Game Designer">
+  <meta property="og:description" content="Full-stack web developer specializing in interactive web applications and game development.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alexredeye.github.io/">
+  
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
   <nav>
@@ -25,28 +37,159 @@ style="fill:#FFFFFF;">
         
       </label>
 
-      <a class="home-link" href="#">Home</a>
+      <a class="home-link" href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#contact">Contact</a>
       <a href="mud.html">MUD</a>
-      <a href="clicker.html">Clicker</a>
+      <a href="clicker.html">Casino</a>
       <a href="dungeon.html">Dungeon</a>
       <a href="warehouse.html">Warehouse</a>
-      <a href="gacha.html">Gacha Game</a>
+      <a href="gacha.html">Gacha</a>
     </div>
   </nav>
 
   <div class="hero">
-    <h1>Alex Marquez</h1>
+    <div class="hero-content">
+      <h1>Alex Marquez</h1>
+      <p class="hero-subtitle">Web Developer & Game Designer</p>
+      <p class="hero-description">Creating interactive web experiences and engaging games</p>
+      <div class="hero-buttons">
+        <a href="#portfolio" class="btn btn-primary">View Portfolio</a>
+        <a href="#about" class="btn btn-secondary">About Me</a>
+      </div>
+    </div>
   </div>
 
-  <div class="portfolio">
-    <h2>Portfolio</h2>
-    <div class="portfolioDesc">
-      <p>This is a list of projects I have worked on.</p>
+  <section id="about" class="about">
+    <div class="container">
+      <h2>About Me</h2>
+      <div class="about-content">
+        <p>I'm a passionate web developer with a focus on creating interactive applications and games. I enjoy building engaging user experiences using modern web technologies.</p>
+        <p>My work spans from idle clicker games to complex dungeon crawlers, each project teaching me new aspects of development and user experience design.</p>
+      </div>
     </div>
-    <li><a href="clicker.html">Clicker</a> (Idle Game)</li>
-    <li><a href="dungeon.html">Dungeon</a> (Progress through Floors)</li>
-    <li><a href="mud.html">MUD</a> (A Chat room thing)</li>
-    <li><a href="warehouse.html">Warehouse Clicker</a> (A Warehouse Idle Game)</li>
-  </div>
+  </section>
+
+  <section id="skills" class="skills">
+    <div class="container">
+      <h2>Technologies & Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-item">
+          <h3>Frontend</h3>
+          <ul>
+            <li>HTML5 & CSS3</li>
+            <li>JavaScript (ES6+)</li>
+            <li>Responsive Design</li>
+            <li>Game Development</li>
+          </ul>
+        </div>
+        <div class="skill-item">
+          <h3>Backend</h3>
+          <ul>
+            <li>Node.js</li>
+            <li>Express.js</li>
+            <li>JSON Data Management</li>
+            <li>Server Architecture</li>
+          </ul>
+        </div>
+        <div class="skill-item">
+          <h3>Tools & Workflow</h3>
+          <ul>
+            <li>Git & GitHub</li>
+            <li>VS Code</li>
+            <li>Browser DevTools</li>
+            <li>Project Management</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio" class="portfolio">
+    <div class="container">
+      <h2>Portfolio</h2>
+      <div class="portfolio-description">
+        <p>Here are some of the interactive projects I've developed, showcasing my skills in web development and game design.</p>
+      </div>
+      <div class="projects-grid">
+        <div class="project-card">
+          <h3><a href="clicker.html">Pocket Friends Casino</a></h3>
+          <p class="project-type">Idle Clicker Game</p>
+          <p>An engaging casino-themed idle game with multiple mini-games, progression systems, and automated gameplay mechanics.</p>
+          <div class="project-tech">
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">HTML5</span>
+            <span class="tech-tag">CSS3</span>
+          </div>
+        </div>
+        
+        <div class="project-card">
+          <h3><a href="dungeon.html">Dungeon Crawler</a></h3>
+          <p class="project-type">RPG Adventure Game</p>
+          <p>A floor-based dungeon crawler with character progression, equipment systems, and strategic combat mechanics.</p>
+          <div class="project-tech">
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">JSON</span>
+            <span class="tech-tag">Game Logic</span>
+          </div>
+        </div>
+        
+        <div class="project-card">
+          <h3><a href="mud.html">MUD Chat System</a></h3>
+          <p class="project-type">Social Platform</p>
+          <p>A text-based multi-user environment with real-time communication and interactive features.</p>
+          <div class="project-tech">
+            <span class="tech-tag">Real-time</span>
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">UI/UX</span>
+          </div>
+        </div>
+        
+        <div class="project-card">
+          <h3><a href="warehouse.html">Warehouse Manager</a></h3>
+          <p class="project-type">Business Simulation</p>
+          <p>An idle warehouse management game with resource optimization and strategic planning elements.</p>
+          <div class="project-tech">
+            <span class="tech-tag">Simulation</span>
+            <span class="tech-tag">Strategy</span>
+            <span class="tech-tag">Economics</span>
+          </div>
+        </div>
+        
+        <div class="project-card">
+          <h3><a href="gacha.html">Gacha Collection Game</a></h3>
+          <p class="project-type">Collection Game</p>
+          <p>A character collection game with randomized rewards and progression systems.</p>
+          <div class="project-tech">
+            <span class="tech-tag">RNG Systems</span>
+            <span class="tech-tag">Collections</span>
+            <span class="tech-tag">Progression</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="container">
+      <h2>Get In Touch</h2>
+      <div class="contact-content">
+        <p>Interested in collaborating or want to learn more about my work? Feel free to reach out!</p>
+        <div class="contact-links">
+          <a href="https://github.com/AlexRedEye" target="_blank" rel="noopener noreferrer" class="contact-link">
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Alex Marquez. All rights reserved.</p>
+    </div>
+  </footer>
 </body>
 </html>
