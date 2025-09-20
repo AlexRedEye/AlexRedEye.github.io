@@ -3,23 +3,23 @@ const fs = require('fs');
 const WebSocket = require('ws');
 
 // Version information
-const SERVER_VERSION = "0.4.2-beta";
+const SERVER_VERSION = "0.4.3-beta";
 const VERSION_DATE = "2025-09-19";
 const CHANGELOG = {
-    "0.4.2-beta": [
+    "0.4.3-beta": [
+        "Critical fixes for connection and username handling",
+        "Simplified connection logic to use only mud.pocketfriends.org",
+        "Fixed username command bug that kept ghost clients connected", 
+        "Improved old username cleanup when changing usernames",
+        "Streamlined reconnection logic for single server",
+        "Enhanced error handling for connection issues",
         "Mobile connection fixes and diagnostics",
-        "Smart server detection based on access method",
-        "Network interface binding for mobile access (0.0.0.0)",
-        "Added /servers and /diagnostics commands",
-        "Improved mobile error handling and troubleshooting",
-        "Enhanced connection status reporting",
-        "Automatic IP address detection and display",
-        "Mobile-specific connection guidance",
+        "Network interface binding for mobile access",
+        "Added diagnostic commands (/servers, /diagnostics)",
         "Responsive CSS for mobile devices",
         "Touch-friendly interface with 44px minimum touch targets",
         "Mobile keyboard handling and viewport optimization",
         "iOS Safari specific fixes and zoom prevention",
-        "Hardware-accelerated scrolling for better performance",
         "Room system with 4 rooms (general, games, random, tech)",
         "User management with online status tracking",
         "Real-time messaging with timestamps",
@@ -139,18 +139,22 @@ wss.on('connection', function connection(ws) {
             switch (msg.type) {
                 case 'username':
                     // Handle username changes
-                    if (users.has(username) && username !== msg.username) {
-                        removeUserFromAllRooms(username);
+                    const oldUsername = username;
+                    const newUsername = msg.username;
+                    
+                    // If this is a username change (not initial set), clean up old user
+                    if (oldUsername && oldUsername !== "Guest" && oldUsername !== newUsername && users.has(oldUsername)) {
+                        removeUserFromAllRooms(oldUsername);
                     }
                     
-                    username = msg.username;
+                    username = newUsername;
                     console.log(`${username} has joined the game`);
                     
-                    // Store user data
+                    // Store user data with new username
                     users.set(username, { ws, room: currentRoom, status: 'online' });
                     ws.username = username;
                     
-                    // Add to default room
+                    // Add to default room if not already there
                     if (!rooms.get(currentRoom).has(username)) {
                         rooms.get(currentRoom).add(username);
                         broadcastToRoom(currentRoom, {

@@ -3,7 +3,7 @@ const commandInput = document.getElementById("command-input");
 const sendBtn = document.getElementById("send-btn");
 
 // Version information
-const CLIENT_VERSION = "0.4.2-beta";
+const CLIENT_VERSION = "0.4.3-beta";
 const VERSION_DATE = "2025-09-19";
 let serverVersion = null;
 
@@ -27,25 +27,10 @@ let socket;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
 
-// Smart server selection based on how the page was accessed
+// Use mud.pocketfriends.org as primary connection point
 function getServerList() {
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const port = '5000';
-    
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        // Local development - try localhost first, then fallback
-        return [
-            `ws://localhost:${port}`,
-            `wss://mud.pocketfriends.org:${port}`
-        ];
-    } else {
-        // Accessed via IP address or domain - use the same host
-        return [
-            `${protocol}//${hostname}:${port}`,
-            `wss://mud.pocketfriends.org:${port}`
-        ];
-    }
+    // Always use mud.pocketfriends.org as primary server
+    return ['wss://mud.pocketfriends.org:5000'];
 }
 
 const servers = getServerList();
@@ -72,17 +57,10 @@ function connectToServer() {
             updateConnectionStatus('Disconnected', `Connection closed (Code: ${event.code})`);
             appendOutput(`<span class="game-line"><strong>System:</strong> Disconnected from server. Reason: ${event.reason || 'Connection lost'}</span>`);
             
-            // Try next server or reconnect
+            // Try to reconnect to the same server
             if (reconnectAttempts < maxReconnectAttempts) {
                 reconnectAttempts++;
-                
-                // Try next server if available
-                if (currentServerIndex < servers.length - 1) {
-                    currentServerIndex++;
-                    appendOutput(`<span class="game-line"><strong>System:</strong> Trying server ${currentServerIndex + 1}/${servers.length}: ${servers[currentServerIndex]}</span>`);
-                } else {
-                    currentServerIndex = 0; // Reset to first server
-                }
+                appendOutput(`<span class="game-line"><strong>System:</strong> Reconnecting to ${servers[currentServerIndex]} (attempt ${reconnectAttempts}/${maxReconnectAttempts})</span>`);
                 
                 updateConnectionStatus('Reconnecting', `Attempt ${reconnectAttempts}/${maxReconnectAttempts} in 3 seconds...`);
                 setTimeout(connectToServer, 3000);
@@ -94,16 +72,12 @@ function connectToServer() {
 
         socket.onerror = function(error) {
             console.error('WebSocket error:', error);
-            console.error('Current server:', servers[currentServerIndex]);
-            console.error('Available servers:', servers);
+            console.error('Server:', servers[currentServerIndex]);
             updateConnectionStatus('Error', 'Connection error occurred');
             
-            // Provide mobile-specific error guidance
+            appendOutput(`<span class="game-line error"><strong>Connection Error:</strong> Cannot reach server ${servers[currentServerIndex]}</span>`);
             if (/Mobi|Android/i.test(navigator.userAgent)) {
-                appendOutput(`<span class="game-line error"><strong>Mobile Connection Error:</strong> Cannot reach server ${servers[currentServerIndex]}</span>`);
-                appendOutput(`<span class="game-line"><strong>Troubleshooting:</strong> Make sure you're on the same WiFi network and try the /servers command to see available servers.</span>`);
-            } else {
-                appendOutput(`<span class="game-line error"><strong>System:</strong> Connection error to ${servers[currentServerIndex]}. Check console for details.</span>`);
+                appendOutput(`<span class="game-line"><strong>Mobile Tip:</strong> Make sure you have a stable internet connection.</span>`);
             }
         };
 
