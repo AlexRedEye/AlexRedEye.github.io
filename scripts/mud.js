@@ -3,7 +3,7 @@ const commandInput = document.getElementById("command-input");
 const sendBtn = document.getElementById("send-btn");
 
 // Version information
-const CLIENT_VERSION = "0.4.0-beta";
+const CLIENT_VERSION = "0.4.1-beta";
 const VERSION_DATE = "2025-09-19";
 let serverVersion = null;
 
@@ -587,3 +587,49 @@ function playNotificationSound() {
         console.log('Notification sound failed:', error);
     }
 }
+
+// Mobile keyboard handling for better UX
+(function() {
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        const mudLayout = document.querySelector('.mud-layout');
+        const commandInput = document.getElementById('command-input');
+        
+        if (commandInput && mudLayout) {
+            // Handle virtual keyboard on mobile
+            commandInput.addEventListener('focus', function() {
+                mudLayout.classList.add('keyboard-open');
+                // Scroll input into view on mobile
+                setTimeout(() => {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            });
+            
+            commandInput.addEventListener('blur', function() {
+                mudLayout.classList.remove('keyboard-open');
+            });
+            
+            // Prevent zoom on iOS when focusing input
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                const viewport = document.querySelector('meta[name=viewport]');
+                if (viewport) {
+                    commandInput.addEventListener('focus', function() {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                    });
+                    
+                    commandInput.addEventListener('blur', function() {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                    });
+                }
+            }
+        }
+        
+        // Add touch-friendly scrolling for output
+        const gameOutput = document.getElementById('game-output');
+        if (gameOutput) {
+            gameOutput.style.webkitOverflowScrolling = 'touch';
+        }
+        
+        // Improve touch responsiveness
+        document.body.style.touchAction = 'manipulation';
+    }
+})();

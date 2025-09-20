@@ -3,11 +3,17 @@ const fs = require('fs');
 const WebSocket = require('ws');
 
 // Version information
-const SERVER_VERSION = "0.4.0-beta";
+const SERVER_VERSION = "0.4.1-beta";
 const VERSION_DATE = "2025-09-19";
 const CHANGELOG = {
-    "0.4.0-beta": [
-        "Beta release with version tracking system",
+    "0.4.1-beta": [
+        "Mobile optimization update",
+        "Responsive CSS for mobile devices",
+        "Touch-friendly interface with 44px minimum touch targets",
+        "Mobile keyboard handling and viewport optimization",
+        "Horizontal scrollable sidebar on mobile",
+        "iOS Safari specific fixes and zoom prevention",
+        "Hardware-accelerated scrolling for better performance",
         "Room system with 4 rooms (general, games, random, tech)",
         "User management with online status tracking",
         "Real-time messaging with timestamps",
