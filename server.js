@@ -186,6 +186,20 @@ wss.on('connection', function connection(ws) {
                     broadcastRoomCounts(); // Update room counts after room change
                     break;
 
+                case 'leaveRoom':
+                    // Handle explicit leave room requests
+                    const roomToLeave = msg.room || currentRoom;
+                    if (rooms.has(roomToLeave) && rooms.get(roomToLeave).has(username)) {
+                        rooms.get(roomToLeave).delete(username);
+                        broadcastToRoom(roomToLeave, {
+                            type: 'userLeft',
+                            username: username,
+                            room: roomToLeave
+                        });
+                        broadcastRoomCounts();
+                    }
+                    break;
+
                 case 'message':
                     // Broadcast regular messages to room
                     console.log(`[${msg.room || currentRoom}] ${username}: ${msg.message}`);
@@ -266,10 +280,11 @@ wss.on('connection', function connection(ws) {
                     break;
 
                 default:
-                    console.log(`Unknown message type: ${msg.type}`);
+                    console.log(`Unknown message type: ${msg.type} from user: ${username}`);
+                    console.log('Full message:', msg);
                     ws.send(JSON.stringify({
                         type: 'error',
-                        message: 'Unknown message type'
+                        message: `Unknown message type: ${msg.type}`
                     }));
             }
         } catch (error) {

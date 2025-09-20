@@ -76,8 +76,20 @@ function connectToServer() {
 
         socket.onmessage = function (event) {
             try {
+                // First check if event.data exists and is valid
+                if (!event.data) {
+                    console.warn('Received empty message from server');
+                    return;
+                }
+                
                 const message = JSON.parse(event.data);
                 const timestamp = new Date().toLocaleTimeString();
+                
+                // Validate message structure
+                if (!message || typeof message !== 'object') {
+                    console.warn('Received invalid message structure:', message);
+                    return;
+                }
                 
                 if (message.type === 'typing') {
                     showTyping(message.username);
@@ -93,7 +105,11 @@ function connectToServer() {
                     appendOutput(`<span class="game-line whisper"><span class="timestamp">[${timestamp}]</span> <strong>${message.from} whispered:</strong> ${message.message}</span>`);
                     playNotificationSound();
                 } else if (message.type === 'userList') {
-                    updateUserList(message.users);
+                    if (message.users && Array.isArray(message.users)) {
+                        updateUserList(message.users);
+                    } else {
+                        console.warn('Received userList message without valid users array:', message);
+                    }
                 } else if (message.type === 'userJoined') {
                     if (message.username) {
                         addUser(message.username);
@@ -112,7 +128,10 @@ function connectToServer() {
                         } else if (message.newRoom === currentRoom && message.oldRoom !== currentRoom) {
                             appendOutput(`<span class="game-line system"><strong>System:</strong> ${message.username} joined from ${message.oldRoom}</span>`);
                         }
-                        updateUserList(message.users);
+                        // Only update user list if users array is provided
+                        if (message.users && Array.isArray(message.users)) {
+                            updateUserList(message.users);
+                        }
                     }
                 } else if (message.type === 'roomUsers') {
                     updateRoomCount(message.room, message.count);
@@ -133,7 +152,9 @@ function connectToServer() {
                 }
             } catch (e) {
                 console.error('Error parsing message:', e);
-                appendOutput(`<span class="game-line"><strong>System:</strong> Error parsing server message.</span>`);
+                console.error('Raw message data:', event.data);
+                console.error('Message length:', event.data ? event.data.length : 'undefined');
+                appendOutput(`<span class="game-line error"><strong>System:</strong> Error parsing server message: ${e.message}</span>`);
             }
         };
 
@@ -149,9 +170,16 @@ connectToServer();
 
 // User list management
 function updateUserList(users) {
+    if (!users || !Array.isArray(users)) {
+        console.warn('updateUserList called with invalid data:', users);
+        return;
+    }
+    
     userList.clear();
     users.forEach(user => {
-        userList.set(user.username, { status: user.status || 'online', room: user.room || 'general' });
+        if (user && user.username) {
+            userList.set(user.username, { status: user.status || 'online', room: user.room || 'general' });
+        }
     });
     renderUserList();
 }
