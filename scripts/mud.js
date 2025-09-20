@@ -1,21 +1,18 @@
 const outputDiv = document.getElementById("game-output");
 const commandInput = document.getElementById("command-input");
+const sendBtn = document.getElementById("send-btn");
 
-let username = localStorage.getItem('username') || "Guest"; // Load username from localStorage or use default
+let username = localStorage.getItem('username') || "Guest";
+let currentRoom = 'general'; // Default room
+let userList = new Map(); // Track users and their status
 
 // Add connection status indicator
 function updateConnectionStatus(status, message) {
-    const statusDiv = document.getElementById('connection-status') || createStatusDiv();
-    statusDiv.innerHTML = `<strong>Connection:</strong> ${status} - ${message}`;
-    statusDiv.className = `connection-status ${status.toLowerCase()}`;
-}
-
-function createStatusDiv() {
-    const statusDiv = document.createElement('div');
-    statusDiv.id = 'connection-status';
-    statusDiv.className = 'connection-status';
-    document.getElementById('mud-container').insertBefore(statusDiv, outputDiv);
-    return statusDiv;
+    const statusDiv = document.getElementById('connection-status');
+    if (statusDiv) {
+        statusDiv.innerHTML = `<strong>Connection:</strong> ${status} - ${message}`;
+        statusDiv.className = `connection-status ${status.toLowerCase()}`;
+    }
 }
 
 // Try to connect to WebSocket server with better error handling
@@ -41,7 +38,9 @@ function connectToServer() {
             updateConnectionStatus('Connected', 'Successfully connected to MUD server');
             reconnectAttempts = 0;
             socket.send(JSON.stringify({ type: 'username', username: username }));
+            socket.send(JSON.stringify({ type: 'joinRoom', room: currentRoom, username: username }));
             appendOutput(`<span class="game-line"><strong>System:</strong> Connected to MUD server!</span>`);
+            appendOutput(`<span class="game-line room-message"><strong>System:</strong> Joined room: ${currentRoom}</span>`);
         };
 
         socket.onclose = function(event) {
@@ -78,12 +77,38 @@ function connectToServer() {
         socket.onmessage = function (event) {
             try {
                 const message = JSON.parse(event.data);
+                const timestamp = new Date().toLocaleTimeString();
+                
                 if (message.type === 'typing') {
                     showTyping(message.username);
+                    updateUserStatus(message.username, 'typing');
                 } else if (message.type === 'stoppedTyping') {
                     stopTyping(message.username);
+                    updateUserStatus(message.username, 'online');
+                } else if (message.type === 'emote') {
+                    if (message.room === currentRoom) {
+                        appendOutput(`<span class="game-line emote"><span class="timestamp">[${timestamp}]</span> <em>* ${message.username} ${message.action}</em></span>`);
+                    }
+                } else if (message.type === 'whisper') {
+                    appendOutput(`<span class="game-line whisper"><span class="timestamp">[${timestamp}]</span> <strong>${message.from} whispered:</strong> ${message.message}</span>`);
+                    playNotificationSound();
+                } else if (message.type === 'userList') {
+                    updateUserList(message.users);
+                } else if (message.type === 'userJoined') {
+                    addUser(message.username);
+                    appendOutput(`<span class="game-line user-join"><strong>System:</strong> ${message.username} joined the room</span>`);
+                } else if (message.type === 'userLeft') {
+                    removeUser(message.username);
+                    appendOutput(`<span class="game-line user-leave"><strong>System:</strong> ${message.username} left the room</span>`);
+                } else if (message.type === 'roomUsers') {
+                    updateRoomCount(message.room, message.count);
+                } else if (message.type === 'message') {
+                    if (message.room === currentRoom) {
+                        appendOutput(`<span class="game-line"><span class="timestamp">[${timestamp}]</span> <strong>${message.username}:</strong> ${message.message}</span>`);
+                        playMessageSound();
+                    }
                 } else {
-                    appendOutput(`<span class="game-line"><strong>${message.username}:</strong> ${message.message}</span>`);
+                    appendOutput(`<span class="game-line"><span class="timestamp">[${timestamp}]</span> <strong>${message.username}:</strong> ${message.message}</span>`);
                 }
             } catch (e) {
                 console.error('Error parsing message:', e);
@@ -101,6 +126,103 @@ function connectToServer() {
 // Start connection
 connectToServer();
 
+// User list management
+function updateUserList(users) {
+    userList.clear();
+    users.forEach(user => {
+        userList.set(user.username, { status: user.status || 'online', room: user.room || 'general' });
+    });
+    renderUserList();
+}
+
+function addUser(username) {
+    userList.set(username, { status: 'online', room: currentRoom });
+    renderUserList();
+}
+
+function removeUser(username) {
+    userList.delete(username);
+    renderUserList();
+}
+
+function updateUserStatus(username, status) {
+    if (userList.has(username)) {
+        userList.get(username).status = status;
+        renderUserList();
+    }
+}
+
+function renderUserList() {
+    const usersContainer = document.getElementById('users-list');
+    const userCount = document.getElementById('user-count');
+    
+    const roomUsers = Array.from(userList.entries()).filter(([name, data]) => data.room === currentRoom);
+    userCount.textContent = roomUsers.length;
+    
+    usersContainer.innerHTML = '';
+    roomUsers.forEach(([name, data]) => {
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user-item';
+        userDiv.innerHTML = `
+            <span class="user-name">${name}</span>
+            <span class="user-status ${data.status}"></span>
+        `;
+        usersContainer.appendChild(userDiv);
+    });
+}
+
+// Room management
+function updateRoomCount(roomName, count) {
+    const roomItem = document.querySelector(`[data-room="${roomName}"] .room-count`);
+    if (roomItem) {
+        roomItem.textContent = count;
+    }
+}
+
+function switchRoom(roomName) {
+    if (roomName === currentRoom) return;
+    
+    // Leave current room
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: 'leaveRoom', room: currentRoom, username: username }));
+        socket.send(JSON.stringify({ type: 'joinRoom', room: roomName, username: username }));
+    }
+    
+    // Update UI
+    document.querySelector('.room-item.active').classList.remove('active');
+    document.querySelector(`[data-room="${roomName}"]`).classList.add('active');
+    
+    currentRoom = roomName;
+    outputDiv.innerHTML = ''; // Clear chat
+    appendOutput(`<span class="game-line room-message"><strong>System:</strong> Switched to room: ${roomName}</span>`);
+    
+    renderUserList();
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Room switching
+    document.querySelectorAll('.room-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const roomName = item.dataset.room;
+            switchRoom(roomName);
+        });
+    });
+    
+    // Send button
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendCommand);
+    }
+});
+
+// Set up input event listeners
+commandInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendCommand();
+    }
+});
+
 let typingTimeout; // To handle user stop typing after a delay
 
 // Notify server when the user is typing
@@ -109,48 +231,21 @@ commandInput.addEventListener("input", function() {
         if (typingTimeout) {
             clearTimeout(typingTimeout);
         }
-        socket.send(JSON.stringify({ type: 'typing', username: username }));
+        socket.send(JSON.stringify({ 
+            type: 'typing', 
+            username: username, 
+            room: currentRoom 
+        }));
 
         typingTimeout = setTimeout(function() {
             if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ type: 'stoppedTyping', username: username }));
+                socket.send(JSON.stringify({ 
+                    type: 'stoppedTyping', 
+                    username: username, 
+                    room: currentRoom 
+                }));
             }
         }, 1000); // User is considered to have stopped typing after 1 second
-    }
-});
-
-socket.onopen = function () {
-    console.log('Connected to the server');
-    socket.send(JSON.stringify({ type: 'username', username: username }));
-};
-
-// Notify server when the user is typing
-commandInput.addEventListener("input", function() {
-    if (typingTimeout) {
-        clearTimeout(typingTimeout);
-    }
-    socket.send(JSON.stringify({ type: 'typing', username: username }));
-
-    typingTimeout = setTimeout(function() {
-        socket.send(JSON.stringify({ type: 'stoppedTyping', username: username }));
-    }, 1000); // User is considered to have stopped typing after 1 second
-});
-
-socket.onmessage = function (event) {
-    const message = JSON.parse(event.data);
-    if (message.type === 'typing') {
-        showTyping(message.username);
-    } else if (message.type === 'stoppedTyping') {
-        stopTyping(message.username);
-    } else {
-        appendOutput(`<span class="game-line"><strong>${message.username}:</strong> ${message.message}</span>`);
-    }
-};
-
-commandInput.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        sendCommand();
     }
 });
 
@@ -162,10 +257,17 @@ function sendCommand() {
         } else {
             // Check if socket is connected before sending
             if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ type: 'message', username: username, message: command }));
-                appendOutput(`<span class="game-line"><strong>You:</strong> ${command}</span>`);
+                socket.send(JSON.stringify({ 
+                    type: 'message', 
+                    username: username, 
+                    message: command,
+                    room: currentRoom 
+                }));
+                const timestamp = new Date().toLocaleTimeString();
+                appendOutput(`<span class="game-line"><span class="timestamp">[${timestamp}]</span> <strong>You:</strong> ${command}</span>`);
+                playMessageSound();
             } else {
-                appendOutput(`<span class="game-line"><strong>System:</strong> Not connected to server. Cannot send message.</span>`);
+                appendOutput(`<span class="game-line error"><strong>System:</strong> Not connected to server. Cannot send message.</span>`);
             }
         }
     }
@@ -182,6 +284,7 @@ function handleCommand(command) {
             showHelp();
             break;
         case "/whisper":
+        case "/w":
             sendWhisper(args);
             break;
         case "/reconnect":
@@ -196,10 +299,80 @@ function handleCommand(command) {
                  socket.readyState === WebSocket.CLOSING ? 'Closing' : 'Disconnected') 
                 : 'No connection';
             appendOutput(`<span class="game-line"><strong>System:</strong> Connection status: ${status}</span>`);
+            appendOutput(`<span class="game-line"><strong>System:</strong> Current room: ${currentRoom}</span>`);
+            break;
+        case "/room":
+            if (args.length > 0) {
+                const roomName = args[0].toLowerCase();
+                const validRooms = ['general', 'games', 'random', 'tech'];
+                if (validRooms.includes(roomName)) {
+                    switchRoom(roomName);
+                } else {
+                    appendOutput(`<span class="game-line"><strong>System:</strong> Invalid room. Available rooms: ${validRooms.join(', ')}</span>`);
+                }
+            } else {
+                appendOutput(`<span class="game-line"><strong>System:</strong> Please specify a room name.</span>`);
+            }
+            break;
+        case "/users":
+            const roomUsers = Array.from(userList.entries()).filter(([name, data]) => data.room === currentRoom);
+            appendOutput(`<span class="game-line"><strong>System:</strong> Users in ${currentRoom}: ${roomUsers.map(([name]) => name).join(', ')}</span>`);
+            break;
+        case "/me":
+            sendEmote(args.join(" "));
+            break;
+        case "/dance":
+            sendEmote("dances energetically! 💃🕺");
+            break;
+        case "/wave":
+            sendEmote("waves hello! 👋");
+            break;
+        case "/laugh":
+            sendEmote("laughs out loud! 😂");
+            break;
+        case "/shrug":
+            sendEmote("shrugs 🤷");
+            break;
+        case "/clap":
+            sendEmote("claps enthusiastically! 👏");
+            break;
+        case "/think":
+            sendEmote("thinks deeply... 🤔");
+            break;
+        case "/hug":
+            if (args.length > 0) {
+                sendEmote(`gives ${args[0]} a warm hug! 🤗`);
+            } else {
+                sendEmote("gives everyone a group hug! 🤗");
+            }
+            break;
+        case "/clear":
+            outputDiv.innerHTML = '';
+            appendOutput(`<span class="game-line"><strong>System:</strong> Chat cleared</span>`);
             break;
         default:
             appendOutput(`<span class="game-line"><strong>System:</strong> Unknown command: ${cmd}. Type /help for a list of commands.</span>`);
             break;
+    }
+}
+
+function sendEmote(action) {
+    if (!action.trim()) {
+        appendOutput(`<span class="game-line"><strong>System:</strong> Please provide an action for the emote.</span>`);
+        return;
+    }
+    
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ 
+            type: 'emote', 
+            username: username, 
+            action: action,
+            room: currentRoom 
+        }));
+        const timestamp = new Date().toLocaleTimeString();
+        appendOutput(`<span class="game-line emote"><span class="timestamp">[${timestamp}]</span> <em>* You ${action}</em></span>`);
+    } else {
+        appendOutput(`<span class="game-line"><strong>System:</strong> Not connected to server. Cannot send emote.</span>`);
     }
 }
 
@@ -219,13 +392,30 @@ function changeUsername(args) {
 
 function showHelp() {
     appendOutput(`<span class="game-line"><strong>System:</strong> Available commands:
-        <ul>
-            <li>/username <name> - Set your username</li>
-            <li>/help - Show this help message</li>
-            <li>/whisper <user> <message> - Send a private message to another user</li>
-            <li>/reconnect - Attempt to reconnect to server</li>
-            <li>/status - Show connection status</li>
-        </ul>
+        <div class="help-commands">
+            <div><strong>Basic Commands:</strong></div>
+            <div>/username &lt;name&gt; - Set your username</div>
+            <div>/help - Show this help message</div>
+            <div>/status - Show connection status</div>
+            <div>/clear - Clear chat history</div>
+            <div>/reconnect - Attempt to reconnect to server</div>
+            
+            <div><strong>Chat Commands:</strong></div>
+            <div>/whisper &lt;user&gt; &lt;message&gt; - Send a private message</div>
+            <div>/w &lt;user&gt; &lt;message&gt; - Send a private message (short)</div>
+            <div>/room &lt;name&gt; - Switch to a different room</div>
+            <div>/users - List users in current room</div>
+            
+            <div><strong>Emote Commands:</strong></div>
+            <div>/me &lt;action&gt; - Perform a custom action</div>
+            <div>/dance - Dance enthusiastically</div>
+            <div>/wave - Wave hello</div>
+            <div>/laugh - Laugh out loud</div>
+            <div>/shrug - Shrug</div>
+            <div>/clap - Clap enthusiastically</div>
+            <div>/think - Think deeply</div>
+            <div>/hug [user] - Give someone a hug</div>
+        </div>
     </span>`);
 }
 
@@ -234,13 +424,20 @@ function sendWhisper(args) {
     const message = messageParts.join(" ").trim();
     if (targetUser && message) {
         if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ type: 'whisper', from: username, to: targetUser, message: message }));
-            appendOutput(`<span class="game-line"><strong>You whispered to ${targetUser}:</strong> ${message}</span>`);
+            socket.send(JSON.stringify({ 
+                type: 'whisper', 
+                from: username, 
+                to: targetUser, 
+                message: message,
+                room: currentRoom 
+            }));
+            const timestamp = new Date().toLocaleTimeString();
+            appendOutput(`<span class="game-line whisper"><span class="timestamp">[${timestamp}]</span> <strong>You whispered to ${targetUser}:</strong> ${message}</span>`);
         } else {
-            appendOutput(`<span class="game-line"><strong>System:</strong> Not connected to server. Cannot send whisper.</span>`);
+            appendOutput(`<span class="game-line error"><strong>System:</strong> Not connected to server. Cannot send whisper.</span>`);
         }
     } else {
-        appendOutput(`<span class="game-line"><strong>System:</strong> Please provide a username and message for whisper.</span>`);
+        appendOutput(`<span class="game-line error"><strong>System:</strong> Please provide a username and message for whisper.</span>`);
     }
 }
 
@@ -253,11 +450,58 @@ function appendOutput(text) {
 // Show typing indicator for a user
 function showTyping(username) {
     const typingIndicator = document.getElementById('typing-indicator');
-    typingIndicator.innerHTML = `${username} is typing...`;
+    if (typingIndicator) {
+        typingIndicator.innerHTML = `${username} is typing...`;
+    }
 }
 
 // Stop typing indicator for a user
 function stopTyping(username) {
     const typingIndicator = document.getElementById('typing-indicator');
-    typingIndicator.innerHTML = '';
+    if (typingIndicator) {
+        typingIndicator.innerHTML = '';
+    }
+}
+
+// Sound notification functions
+function playMessageSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+        console.log('Message sound failed:', error);
+    }
+}
+
+function playNotificationSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+    } catch (error) {
+        console.log('Notification sound failed:', error);
+    }
 }

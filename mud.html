@@ -9,10 +9,52 @@
 <body>
     <a href="index.html">Home</a>
     <div id="mud-container">
-        <h1>Welcome to the MUD <span id="version">v0.2.1 - Prototype</span></h1>
-        <div id="game-output"></div>
-        <div id="typing-indicator"></div> <!-- Typing indicator -->
-        <input type="text" id="command-input" placeholder="Enter command...">
+        <h1>Welcome to the MUD <span id="version">v0.3.0 - Enhanced</span></h1>
+        
+        <!-- Connection status indicator -->
+        <div id="connection-status" class="connection-status connecting">
+            <strong>Connection:</strong> Initializing...
+        </div>
+        
+        <div class="mud-layout">
+            <div class="main-chat">
+                <div id="game-output"></div>
+                <div id="typing-indicator"></div>
+                <div class="input-area">
+                    <input type="text" id="command-input" placeholder="Enter command or message...">
+                    <button id="send-btn">Send</button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="users-panel">
+                    <h3>Online Users (<span id="user-count">0</span>)</h3>
+                    <div id="users-list"></div>
+                </div>
+                
+                <div class="rooms-panel">
+                    <h3>Rooms</h3>
+                    <div id="rooms-list">
+                        <div class="room-item active" data-room="general">
+                            <span class="room-name">🏠 General</span>
+                            <span class="room-count">0</span>
+                        </div>
+                        <div class="room-item" data-room="games">
+                            <span class="room-name">🎮 Games</span>
+                            <span class="room-count">0</span>
+                        </div>
+                        <div class="room-item" data-room="random">
+                            <span class="room-name">🎲 Random</span>
+                            <span class="room-count">0</span>
+                        </div>
+                        <div class="room-item" data-room="tech">
+                            <span class="room-name">💻 Tech</span>
+                            <span class="room-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="scripts/mud.js"></script>

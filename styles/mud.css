@@ -38,13 +38,190 @@ body {
 
 /* Container for the game */
 #mud-container {
-    background-color: #000; /* Black background for the container */
+    background-color: #000;
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-    width: 80%;
-    max-width: 900px;
-    margin-top: 60px; /* Ensure the game content starts after the link */
+    width: 95%;
+    max-width: 1200px;
+    margin-top: 60px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main layout */
+.mud-layout {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+    margin-top: 15px;
+}
+
+.main-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sidebar {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Input area */
+.input-area {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.input-area input {
+    flex: 1;
+    background-color: #000;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-area input:focus {
+    outline: none;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+#send-btn {
+    padding: 10px 20px;
+    background-color: #00ff00;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#send-btn:hover {
+    background-color: #00cc00;
+}
+
+/* Sidebar panels */
+.users-panel, .rooms-panel {
+    background-color: rgba(0, 255, 0, 0.05);
+    border: 1px solid #00ff00;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.users-panel h3, .rooms-panel h3 {
+    color: #00ff00;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Users list */
+#users-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 3px 0;
+    background-color: rgba(0, 255, 0, 0.1);
+    border-radius: 4px;
+    font-size: 13px;
+    transition: background-color 0.3s;
+}
+
+.user-item:hover {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+.user-name {
+    flex: 1;
+    color: #00ff00;
+}
+
+.user-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #00ff00;
+    margin-left: 5px;
+}
+
+.user-status.typing {
+    background-color: #ffff00;
+    animation: pulse 1s infinite;
+}
+
+.user-status.away {
+    background-color: #ffa500;
+}
+
+/* Rooms list */
+#rooms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.room-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: rgba(0, 255, 0, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 13px;
+}
+
+.room-item:hover {
+    background-color: rgba(0, 255, 0, 0.2);
+    transform: translateX(3px);
+}
+
+.room-item.active {
+    background-color: rgba(0, 255, 0, 0.3);
+    border-left: 3px solid #00ff00;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.room-name {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+.room-count {
+    background-color: #00ff00;
+    color: black;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
 }
 
 /* Connection status indicator */
@@ -85,16 +262,60 @@ body {
 
 /* Output area (terminal-style) */
 #game-output {
-    height: 300px;
+    flex: 1;
     overflow-y: auto;
-    background-color: #000; /* Black background for output area */
+    background-color: #000;
     padding: 15px;
     border-radius: 4px;
-    color: #00ff00; /* Bright green text for output */
-    font-size: 16px;
+    color: #00ff00;
+    font-size: 14px;
     line-height: 1.4;
-    margin-bottom: 20px;
-    white-space: pre-wrap; /* Preserve new lines */
+    white-space: pre-wrap;
+    border: 1px solid #00ff00;
+    min-height: 300px;
+}
+
+/* Typing indicator */
+#typing-indicator {
+    min-height: 20px;
+    padding: 5px 15px;
+    color: #ffff00;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .mud-layout {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 10px;
+    }
+    
+    .users-panel, .rooms-panel {
+        min-width: 200px;
+        flex-shrink: 0;
+    }
+    
+    #mud-container {
+        width: 98%;
+        height: 90vh;
+        padding: 15px;
+    }
+    
+    .input-area {
+        flex-wrap: wrap;
+    }
+    
+    .input-area input {
+        min-width: 200px;
+    }
 }
 
 /* Command input */
@@ -133,6 +354,22 @@ button:hover {
 
 button:active {
     background-color: #009900; /* Even darker green on active */
+}
+
+/* Message styling */
+.room-message {
+    color: #00ffff;
+    font-weight: bold;
+}
+
+.user-join {
+    color: #ffff00;
+    font-style: italic;
+}
+
+.user-leave {
+    color: #ff6600;
+    font-style: italic;
 }
 
 /* Terminal prompt look */
