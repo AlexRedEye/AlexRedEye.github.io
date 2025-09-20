@@ -2,6 +2,31 @@ const https = require('https');
 const fs = require('fs');
 const WebSocket = require('ws');
 
+// Version information
+const SERVER_VERSION = "0.4.0-beta";
+const VERSION_DATE = "2025-09-19";
+const CHANGELOG = {
+    "0.4.0-beta": [
+        "Beta release with version tracking system",
+        "Room system with 4 rooms (general, games, random, tech)",
+        "User management with online status tracking",
+        "Real-time messaging with timestamps",
+        "Emote system with predefined actions",
+        "Private whisper messaging",
+        "Typing indicators",
+        "Sound notifications",
+        "Connection status monitoring",
+        "Room user count tracking",
+        "Graceful error handling and reconnection",
+        "Interactive version command (/version)"
+    ]
+};
+
+console.log(`=== MUD Server v${SERVER_VERSION} (${VERSION_DATE}) ===`);
+console.log("Changelog for this version:");
+CHANGELOG[SERVER_VERSION].forEach(change => console.log(`  • ${change}`));
+console.log("=".repeat(50));
+
 // Read SSL certificate and key
 const serverOptions = {
     cert: fs.readFileSync('pfcert.cer'),
@@ -279,6 +304,16 @@ wss.on('connection', function connection(ws) {
                     }, username);
                     break;
 
+                case 'version':
+                    // Send version information to client
+                    ws.send(JSON.stringify({
+                        type: 'version',
+                        serverVersion: SERVER_VERSION,
+                        versionDate: VERSION_DATE,
+                        changelog: CHANGELOG[SERVER_VERSION]
+                    }));
+                    break;
+
                 default:
                     console.log(`Unknown message type: ${msg.type} from user: ${username}`);
                     console.log('Full message:', msg);
@@ -322,8 +357,9 @@ wss.on('connection', function connection(ws) {
 
 // Start the server on port 5000 (changed from 5000 to match client expectations)
 server.listen(5000, function() {
-    console.log('HTTPS MUD Server running at https://localhost:5000');
+    console.log(`HTTPS MUD Server v${SERVER_VERSION} running at https://localhost:5000`);
     console.log('Supported rooms:', Array.from(rooms.keys()).join(', '));
+    console.log(`Server started on ${new Date().toISOString()}`);
     console.log('Ready for connections!');
     
     // Initialize room counts

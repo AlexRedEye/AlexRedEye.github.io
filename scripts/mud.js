@@ -2,6 +2,13 @@ const outputDiv = document.getElementById("game-output");
 const commandInput = document.getElementById("command-input");
 const sendBtn = document.getElementById("send-btn");
 
+// Version information
+const CLIENT_VERSION = "0.4.0-beta";
+const VERSION_DATE = "2025-09-19";
+let serverVersion = null;
+
+console.log(`MUD Client v${CLIENT_VERSION} (${VERSION_DATE}) initialized`);
+
 let username = localStorage.getItem('username') || "Guest";
 let currentRoom = 'general'; // Default room
 let userList = new Map(); // Track users and their status
@@ -142,6 +149,16 @@ function connectToServer() {
                     }
                 } else if (message.type === 'error') {
                     appendOutput(`<span class="game-line error"><strong>Error:</strong> ${message.message}</span>`);
+                } else if (message.type === 'version') {
+                    // Handle version information from server
+                    serverVersion = message.serverVersion;
+                    appendOutput(`<span class="game-line system"><strong>Server Version:</strong> v${message.serverVersion} (${message.versionDate})</span>`);
+                    if (message.changelog && message.changelog.length > 0) {
+                        appendOutput(`<span class="game-line system"><strong>Server Features:</strong></span>`);
+                        message.changelog.forEach(feature => {
+                            appendOutput(`<span class="game-line system">  • ${feature}</span>`);
+                        });
+                    }
                 } else {
                     // Handle unknown message types with safety checks
                     if (message.username && message.message) {
@@ -403,6 +420,17 @@ function handleCommand(command) {
             outputDiv.innerHTML = '';
             appendOutput(`<span class="game-line"><strong>System:</strong> Chat cleared</span>`);
             break;
+        case "/version":
+            appendOutput(`<span class="game-line system"><strong>Client Version:</strong> v${CLIENT_VERSION} (${VERSION_DATE})</span>`);
+            if (serverVersion) {
+                appendOutput(`<span class="game-line system"><strong>Server Version:</strong> v${serverVersion}</span>`);
+            } else {
+                appendOutput(`<span class="game-line system"><strong>Server Version:</strong> Requesting...</span>`);
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'version' }));
+                }
+            }
+            break;
         default:
             appendOutput(`<span class="game-line"><strong>System:</strong> Unknown command: ${cmd}. Type /help for a list of commands.</span>`);
             break;
@@ -450,6 +478,7 @@ function showHelp() {
             <div>/username &lt;name&gt; - Set your username</div>
             <div>/help - Show this help message</div>
             <div>/status - Show connection status</div>
+            <div>/version - Show client and server version information</div>
             <div>/clear - Clear chat history</div>
             <div>/reconnect - Attempt to reconnect to server</div>
             
