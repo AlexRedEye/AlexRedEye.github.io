@@ -22,7 +22,7 @@ const maxReconnectAttempts = 5;
 
 // Try local server first, then fallback to remote
 const servers = [
-    'ws://localhost:3000',
+    'ws://localhost:5000',
     'wss://mud.pocketfriends.org:5000'
 ];
 let currentServerIndex = 0;
@@ -95,11 +95,25 @@ function connectToServer() {
                 } else if (message.type === 'userList') {
                     updateUserList(message.users);
                 } else if (message.type === 'userJoined') {
-                    addUser(message.username);
-                    appendOutput(`<span class="game-line user-join"><strong>System:</strong> ${message.username} joined the room</span>`);
+                    if (message.username) {
+                        addUser(message.username);
+                        appendOutput(`<span class="game-line user-join"><strong>System:</strong> ${message.username} joined the room</span>`);
+                    }
                 } else if (message.type === 'userLeft') {
-                    removeUser(message.username);
-                    appendOutput(`<span class="game-line user-leave"><strong>System:</strong> ${message.username} left the room</span>`);
+                    if (message.username) {
+                        removeUser(message.username);
+                        appendOutput(`<span class="game-line user-leave"><strong>System:</strong> ${message.username} left the room</span>`);
+                    }
+                } else if (message.type === 'roomChanged') {
+                    if (message.username && message.oldRoom && message.newRoom) {
+                        // Handle room change notifications
+                        if (message.oldRoom === currentRoom && message.newRoom !== currentRoom) {
+                            appendOutput(`<span class="game-line system"><strong>System:</strong> ${message.username} moved to ${message.newRoom}</span>`);
+                        } else if (message.newRoom === currentRoom && message.oldRoom !== currentRoom) {
+                            appendOutput(`<span class="game-line system"><strong>System:</strong> ${message.username} joined from ${message.oldRoom}</span>`);
+                        }
+                        updateUserList(message.users);
+                    }
                 } else if (message.type === 'roomUsers') {
                     updateRoomCount(message.room, message.count);
                 } else if (message.type === 'message') {
@@ -107,8 +121,15 @@ function connectToServer() {
                         appendOutput(`<span class="game-line"><span class="timestamp">[${timestamp}]</span> <strong>${message.username}:</strong> ${message.message}</span>`);
                         playMessageSound();
                     }
+                } else if (message.type === 'error') {
+                    appendOutput(`<span class="game-line error"><strong>Error:</strong> ${message.message}</span>`);
                 } else {
-                    appendOutput(`<span class="game-line"><span class="timestamp">[${timestamp}]</span> <strong>${message.username}:</strong> ${message.message}</span>`);
+                    // Handle unknown message types with safety checks
+                    if (message.username && message.message) {
+                        appendOutput(`<span class="game-line"><span class="timestamp">[${timestamp}]</span> <strong>${message.username}:</strong> ${message.message}</span>`);
+                    } else {
+                        console.log('Unknown message type or incomplete data:', message);
+                    }
                 }
             } catch (e) {
                 console.error('Error parsing message:', e);
@@ -136,17 +157,21 @@ function updateUserList(users) {
 }
 
 function addUser(username) {
-    userList.set(username, { status: 'online', room: currentRoom });
-    renderUserList();
+    if (username && username.trim()) {
+        userList.set(username, { status: 'online', room: currentRoom });
+        renderUserList();
+    }
 }
 
 function removeUser(username) {
-    userList.delete(username);
-    renderUserList();
+    if (username && username.trim()) {
+        userList.delete(username);
+        renderUserList();
+    }
 }
 
 function updateUserStatus(username, status) {
-    if (userList.has(username)) {
+    if (username && username.trim() && userList.has(username)) {
         userList.get(username).status = status;
         renderUserList();
     }
