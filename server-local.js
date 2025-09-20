@@ -158,8 +158,25 @@ wss.on('connection', function connection(ws) {
     ws.send(JSON.stringify({ username: 'System', message: 'Welcome to the MUD! Type /help for commands. Click rooms to switch!' }));
 });
 
-// Start the server on port 3000 for local testing
-server.listen(3000, function() {
-    console.log('Local MUD server running at http://localhost:3000');
-    console.log('WebSocket available at ws://localhost:3000');
+// Start the server on port 3000 for local testing (listen on all interfaces for mobile access)
+server.listen(3000, '0.0.0.0', function() {
+    const os = require('os');
+    const networkInterfaces = os.networkInterfaces();
+    
+    console.log('Local MUD server running on port 3000');
+    console.log('Server accessible at:');
+    console.log('  - http://localhost:3000 (local)');
+    console.log('  - ws://localhost:3000 (WebSocket)');
+    
+    // Show all available IP addresses for mobile access
+    Object.keys(networkInterfaces).forEach(ifname => {
+        networkInterfaces[ifname].forEach(iface => {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                console.log(`  - http://${iface.address}:3000 (network)`);
+                console.log(`  - ws://${iface.address}:3000 (WebSocket)`);
+            }
+        });
+    });
+    
+    console.log('For mobile access: Use your computer\'s IP address from the network list above');
 });

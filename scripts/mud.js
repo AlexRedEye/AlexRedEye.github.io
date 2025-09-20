@@ -27,11 +27,28 @@ let socket;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
 
-// Try local server first, then fallback to remote
-const servers = [
-    'ws://localhost:5000',
-    'wss://mud.pocketfriends.org:5000'
-];
+// Smart server selection based on how the page was accessed
+function getServerList() {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const port = '5000';
+    
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Local development - try localhost first, then fallback
+        return [
+            `ws://localhost:${port}`,
+            `wss://mud.pocketfriends.org:${port}`
+        ];
+    } else {
+        // Accessed via IP address or domain - use the same host
+        return [
+            `${protocol}//${hostname}:${port}`,
+            `wss://mud.pocketfriends.org:${port}`
+        ];
+    }
+}
+
+const servers = getServerList();
 let currentServerIndex = 0;
 
 function connectToServer() {
@@ -53,7 +70,7 @@ function connectToServer() {
         socket.onclose = function(event) {
             console.log('Disconnected from server', event);
             updateConnectionStatus('Disconnected', `Connection closed (Code: ${event.code})`);
-            appendOutput(`<span class="game-line"><strong>System:</strong> Disconnected from server. Reason: ${event.reason || 'Unknown'}</span>`);
+            appendOutput(`<span class="game-line"><strong>System:</strong> Disconnected from server. Reason: ${event.reason || 'Connection lost'}</span>`);
             
             // Try next server or reconnect
             if (reconnectAttempts < maxReconnectAttempts) {
@@ -62,7 +79,7 @@ function connectToServer() {
                 // Try next server if available
                 if (currentServerIndex < servers.length - 1) {
                     currentServerIndex++;
-                    appendOutput(`<span class="game-line"><strong>System:</strong> Trying next server...</span>`);
+                    appendOutput(`<span class="game-line"><strong>System:</strong> Trying server ${currentServerIndex + 1}/${servers.length}: ${servers[currentServerIndex]}</span>`);
                 } else {
                     currentServerIndex = 0; // Reset to first server
                 }
@@ -77,8 +94,17 @@ function connectToServer() {
 
         socket.onerror = function(error) {
             console.error('WebSocket error:', error);
+            console.error('Current server:', servers[currentServerIndex]);
+            console.error('Available servers:', servers);
             updateConnectionStatus('Error', 'Connection error occurred');
-            appendOutput(`<span class="game-line"><strong>System:</strong> Connection error. Check console for details.</span>`);
+            
+            // Provide mobile-specific error guidance
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                appendOutput(`<span class="game-line error"><strong>Mobile Connection Error:</strong> Cannot reach server ${servers[currentServerIndex]}</span>`);
+                appendOutput(`<span class="game-line"><strong>Troubleshooting:</strong> Make sure you're on the same WiFi network and try the /servers command to see available servers.</span>`);
+            } else {
+                appendOutput(`<span class="game-line error"><strong>System:</strong> Connection error to ${servers[currentServerIndex]}. Check console for details.</span>`);
+            }
         };
 
         socket.onmessage = function (event) {
@@ -431,6 +457,30 @@ function handleCommand(command) {
                 }
             }
             break;
+        case "/servers":
+            appendOutput(`<span class="game-line system"><strong>Available Servers:</strong></span>`);
+            servers.forEach((server, index) => {
+                const status = index === currentServerIndex ? ' (current)' : '';
+                appendOutput(`<span class="game-line system">  ${index + 1}. ${server}${status}</span>`);
+            });
+            break;
+        case "/diagnostics":
+            appendOutput(`<span class="game-line system"><strong>Connection Diagnostics:</strong></span>`);
+            appendOutput(`<span class="game-line system">Current URL: ${window.location.href}</span>`);
+            appendOutput(`<span class="game-line system">Host: ${window.location.hostname}</span>`);
+            appendOutput(`<span class="game-line system">Protocol: ${window.location.protocol}</span>`);
+            appendOutput(`<span class="game-line system">User Agent: ${navigator.userAgent}</span>`);
+            appendOutput(`<span class="game-line system">Current Server: ${servers[currentServerIndex]} (${currentServerIndex + 1}/${servers.length})</span>`);
+            appendOutput(`<span class="game-line system">Connection State: ${socket ? socket.readyState : 'No socket'}</span>`);
+            appendOutput(`<span class="game-line system">Reconnect Attempts: ${reconnectAttempts}/${maxReconnectAttempts}</span>`);
+            
+            // Mobile-specific info
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                appendOutput(`<span class="game-line system"><strong>Mobile Device Detected:</strong></span>`);
+                appendOutput(`<span class="game-line system">To connect from mobile, access via your computer's IP address</span>`);
+                appendOutput(`<span class="game-line system">Find your computer's IP in network settings, then use: https://YOUR_IP:5000/mud.html</span>`);
+            }
+            break;
         default:
             appendOutput(`<span class="game-line"><strong>System:</strong> Unknown command: ${cmd}. Type /help for a list of commands.</span>`);
             break;
@@ -479,6 +529,8 @@ function showHelp() {
             <div>/help - Show this help message</div>
             <div>/status - Show connection status</div>
             <div>/version - Show client and server version information</div>
+            <div>/servers - List available servers</div>
+            <div>/diagnostics - Show connection diagnostics (useful for mobile troubleshooting)</div>
             <div>/clear - Clear chat history</div>
             <div>/reconnect - Attempt to reconnect to server</div>
             

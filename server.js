@@ -361,9 +361,24 @@ wss.on('connection', function connection(ws) {
 });
 
 
-// Start the server on port 5000 (changed from 5000 to match client expectations)
-server.listen(5000, function() {
-    console.log(`HTTPS MUD Server v${SERVER_VERSION} running at https://localhost:5000`);
+// Start the server on port 5000 (listen on all interfaces for mobile access)
+server.listen(5000, '0.0.0.0', function() {
+    const os = require('os');
+    const networkInterfaces = os.networkInterfaces();
+    
+    console.log(`HTTPS MUD Server v${SERVER_VERSION} running on port 5000`);
+    console.log('Server accessible at:');
+    console.log('  - https://localhost:5000 (local)');
+    
+    // Show all available IP addresses for mobile access
+    Object.keys(networkInterfaces).forEach(ifname => {
+        networkInterfaces[ifname].forEach(iface => {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                console.log(`  - https://${iface.address}:5000 (network)`);
+            }
+        });
+    });
+    
     console.log('Supported rooms:', Array.from(rooms.keys()).join(', '));
     console.log(`Server started on ${new Date().toISOString()}`);
     console.log('Ready for connections!');
