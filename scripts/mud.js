@@ -3,7 +3,7 @@ const commandInput = document.getElementById("command-input");
 const sendBtn = document.getElementById("send-btn");
 
 // Version information
-const CLIENT_VERSION = "0.4.1-beta";
+const CLIENT_VERSION = "0.4.2-beta";
 const VERSION_DATE = "2025-09-19";
 let serverVersion = null;
 

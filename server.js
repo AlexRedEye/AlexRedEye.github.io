@@ -3,15 +3,21 @@ const fs = require('fs');
 const WebSocket = require('ws');
 
 // Version information
-const SERVER_VERSION = "0.4.1-beta";
+const SERVER_VERSION = "0.4.2-beta";
 const VERSION_DATE = "2025-09-19";
 const CHANGELOG = {
-    "0.4.1-beta": [
-        "Mobile optimization update",
+    "0.4.2-beta": [
+        "Mobile connection fixes and diagnostics",
+        "Smart server detection based on access method",
+        "Network interface binding for mobile access (0.0.0.0)",
+        "Added /servers and /diagnostics commands",
+        "Improved mobile error handling and troubleshooting",
+        "Enhanced connection status reporting",
+        "Automatic IP address detection and display",
+        "Mobile-specific connection guidance",
         "Responsive CSS for mobile devices",
         "Touch-friendly interface with 44px minimum touch targets",
         "Mobile keyboard handling and viewport optimization",
-        "Horizontal scrollable sidebar on mobile",
         "iOS Safari specific fixes and zoom prevention",
         "Hardware-accelerated scrolling for better performance",
         "Room system with 4 rooms (general, games, random, tech)",
@@ -19,10 +25,8 @@ const CHANGELOG = {
         "Real-time messaging with timestamps",
         "Emote system with predefined actions",
         "Private whisper messaging",
-        "Typing indicators",
-        "Sound notifications",
-        "Connection status monitoring",
-        "Room user count tracking",
+        "Typing indicators and sound notifications",
+        "Connection status monitoring and room user count tracking",
         "Graceful error handling and reconnection",
         "Interactive version command (/version)"
     ]
