@@ -5,8 +5,23 @@ import { generateMission } from './missions.js';
 import { saveState, loadState, clearSave } from './storage.js';
 import { CHALLENGES, ChallengeManager } from './challenge.js';
 
+// Game Version Information
+export const GAME_VERSION = '0.1.0-alpha';
+export const VERSION_INFO = {
+  version: '0.1.0-alpha',
+  date: '2025-09-21',
+  build: 'alpha',
+  changelog: [
+    'Initial alpha release',
+    'Basic game mechanics implemented',
+    'Challenge mode available',
+    'Save/Load functionality'
+  ]
+};
+
 export default class Game {
   constructor(logEl) {
+    this.version = GAME_VERSION;
     this.logger = new Logger(logEl);
     this.state = {
       deck: [],

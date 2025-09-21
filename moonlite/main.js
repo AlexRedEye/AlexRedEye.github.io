@@ -1,5 +1,12 @@
 import Game from './game.js';
 
+// Moonrakers-Lite Version System
+const MOONLITE_VERSION = '0.1.0-alpha';
+const VERSION_DATE = '2025-09-21';
+
+console.log(`%c🚀 Moonrakers-Lite v${MOONLITE_VERSION}`, 'color: #4f46e5; font-weight: bold;');
+console.log(`Built: ${VERSION_DATE}`);
+
 const logEl = document.getElementById('log');
 const game = new Game(logEl);
 
