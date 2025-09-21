@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Moonrakers-Lite</title>
+  <link rel="stylesheet" href="styles/moonlite.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Moonrakers-Lite</h1>
+    <nav class="controls">
+      <button id="btn-new" class="primary">New Game</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: Mission & Guidance -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Current Mission</h2>
+        <span class="sub" id="mission-reward"></span>
+      </div>
+
+      <div id="mission" class="mission-card">
+        <div class="mission-title">No mission yet</div>
+        <ul id="mission-reqs" class="checklist"></ul>
+      </div>
+
+      <div class="row gap-top">
+        <button id="btn-new-mission">New Mission</button>
+        <button id="btn-attempt" class="primary">Attempt Mission</button>
+      </div>
+
+      <div class="panel-sep"></div>
+
+      <h3>What to do next</h3>
+      <ul id="todo" class="todo"></ul>
+    </section>
+
+    <!-- CENTER: Hand -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Your Hand</h2>
+        <span class="sub">Click a card to play it (costs 1 Action unless noted)</span>
+      </div>
+
+      <div id="hand" class="hand-grid"></div>
+
+      <div class="row gap-top">
+        <button id="btn-discard-hand" class="ghost">Discard Hand</button>
+      </div>
+
+      <div class="row gap-top">
+        <button id="btn-end-turn" class="primary">End Turn</button>
+        <button id="btn-shuffle" class="ghost">Shuffle All</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: Turn, Challenge, Save/Load, Log -->
+    <aside class="sidebar">
+      <div class="stack">
+        <div class="statgrid">
+          <div class="stat"><span>Deck</span><strong id="deck-count">0</strong></div>
+          <div class="stat"><span>Discard</span><strong id="discard-count">0</strong></div>
+          <div class="stat"><span>Hand</span><strong id="hand-count">0</strong></div>
+          <div class="stat"><span>Credits</span><strong id="credits">0</strong></div>
+        </div>
+
+        <div class="pillgrid">
+          <div class="pill"><span>Actions</span><strong id="actions">0</strong></div>
+          <div class="pill"><span>Shields</span><strong id="shields">0</strong></div>
+          <div class="pill"><span>Damage</span><strong id="damage">0</strong></div>
+          <div class="pill"><span>Reactors</span><strong id="reactorsPlayed">0</strong></div>
+          <div class="pill"><span>Thrusters</span><strong id="thrustersPlayed">0</strong></div>
+        </div>
+
+        <!-- Challenge Mode -->
+        <div class="challenge">
+          <div class="challenge-head">
+            <h3>Solo Challenge</h3>
+            <span id="challenge-status" class="sub"></span>
+          </div>
+          <div class="row">
+            <select id="challenge-select" aria-label="Choose a challenge">
+              <option value="rookie">Rookie — Win 2 in 5 turns</option>
+              <option value="pilot" selected>Pilot — Win 3 in 6 turns</option>
+              <option value="captain">Captain — Win 4 in 7 turns</option>
+            </select>
+          </div>
+          <div class="row gap-top">
+            <button id="btn-challenge-start" class="primary">Start</button>
+            <button id="btn-challenge-cancel" class="ghost">Cancel</button>
+          </div>
+          <div id="challenge-progress" class="progress"></div>
+        </div>
+
+        <div class="row">
+          <button id="btn-save" title="Save to browser storage">Save</button>
+          <button id="btn-load" title="Load from browser storage">Load</button>
+          <button id="btn-clear-save" class="ghost" title="Delete saved game">Clear Save</button>
+        </div>
+        <span class="sub">Shortcuts: <strong>N</strong> New Mission, <strong>A</strong> Attempt, <strong>E</strong> End Turn, <strong>S</strong> Save, <strong>L</strong> Load, <strong>Shift+S</strong> Shuffle</span>
+
+        <details class="legend">
+          <summary>Legend / Hints</summary>
+          <ul>
+            <li><strong>Reactor</strong>: +2 Actions (no draws).</li>
+            <li><strong>Thrusters</strong>: +2 Draws.</li>
+            <li><strong>Shields</strong>: +1 Shield.</li>
+            <li><strong>Damage</strong>: +1 Damage.</li>
+            <li><strong>Miss</strong>: No effect.</li>
+          </ul>
+        </details>
+
+        <h3>Log</h3>
+        <div id="log" class="log"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <small>Challenge Mode: meet the win goal before you run out of turns.</small>
+  </footer>
+
+  <!-- Results Modal -->
+  <div id="modal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="document">
+      <h3 id="modal-title">Challenge Result</h3>
+      <p id="modal-body" class="modal-body"></p>
+      <div class="row modal-actions">
+        <button id="btn-modal-retry" class="primary">Retry Challenge</button>
+        <button id="btn-modal-new">New Game</button>
+        <button id="btn-modal-close" class="ghost" data-close>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="moonlite/main.js"></script>
+</body>
+</html>

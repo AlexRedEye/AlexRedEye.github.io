@@ -1,4 +1,43 @@
 <!DOCTYPE html>
+<!-- 
+  GALLERY MEDIA FORMAT GUIDE:
+  
+  1. STATIC IMAGES:
+     <div class="gallery-media">
+       <img src="assets/image.jpg" alt="Description" loading="lazy">
+     </div>
+  
+  2. ANIMATED GIFs:
+     <div class="gallery-media" data-type="gif">
+       <img src="assets/animation.gif" alt="Description" loading="lazy">
+       <!-- Optional: Add data-static="assets/static-version.jpg" for hover animation -->
+     </div>
+  
+  3. VIDEOS (MP4, WebM, etc.):
+     <div class="gallery-media" data-type="video">
+       <video src="assets/demo.mp4" alt="Description" muted loop preload="metadata">
+         <!-- Fallback for unsupported browsers -->
+         <img src="assets/fallback.jpg" alt="Description">
+       </video>
+     </div>
+  
+  4. MULTIPLE VIDEO FORMATS:
+     <div class="gallery-media" data-type="video">
+       <video muted loop preload="metadata">
+         <source src="assets/demo.mp4" type="video/mp4">
+         <source src="assets/demo.webm" type="video/webm">
+         <img src="assets/fallback.jpg" alt="Description">
+       </video>
+     </div>
+  
+  Features:
+  - Videos auto-pause and show play button overlay
+  - Click videos to play/pause
+  - GIFs show "GIF" indicator, Videos show "VIDEO" indicator
+  - All media scales on hover
+  - Mobile-optimized with touch controls
+  - Lazy loading for performance
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -41,10 +80,12 @@ style="fill:#FFFFFF;">
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
       <a href="#portfolio">Portfolio</a>
+      <a href="#gallery">Gallery</a>
       <a href="#contact">Contact</a>
       <a href="mud.html">MUD</a>
       <a href="clicker.html">Casino</a>
       <a href="gacha.html">Gacha</a>
+      <a href="moonlite.html">Moonrakers-Lite</a>
     </div>
   </nav>
 
@@ -55,7 +96,7 @@ style="fill:#FFFFFF;">
       <p class="hero-description">Creating interactive web experiences and engaging games</p>
       <div class="hero-buttons">
         <a href="#portfolio" class="btn btn-primary">View Portfolio</a>
-        <a href="#about" class="btn btn-secondary">About Me</a>
+        <a href="#gallery" class="btn btn-secondary">See Gallery</a>
       </div>
     </div>
   </div>
@@ -144,6 +185,64 @@ style="fill:#FFFFFF;">
             <span class="tech-tag">Progression</span>
           </div>
         </div>
+
+        <div class="project-card">
+          <h3><a href="moonlite.html">Moonrakers-Lite</a></h3>
+          <p class="project-type">Dice Game</p>
+          <p>A simplified version of the Moonrakers dice game focusing on quick gameplay and challenge modes.</p>
+          <div class="project-tech">
+            <span class="tech-tag">Game Logic</span>
+            <span class="tech-tag">JavaScript</span>
+            <span class="tech-tag">HTML5</span>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery" class="gallery">
+    <div class="container">
+      <h2>Project Gallery</h2>
+      <div class="gallery-description">
+        <p>Visual showcase of my interactive projects and games in action.</p>
+      </div>
+      <div class="gallery-grid">
+        <!-- Static Image Example -->
+        <div class="gallery-item">
+          <div class="gallery-media">
+            <img src="assets/PocketFriend.jpg" alt="Pocket Friends Casino Screenshot" loading="lazy">
+          </div>
+          <div class="gallery-info">
+            <h3>Pocket Friends Casino</h3>
+            <p>Casino-themed idle clicker with multiple mini-games and progression systems.</p>
+            <a href="clicker.html" class="gallery-link">Play Now</a>
+          </div>
+        </div>
+        
+        <!-- Video Example (replace with your video file) -->
+        <div class="gallery-item">
+          <div class="gallery-media" data-type="video">
+            <!-- Replace with: <video src="assets/mud-demo.mp4" alt="MUD Chat System Demo" muted loop preload="metadata"></video> -->
+            <img src="assets/Tuesday.jpg" alt="MUD Chat System Screenshot" loading="lazy">
+          </div>
+          <div class="gallery-info">
+            <h3>MUD Chat System</h3>
+            <p>Real-time multi-user chat environment with rooms and interactive features.</p>
+            <a href="mud.html" class="gallery-link">Join Chat</a>
+          </div>
+        </div>
+        
+        <!-- GIF Example (replace with your GIF file) -->
+        <div class="gallery-item">
+          <div class="gallery-media" data-type="gif">
+            <!-- Replace with: <img src="assets/gacha-animation.gif" alt="Gacha Collection Game Animation" loading="lazy"> -->
+            <img src="assets/X3L4.jpg" alt="Gacha Collection Game Screenshot" loading="lazy">
+          </div>
+          <div class="gallery-info">
+            <h3>Gacha Collection Game</h3>
+            <p>Character collection game with randomized rewards and progression mechanics.</p>
+            <a href="gacha.html" class="gallery-link">Start Collecting</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -167,5 +266,74 @@ style="fill:#FFFFFF;">
       <p>&copy; 2025 Alex Marquez. All rights reserved.</p>
     </div>
   </footer>
+
+  <script>
+    // Gallery media functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle video interactions
+      const videoElements = document.querySelectorAll('.gallery-media video');
+      
+      videoElements.forEach(video => {
+        // Pause video by default
+        video.pause();
+        
+        // Handle video click to play/pause
+        video.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (this.paused) {
+            this.play();
+            this.parentElement.classList.add('playing');
+          } else {
+            this.pause();
+            this.parentElement.classList.remove('playing');
+          }
+        });
+        
+        // Handle video end
+        video.addEventListener('ended', function() {
+          this.parentElement.classList.remove('playing');
+        });
+        
+        // Pause video when mouse leaves (optional)
+        video.addEventListener('mouseleave', function() {
+          // Uncomment if you want videos to pause on mouse leave
+          // this.pause();
+          // this.parentElement.classList.remove('playing');
+        });
+      });
+      
+      // Handle GIF pause/play on hover (optional enhancement)
+      const gifElements = document.querySelectorAll('.gallery-media[data-type="gif"] img');
+      
+      gifElements.forEach(gif => {
+        let originalSrc = gif.src;
+        let staticSrc = gif.dataset.static; // Optional static version
+        
+        if (staticSrc) {
+          // Show static version by default, animate on hover
+          gif.src = staticSrc;
+          
+          gif.parentElement.addEventListener('mouseenter', function() {
+            gif.src = originalSrc;
+          });
+          
+          gif.parentElement.addEventListener('mouseleave', function() {
+            gif.src = staticSrc;
+          });
+        }
+      });
+      
+      // Add smooth scroll for gallery navigation
+      const galleryLinks = document.querySelectorAll('a[href="#gallery"]');
+      galleryLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('gallery').scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
+      });
+    });
+  </script>
 </body>
 </html>
