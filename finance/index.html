@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finance CSV Cruncher</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar">
+        <div>
+          <h1>Finance CSV Cruncher</h1>
+          <p>Import Chase credit-card or checking CSV exports and inspect cash flow, spending, categories, and merchants.</p>
+        </div>
+        <label class="upload-button">
+          <input id="fileInput" type="file" accept=".csv,text/csv" multiple>
+          Choose CSV files
+        </label>
+      </section>
+
+      <section class="controls" aria-label="Analysis controls">
+        <label>
+          Search
+          <input id="searchInput" type="search" placeholder="Merchant, memo, type, category">
+        </label>
+        <label>
+          Account
+          <select id="accountFilter">
+            <option value="all">All accounts</option>
+          </select>
+        </label>
+        <label>
+          Flow
+          <select id="flowFilter">
+            <option value="all">All flows</option>
+            <option value="income">Income</option>
+            <option value="expense">Expenses</option>
+            <option value="transfer">Transfers & payments</option>
+          </select>
+        </label>
+      </section>
+
+      <section id="emptyState" class="empty-state">
+        <h2>Start with a Chase CSV export</h2>
+        <p>The app runs locally in your browser. Choose one or more Chase CSV exports to start the first crunch.</p>
+      </section>
+
+      <section id="dashboard" class="dashboard hidden" aria-live="polite">
+        <div class="metrics">
+          <article>
+            <span>Income</span>
+            <strong id="incomeMetric">$0.00</strong>
+          </article>
+          <article>
+            <span>Expenses</span>
+            <strong id="expenseMetric">$0.00</strong>
+          </article>
+          <article>
+            <span>Net</span>
+            <strong id="netMetric">$0.00</strong>
+          </article>
+          <article>
+            <span>Transactions</span>
+            <strong id="countMetric">0</strong>
+          </article>
+        </div>
+
+        <section class="biggest-spend">
+          <div class="biggest-spend-card">
+            <span>Biggest merchant</span>
+            <strong id="biggestSpendName">No expenses found</strong>
+            <p id="biggestSpendDetail">Load a CSV to see where the most money went.</p>
+            <div class="biggest-spend-total" id="biggestSpendAmount">$0.00</div>
+          </div>
+          <div class="biggest-spend-card">
+            <span>Biggest category</span>
+            <strong id="biggestCategoryName">No expenses found</strong>
+            <p id="biggestCategoryDetail">Grouped from Chase categories and simple rules.</p>
+            <div class="biggest-spend-total" id="biggestCategoryAmount">$0.00</div>
+          </div>
+        </section>
+
+        <div class="analysis-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Monthly Flow</h2>
+              <span id="dateRange"></span>
+            </div>
+            <div id="monthlyChart" class="bar-chart"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Spending By Category</h2>
+              <span id="categoryTotal"></span>
+            </div>
+            <div id="categoryList" class="rank-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Top Spending</h2>
+              <span>Grouped merchants</span>
+            </div>
+            <div id="merchantList" class="rank-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Accounts</h2>
+              <span id="accountCount"></span>
+            </div>
+            <div id="accountList" class="rank-list"></div>
+          </section>
+        </div>
+
+        <section class="panel table-panel">
+          <div class="panel-heading">
+            <h2>Transactions</h2>
+            <span id="visibleRows"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Account</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th class="numeric">Amount</th>
+                  <th>Flow</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
